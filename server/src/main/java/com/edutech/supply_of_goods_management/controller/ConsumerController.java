@@ -27,8 +27,13 @@ public class ConsumerController {
          @Autowired
          private OrderService orderService;
 
+                 @Autowired
+        private FeedbackService feedbackService;
+
+
         // @Autowired
         // private FeedbackService feedbackService;
+
 
         // Get all products
         @GetMapping("/products")
@@ -53,6 +58,16 @@ public class ConsumerController {
         }
 
 
+        
+        // Provide feedback for the order
+        @PostMapping("/order/{orderId}/feedback")
+        public ResponseEntity<Feedback> addFeedback(
+                        @PathVariable Long orderId,
+                        @RequestParam Long userId,
+                        @RequestBody Feedback feedback) {
+
+                return ResponseEntity.ok(feedbackService.addFeedback(orderId, userId, feedback));
+        }
 
 
    
@@ -60,6 +75,6 @@ public class ConsumerController {
     
        // get all orders for the user (consumer)
    
-       // Provide feedback for the order
+      
     
 }
