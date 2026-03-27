@@ -24,8 +24,8 @@ public class ConsumerController {
         @Autowired
         private ProductService productService;
 
-        // @Autowired
-        // private OrderService orderService;
+         @Autowired
+         private OrderService orderService;
 
         // @Autowired
         // private FeedbackService feedbackService;
@@ -35,6 +35,25 @@ public class ConsumerController {
         public ResponseEntity<List<Product>> getProducts() {
                 return ResponseEntity.ok(productService.getAllProducts());
         }
+        
+         // Place order for the product
+        @PostMapping("/order")
+        public ResponseEntity<Order> placeOrder(
+                        @RequestParam Long productId,
+                        @RequestParam Long userId,
+                        @RequestBody Order order) {
+
+                return ResponseEntity.ok(orderService.placeOrder(productId, userId, order));
+        }
+
+        // get all orders for the user (consumer)
+        @GetMapping("/orders")
+        public ResponseEntity<List<Order>> getOrders(@RequestParam Long userId) {
+                return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+        }
+
+
+
 
    
         // Place order for the product

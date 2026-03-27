@@ -17,4 +17,38 @@ import java.util.Optional;
 
 public class OrderService {
     // implement the order service here
+    @Autowired
+    private OrderRepository repo;
+
+    @Autowired
+    private ProductRepository productRepo;
+
+    @Autowired
+    private UserRepository userRepo;
+
+    public Order placeOrder(Long productId, Long userId, Order order) {
+
+        Product product = productRepo.findById(productId).orElseThrow();
+        User user = userRepo.findById(userId).orElseThrow();
+
+        order.setProduct(product);
+        order.setUser(user);
+
+        return repo.save(order);
+    }
+
+    public Order updateStatus(Long id, String status) {
+        Order order = repo.findById(id).orElseThrow();
+        order.setStatus(status);
+        return repo.save(order);
+    }
+
+    public List<Order> getOrdersByUser(Long userId) {
+        return repo.findByUserId(userId);
+    }
 }
+
+
+
+
+

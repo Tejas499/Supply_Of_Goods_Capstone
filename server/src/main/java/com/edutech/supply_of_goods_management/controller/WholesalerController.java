@@ -1,6 +1,5 @@
 package com.edutech.supply_of_goods_management.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +17,6 @@ import java.util.List;
 @RequestMapping("/api/wholesalers")
 public class WholesalerController {
 
-
-
     @Autowired
     private ProductService productService;
 
@@ -34,27 +31,41 @@ public class WholesalerController {
     public ResponseEntity<List<Product>> getProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
-    
-   
-        // place order for a product
-    
 
-   
-        // update order status
-    
+    @PostMapping("/order")
+    public ResponseEntity<Order> placeOrder(
+            @RequestParam Long productId,
+            @RequestParam Long userId,
+            @RequestBody Order order) {
 
-   
-       // get all orders for a user (wholesaler)
-    
+        return ResponseEntity.ok(orderService.placeOrder(productId, userId, order));
+    }
 
-   
-       // add inventory for a product
-    
+    // update order status
+    @PutMapping("/order/{id}")
+    public ResponseEntity<Order> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
 
-   
-        // update inventory stock quantity
-    
-   
-        // get all inventories for a wholesaler
-    
+        return ResponseEntity.ok(orderService.updateStatus(id, status));
+    }
+
+    // get all orders for a user (wholesaler)
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getOrders(@RequestParam Long userId) {
+        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+    }
+
+    // place order for a product
+
+    // update order status
+
+    // get all orders for a user (wholesaler)
+
+    // add inventory for a product
+
+    // update inventory stock quantity
+
+    // get all inventories for a wholesaler
+
 }
