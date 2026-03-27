@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
-    // implement the repository here
     List<Inventory> findByWholesalerId(Long wholesalerId);
 }

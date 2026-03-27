@@ -54,18 +54,28 @@ public class WholesalerController {
     @GetMapping("/orders")
     public ResponseEntity<List<Order>> getOrders(@RequestParam Long userId) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+    } 
+
+        // add inventory for a product
+    @PostMapping("/inventories")
+    public ResponseEntity<Inventory> addInventory(
+            @RequestParam Long productId,
+            @RequestBody Inventory inventory) {
+        return ResponseEntity.ok(inventoryService.addInventory(productId, inventory));
     }
 
-    // place order for a product
-
-    // update order status
-
-    // get all orders for a user (wholesaler)
-
-    // add inventory for a product
-
     // update inventory stock quantity
+    @PutMapping("/inventories/{id}")
+    public ResponseEntity<Inventory> updateInventory(
+            @PathVariable Long id,
+            @RequestParam int stockQuantity) {
+        return ResponseEntity.ok(inventoryService.updateInventory(id, stockQuantity));
+    }
 
     // get all inventories for a wholesaler
+    @GetMapping("/inventories")
+    public ResponseEntity<List<Inventory>> getInventories(@RequestParam Long wholesalerId) {
+        return ResponseEntity.ok(inventoryService.getByWholesaler(wholesalerId));
+    }
 
 }
