@@ -13,13 +13,6 @@ import java.util.List;
 @RequestMapping("/api/manufacturers")
 public class ManufacturerController {
 
-    
-       // create product
-    
-        // update product
-    
-        // get all products of manufacturer
-
 
         @Autowired
         private ProductService productService;

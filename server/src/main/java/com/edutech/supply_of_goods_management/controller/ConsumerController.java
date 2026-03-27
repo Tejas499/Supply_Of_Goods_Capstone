@@ -31,8 +31,7 @@ public class ConsumerController {
         private FeedbackService feedbackService;
 
 
-        // @Autowired
-        // private FeedbackService feedbackService;
+
 
 
         // Get all products
@@ -71,9 +70,6 @@ public class ConsumerController {
 
 
    
-        // Place order for the product
-    
-       // get all orders for the user (consumer)
    
       
     
