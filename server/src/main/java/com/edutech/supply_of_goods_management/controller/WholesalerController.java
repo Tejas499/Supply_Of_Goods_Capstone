@@ -14,11 +14,26 @@ import com.edutech.supply_of_goods_management.service.ProductService;
 
 import java.util.List;
 
-
+@RestController
+@RequestMapping("/api/wholesalers")
 public class WholesalerController {
 
-    
-        // get all products
+
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private InventoryService inventoryService;
+
+    // get all products
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
     
    
         // place order for a product
