@@ -28,10 +28,11 @@ public class WholesalerController {
 
     // get all products
     @GetMapping("/products")
-    public ResponseEntity<List<Product>> getProducts() {
+    public ResponseEntity<List<Product>> browseProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    // place order for a product
     @PostMapping("/order")
     public ResponseEntity<Order> placeOrder(
             @RequestParam Long productId,
@@ -47,20 +48,21 @@ public class WholesalerController {
             @PathVariable Long id,
             @RequestParam String status) {
 
-        return ResponseEntity.ok(orderService.updateStatus(id, status));
+        return ResponseEntity.ok(orderService.updateOrder(id, status));
     }
 
     // get all orders for a user (wholesaler)
     @GetMapping("/orders")
-    public ResponseEntity<List<Order>> getOrders(@RequestParam Long userId) {
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
-    } 
+    public ResponseEntity<List<Order>> getAllOrders(@RequestParam Long userId) {
+        return ResponseEntity.ok(orderService.getAllOrders(userId));
+    }
 
-        // add inventory for a product
+    // add inventory for a product
     @PostMapping("/inventories")
     public ResponseEntity<Inventory> addInventory(
             @RequestParam Long productId,
             @RequestBody Inventory inventory) {
+
         return ResponseEntity.ok(inventoryService.addInventory(productId, inventory));
     }
 
@@ -69,13 +71,13 @@ public class WholesalerController {
     public ResponseEntity<Inventory> updateInventory(
             @PathVariable Long id,
             @RequestParam int stockQuantity) {
+
         return ResponseEntity.ok(inventoryService.updateInventory(id, stockQuantity));
     }
 
     // get all inventories for a wholesaler
     @GetMapping("/inventories")
-    public ResponseEntity<List<Inventory>> getInventories(@RequestParam Long wholesalerId) {
-        return ResponseEntity.ok(inventoryService.getByWholesaler(wholesalerId));
+    public ResponseEntity<List<Inventory>> getAllInventories(@RequestParam Long wholesalerId) {
+        return ResponseEntity.ok(inventoryService.getAllInventories(wholesalerId));
     }
-
 }

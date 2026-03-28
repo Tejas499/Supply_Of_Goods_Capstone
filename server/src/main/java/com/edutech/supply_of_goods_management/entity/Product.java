@@ -99,4 +99,3 @@ public class Product {
         this.inventories = inventories;
     }
 }
-

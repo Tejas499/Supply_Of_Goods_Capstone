@@ -1,6 +1,5 @@
 package com.edutech.supply_of_goods_management.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +28,20 @@ public class RegisterAndLoginController {
 
         // Implement registration logic here
         @PostMapping("/register")
-        public ResponseEntity<?> register(@RequestBody User user) {
+        public ResponseEntity<?> registerUser(@RequestBody User user) {
                 return ResponseEntity.ok(userService.register(user));
         }
 
         // Implement login logic here
         // return jwt token in LoginResponse object
         // if login fails, return 401 Unauthorized http status
-       
+        @PostMapping("/login")
+        public ResponseEntity<?> loginUser(@RequestBody LoginRequest request) {
+                try {
+                        String token = userService.login(request.getUsername(), request.getPassword());
+                        return ResponseEntity.ok(new LoginResponse(token));
+                } catch (Exception e) {
+                        return ResponseEntity.status(401).body("Unauthorized");
+                }
+        }
 }
-
-

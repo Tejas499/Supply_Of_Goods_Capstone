@@ -28,6 +28,14 @@ public class LoginResponse {
         this.role = role;
     }
 
+    
+
+    public LoginResponse(String token) {
+        this.token = token;
+    }
+
+
+
     public String getToken() {
         return token;
     }

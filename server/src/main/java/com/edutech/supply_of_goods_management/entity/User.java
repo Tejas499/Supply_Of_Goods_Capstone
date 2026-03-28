@@ -1,4 +1,5 @@
 package com.edutech.supply_of_goods_management.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,7 +13,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-     @Column(nullable = false, unique = true)
+    
+    @Column(nullable = false, unique = true)
     private String username;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // hide in response

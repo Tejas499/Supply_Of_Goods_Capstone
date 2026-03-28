@@ -18,7 +18,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.edutech.supply_of_goods_management.jwt.JwtRequestFilter;
 
 
-public class SecurityConfig  {
+@Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private JwtRequestFilter jwtFilter;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Implement security configuration here
     // /api/user/register and /api/user/login should be permitted to all
@@ -39,4 +51,40 @@ public class SecurityConfig  {
 
     // Note: Use hasAuthority method to check the role of the user
     // for example, hasAuthority("CONSUMER")
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.csrf().disable()
+                .authorizeRequests()
+
+                // Public APIs
+                .antMatchers("/api/user/register", "/api/user/login").permitAll()
+
+                // Manufacturer APIs
+                .antMatchers("/api/manufacturers/**").hasAuthority("MANUFACTURER")
+
+                // Wholesaler APIs
+                .antMatchers("/api/wholesalers/**").hasAuthority("WHOLESALER")
+
+                // Consumer APIs
+                .antMatchers("/api/consumers/**").hasAuthority("CONSUMER")
+
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
 }

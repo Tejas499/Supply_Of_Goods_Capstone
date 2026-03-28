@@ -1,21 +1,26 @@
 package com.edutech.supply_of_goods_management.entity;
 
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "inventories") // do not change the table name ( do not change this line)
 public class Inventory {
     // implement the entity here
-    @Id
+      @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Long wholesalerId;
+
     private int stockQuantity;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
     // Getters & Setters
+
     public Long getId() {
         return id;
     }

@@ -1,5 +1,6 @@
 package com.edutech.supply_of_goods_management.entity;
 
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -7,20 +8,26 @@ import java.util.Date;
 @Table(name = "feedbacks") // do not change the table name ( do not change this line)
 public class Feedback {
     // implement the entity here
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String content;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    // ✅ Getters & Setters
+    // Getters & Setters
+
     public Long getId() {
         return id;
     }

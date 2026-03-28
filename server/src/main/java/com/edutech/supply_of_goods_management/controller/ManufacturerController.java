@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/api/manufacturers")
 public class ManufacturerController {
 
-
         @Autowired
         private ProductService productService;
 
@@ -31,11 +30,7 @@ public class ManufacturerController {
 
         // get all products of manufacturer
         @GetMapping("/products")
-        public ResponseEntity<List<Product>> getProducts(@RequestParam Long manufacturerId) {
+        public ResponseEntity<List<Product>> getAllProductsOfManufacturer(@RequestParam Long manufacturerId) {
                 return ResponseEntity.ok(productService.getByManufacturer(manufacturerId));
         }
 }
-
-
-    
-

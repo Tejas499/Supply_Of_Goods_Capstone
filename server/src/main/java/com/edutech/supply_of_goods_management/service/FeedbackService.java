@@ -22,7 +22,7 @@ public class FeedbackService {
     @Autowired
     private UserRepository userRepo;
 
-    public Feedback addFeedback(Long orderId, Long userId, Feedback fb) {
+    public Feedback provideFeedback(Long orderId, Long userId, Feedback fb) {
 
         Order order = orderRepo.findById(orderId).orElseThrow();
         User user = userRepo.findById(userId).orElseThrow();

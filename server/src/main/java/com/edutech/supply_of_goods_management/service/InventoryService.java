@@ -32,8 +32,7 @@ public class InventoryService {
         return repo.save(inv);
     }
 
-    public List<Inventory> getByWholesaler(Long wholesalerId) {
+    public List<Inventory> getAllInventories(Long wholesalerId) {
         return repo.findByWholesalerId(wholesalerId);
     }
 }
-

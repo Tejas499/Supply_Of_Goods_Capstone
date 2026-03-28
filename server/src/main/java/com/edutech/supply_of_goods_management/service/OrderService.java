@@ -1,7 +1,5 @@
 package com.edutech.supply_of_goods_management.service;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +13,9 @@ import com.edutech.supply_of_goods_management.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class OrderService {
-    // implement the order service here
+
     @Autowired
     private OrderRepository repo;
 
@@ -37,18 +36,14 @@ public class OrderService {
         return repo.save(order);
     }
 
-    public Order updateStatus(Long id, String status) {
+    public Order updateOrder(Long id, String status) {
         Order order = repo.findById(id).orElseThrow();
         order.setStatus(status);
         return repo.save(order);
     }
 
-    public List<Order> getOrdersByUser(Long userId) {
+    public List<Order> getAllOrders(Long userId) {
         return repo.findByUserId(userId);
     }
+
 }
-
-
-
-
-

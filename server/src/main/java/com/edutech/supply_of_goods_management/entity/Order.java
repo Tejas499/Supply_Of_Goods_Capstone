@@ -1,6 +1,8 @@
 package com.edutech.supply_of_goods_management.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -8,34 +10,30 @@ import java.util.List;
 @Table(name = "orders") // do not change the table name ( do not change this line)
 public class Order {
     // implement the entity here
+
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public List<Feedback> getFeedbacks() {
-        return feedbacks;
-    }
-
-    public void setFeedbacks(List<Feedback> feedbacks) {
-        this.feedbacks = feedbacks;
-    }
 
     private int quantity;
+
     private String status;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Feedback> feedbacks;
 
     // Getters & Setters
+
     public Long getId() {
         return id;
     }
@@ -70,5 +68,17 @@ public class Order {
 
     public Product getProduct() {
         return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public List<Feedback> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(List<Feedback> feedbacks) {
+        this.feedbacks = feedbacks;
     }
 }
