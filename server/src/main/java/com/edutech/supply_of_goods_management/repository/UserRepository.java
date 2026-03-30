@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.edutech.supply_of_goods_management.entity.User;
 
-public interface UserRepository {
-   // implement the repository here
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    User findByUsername(String username);
 }

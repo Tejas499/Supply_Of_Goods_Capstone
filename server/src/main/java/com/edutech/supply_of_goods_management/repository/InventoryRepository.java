@@ -9,6 +9,7 @@ import com.edutech.supply_of_goods_management.entity.Inventory;
 
 import java.util.List;
 
-public interface InventoryRepository {
-    // implement the repository here
+@Repository
+public interface InventoryRepository extends JpaRepository<Inventory, Long> {
+    List<Inventory> findByWholesalerId(Long wholesalerId);
 }

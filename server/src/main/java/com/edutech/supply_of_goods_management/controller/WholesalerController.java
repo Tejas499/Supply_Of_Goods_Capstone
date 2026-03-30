@@ -15,31 +15,57 @@ import com.edutech.supply_of_goods_management.service.ProductService;
 import java.util.List;
 
 
+@RestController
+@RequestMapping("/api/wholesalers")
 public class WholesalerController {
 
-    
-        // get all products
-    
-   
-        // place order for a product
-    
+    @Autowired
+    private ProductService productService;
 
-   
-        // update order status
-    
+    @Autowired
+    private OrderService orderService;
 
-   
-       // get all orders for a user (wholesaler)
-    
+    @Autowired
+    private InventoryService inventoryService;
 
-   
-       // add inventory for a product
-    
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
 
-   
-        // update inventory stock quantity
-    
-   
-        // get all inventories for a wholesaler
-    
+    @PostMapping("/order")
+    public ResponseEntity<Order> placeOrder(@RequestBody Order order,
+                                             @RequestParam Long productId,
+                                             @RequestParam Long userId) {
+        return ResponseEntity.ok(orderService.placeOrder(order, productId, userId));
+    }
+
+    @PutMapping("/order/{id}")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id,
+                                                    @RequestParam String status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<List<Order>> getOrdersByUser(@RequestParam Long userId) {
+        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+    }
+
+    @PostMapping("/inventories")
+    public ResponseEntity<Inventory> addInventory(@RequestBody Inventory inventory,
+                                                   @RequestParam Long productId) {
+        return ResponseEntity.ok(inventoryService.addInventory(inventory, productId));
+    }
+
+    @PutMapping("/inventories/{id}")
+    public ResponseEntity<Inventory> updateInventory(@PathVariable Long id,
+                                                      @RequestParam int stockQuantity) {
+        return ResponseEntity.ok(inventoryService.updateInventory(id, stockQuantity));
+    }
+
+    @GetMapping("/inventories")
+    public ResponseEntity<List<Inventory>> getInventoriesByWholesaler(
+            @RequestParam Long wholesalerId) {
+        return ResponseEntity.ok(inventoryService.getInventoriesByWholesalerId(wholesalerId));
+    }
 }

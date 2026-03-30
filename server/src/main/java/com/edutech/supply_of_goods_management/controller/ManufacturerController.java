@@ -10,13 +10,27 @@ import com.edutech.supply_of_goods_management.service.ProductService;
 import java.util.List;
 
 
+@RestController
+@RequestMapping("/api/manufacturers")
 public class ManufacturerController {
 
-    
-       // create product
-    
-        // update product
-    
-        // get all products of manufacturer
-    
+    @Autowired
+    private ProductService productService;
+
+    @PostMapping("/product")
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        return ResponseEntity.ok(productService.createProduct(product));
+    }
+
+    @PutMapping("/product/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id,
+                                                  @RequestBody Product product) {
+        return ResponseEntity.ok(productService.updateProduct(id, product));
+    }
+
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getProductsByManufacturer(
+            @RequestParam Long manufacturerId) {
+        return ResponseEntity.ok(productService.getProductsByManufacturerId(manufacturerId));
+    }
 }

@@ -8,6 +8,7 @@ import com.edutech.supply_of_goods_management.entity.Feedback;
 
 import java.util.List;
 
-public interface FeedbackRepository {
-    // implement the repository here
+@Repository
+public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
+    List<Feedback> findByOrderId(Long orderId);
 }

@@ -9,5 +9,37 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './get-orders.component.html',
   styleUrls: ['./get-orders.component.scss']
 })
-export class GetOrdersComponent //todo: complete missing code
+export class GetOrdersComponent implements OnInit {
+  itemForm!: FormGroup;
+  orders: any[] = [];
+
+  constructor(
+    private fb: FormBuilder,
+    private httpService: HttpService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.itemForm = this.fb.group({
+      orderId: [''],
+      status: ['']
+    });
+
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      this.httpService.getOrderByWholesalers(userId).subscribe((res: any) => {
+        this.orders = res;
+      });
+    }
+  }
+
+  onSubmit(): void {
+    if (this.itemForm.valid) {
+      const { orderId, status } = this.itemForm.value;
+      this.httpService.updateOrderStatus(orderId, status).subscribe(() => {
+        this.router.navigate(['/dashboard']);
+      });
+    }
+  }
 }

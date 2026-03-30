@@ -21,6 +21,46 @@ import java.io.IOException;
 import java.util.Collection;
 
 
-public class JwtRequestFilter  {
+@Component
+public class JwtRequestFilter extends OncePerRequestFilter {
 
+    @Autowired
+    @Lazy
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    @Lazy
+    private JwtUtil jwtUtil;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        final String authHeader = request.getHeader("Authorization");
+        String username = null;
+        String token = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (Exception e) {
+                logger.warn("JWT token extraction failed: " + e.getMessage());
+            }
+        }
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (jwtUtil.validateToken(token, userDetails)) {
+                String role = jwtUtil.extractRole(token);
+                Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(role);
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
 }

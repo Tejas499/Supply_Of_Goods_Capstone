@@ -10,5 +10,26 @@ import { HttpService } from '../../services/http.service';
  
 })
 export class RegistrationComponent {
+  itemForm!: FormGroup;
 
-  //todo: complete missing code
+  constructor(
+    private fb: FormBuilder,
+    private httpService: HttpService,
+    private router: Router
+  ) {
+    this.itemForm = this.fb.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      role: ['', Validators.required]
+    });
+  }
+
+  onSubmit(): void {
+    if (this.itemForm.valid) {
+      this.httpService.registerUser(this.itemForm.value).subscribe(() => {
+        this.router.navigate(['/login']);
+      });
+    }
+  }
+}
