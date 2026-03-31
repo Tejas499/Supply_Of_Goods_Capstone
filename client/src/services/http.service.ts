@@ -72,6 +72,8 @@ export class HttpService {
   }
 
   addConsumerFeedBack(id: any, userId: any, details: any): Observable<any> {
+    // console.log(id+" from httpService");
+    
     return this.http.post(`${this.serverName}/api/consumers/order/${id}/feedback?userId=${userId}`,
       details, { headers: this.getAuthHeaders() });
   }

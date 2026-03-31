@@ -8,23 +8,21 @@ import { Router } from '@angular/router';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  IsLoggin:any=false;
-  roleName: string | null;
-  constructor(private authService: AuthService, private router:Router)
-  {
-   
-    this.IsLoggin=authService.getLoginStatus;
-    this.roleName=authService.getRole;
-    if(this.IsLoggin==false)
-    {
-      this.router.navigateByUrl('/login'); 
-    
-    }
-  }
-  logout()
-{
-  this.authService.logout();
-  window.location.reload();
-}
+  IsLoggin: boolean = false;
+  roleName: string | null = null;
 
+  constructor(private authService: AuthService, private router: Router) {
+    // Reactively update navbar whenever login/logout/role changes
+    this.authService.isLoggedIn$.subscribe(status => {
+      this.IsLoggin = status;
+    });
+    this.authService.currentRole$.subscribe(role => {
+      this.roleName = role;
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }

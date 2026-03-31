@@ -1,1 +1,56 @@
-//todo: complete missing code
+<div class="container mt-4">
+  <h3 class="mb-4">Manage Product Inventory</h3>
+
+  <div class="card mb-4">
+    <div class="card-header">Add Product Inventory</div>
+    <div class="card-body">
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Products</label>
+            <input type="text" class="form-control" formControlName="productId" placeholder="Choose Products">
+            <div *ngIf="itemForm.get('productId')?.invalid && itemForm.get('productId')?.touched" class="text-danger small">Required.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Stock Quantity</label>
+            <input type="number" class="form-control" formControlName="stockQuantity" placeholder="Stock Quantity">
+            <div *ngIf="itemForm.get('stockQuantity')?.invalid && itemForm.get('stockQuantity')?.touched" class="text-danger small">Required.</div>
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-outline-secondary" >Submit</button>
+          </div>
+        </div>
+        <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Order Information</div>
+    <div class="card-body p-0">
+      <table class="table table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>Sr#</th>
+            <th>Product</th>
+            <th>Stock Quantity</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of inventories; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ inv.product?.name }}</td>
+            <td>{{ inv.stockQuantity }}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" (click)="editInventory(inv)">Edit</button>
+            </td>
+          </tr>
+          <tr *ngIf="inventories.length === 0">
+            <td colspan="4" class="text-center text-muted">No inventory records.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

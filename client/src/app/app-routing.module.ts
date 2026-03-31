@@ -18,15 +18,15 @@ import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-o
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'registration', component: RegistrationComponent },
-  { path: 'dashboard', component: DashbaordComponent },  
-  { path: 'create-product', component: CreateProductsComponent }, 
-  { path: 'place-product', component: PlaceOrderComponent }, 
-  { path: 'add-inventory', component: AddInventoryComponent }, 
-  { path: 'get-orders', component: GetOrdersComponent }, 
- { path: 'consumer-place-order', component: ConsumerPlaceOrderComponent }, 
- { path: 'consumer-get-orders', component: ConsumerGetOrdersComponent }, 
- 
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: 'dashboard', component: DashbaordComponent },
+  { path: 'create-product', component: CreateProductsComponent },
+  { path: 'place-product', component: PlaceOrderComponent },
+  { path: 'add-inventory', component: AddInventoryComponent },
+  { path: 'get-orders', component: GetOrdersComponent },
+  { path: 'consumer-place-order', component: ConsumerPlaceOrderComponent },
+  { path: 'consumer-get-orders', component: ConsumerGetOrdersComponent },
+
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 
   { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
 ];
@@ -35,4 +35,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

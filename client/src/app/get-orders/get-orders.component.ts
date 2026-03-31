@@ -12,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 export class GetOrdersComponent implements OnInit {
   itemForm!: FormGroup;
   orders: any[] = [];
+  newStatus: string = '';
+  successMsg: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -34,11 +36,27 @@ export class GetOrdersComponent implements OnInit {
     }
   }
 
+  processOrder(orderId: any): void {
+    if (this.newStatus) {
+      this.httpService.updateOrderStatus(orderId, this.newStatus).subscribe(() => {
+        this.successMsg = 'Order status updated';
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          this.httpService.getOrderByWholesalers(userId).subscribe((res: any) => {
+            this.orders = res;
+          });
+        }
+        setTimeout(() => this.successMsg = '', 3000);
+      });
+    }
+  }
+
   onSubmit(): void {
     if (this.itemForm.valid) {
       const { orderId, status } = this.itemForm.value;
       this.httpService.updateOrderStatus(orderId, status).subscribe(() => {
-        this.router.navigate(['/dashboard']);
+        this.successMsg = 'Order status updated';
+        setTimeout(() => this.successMsg = '', 3000);
       });
     }
   }

@@ -1,6 +1,8 @@
 package com.edutech.supply_of_goods_management.entity;
 
 
+// import java.sql.Date;
+
 import javax.persistence.*;
 import java.util.Date;
 

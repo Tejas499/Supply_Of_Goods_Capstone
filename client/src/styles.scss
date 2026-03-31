@@ -1,1 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global Styles - Supply of Goods Management Platform */
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Top navbar blue accent border */
+nav.navbar {
+  border-top: 4px solid #0d6efd;
+}
+
+/* Card styling */
+.card {
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.card-header {
+  background-color: #f1f3f5;
+  font-weight: 500;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Table */
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn-warning {
+  color: #000;
+}
+
+/* Login/Registration card shadow */
+.card.shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  border: none;
+}
+
+/* Alert success */
+.alert-success {
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+  color: #0f5132;
+}

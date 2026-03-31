@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
-import { AuthService } from '../../services/auth.service';
+// import { AuthService } from '../../services/auth.service';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -14,24 +14,25 @@ import { DatePipe } from '@angular/common';
 export class ConsumerGetOrdersComponent implements OnInit {
   itemForm!: FormGroup;
   orders: any[] = [];
+  successMsg: string = '';
 
   constructor(
     private fb: FormBuilder,
     private httpService: HttpService,
-    private authService: AuthService,
+    // private authService: AuthService,
     private router: Router,
     private datePipe: DatePipe
   ) {}
 
   ngOnInit(): void {
+    const userId = localStorage.getItem('userId');
     this.itemForm = this.fb.group({
       orderId: [''],
-      userId: ['', Validators.required],
+      userId: [userId || '', Validators.required],
       content: [''],
-      timestamp: ['']
+      timestamp: [this.datePipe.transform(new Date(), 'yyyy-MM-dd HH:mm:ss')]
     });
 
-    const userId = localStorage.getItem('userId');
     if (userId) {
       this.httpService.getOrderConsumer(userId).subscribe((res: any) => {
         this.orders = res;
@@ -40,12 +41,13 @@ export class ConsumerGetOrdersComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.itemForm.valid) {
-      const { orderId, userId, content, timestamp } = this.itemForm.value;
-      const details = { content, timestamp };
-      this.httpService.addConsumerFeedBack(orderId, userId, details).subscribe(() => {
-        this.router.navigate(['/dashboard']);
-      });
-    }
+    const { orderId, userId, content, timestamp } = this.itemForm.value;
+    const details = { content, timestamp };
+    // console.log(orderId +" from httpService");
+    this.httpService.addConsumerFeedBack(orderId, userId, details).subscribe(() => {
+      this.successMsg = 'Feedback submitted successfully';
+      this.itemForm.patchValue({ orderId: '', content: '' });
+      setTimeout(() => this.successMsg = '', 3000);
+    });
   }
 }

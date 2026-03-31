@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 import { AuthService } from '../../services/auth.service';
 
-
 @Component({
   selector: 'app-consumer-place-order',
   templateUrl: './consumer-place-order.component.html',
@@ -13,6 +12,8 @@ import { AuthService } from '../../services/auth.service';
 export class ConsumerPlaceOrderComponent implements OnInit {
   itemForm!: FormGroup;
   products: any[] = [];
+  successMsg: string = '';
+  selectedProductId: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -33,13 +34,24 @@ export class ConsumerPlaceOrderComponent implements OnInit {
     });
   }
 
+  selectProduct(p: any): void {
+    this.selectedProductId = p.id;
+    this.itemForm.patchValue({ productId: p.id });
+    this.onSubmit();
+  }
+
   onSubmit(): void {
     if (this.itemForm.valid) {
       const userId = localStorage.getItem('userId');
-      const productId = this.itemForm.value.productId;
-      const details = { quantity: this.itemForm.value.quantity, status: this.itemForm.value.status };
+      const productId = this.selectedProductId || this.itemForm.value.productId;
+      const details = {
+        quantity: this.itemForm.value.quantity,
+        status: this.itemForm.value.status
+      };
       this.httpService.consumerPlaceOrder(details, productId, userId).subscribe(() => {
-        this.router.navigate(['/consumer-get-orders']);
+        this.successMsg = 'Order placed successfully';
+        this.itemForm.reset();
+        setTimeout(() => this.successMsg = '', 3000);
       });
     }
   }

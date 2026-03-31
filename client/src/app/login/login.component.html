@@ -1,0 +1,32 @@
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
+    <h2 class="text-center text-uppercase fw-bold mb-1">Supply-of-Goods Management and Distribution Platform</h2>
+    <p class="text-center text-muted mb-4">Please enter your user and password!</p>
+
+    <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" formControlName="username" placeholder="name@example.com">
+        <div *ngIf="itemForm.get('username')?.invalid && itemForm.get('username')?.touched" class="text-danger small">
+          Username is required.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" formControlName="password" placeholder="••••••••">
+        <div *ngIf="itemForm.get('password')?.invalid && itemForm.get('password')?.touched" class="text-danger small">
+          Password is required.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid">Login</button>
+    </form>
+
+    <p class="text-center mb-0">Don't have an account?
+      <a [routerLink]="['/registration']" class="fw-bold text-primary">Registration</a>
+    </p>
+  </div>
+</div>

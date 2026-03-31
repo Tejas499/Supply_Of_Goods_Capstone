@@ -1,1 +1,46 @@
-//todo: complete missing code
+<div class="container mt-4">
+  <h3 class="mb-4">Orders</h3>
+
+  <div class="card mb-4">
+    <div class="card-header">Order Information</div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          <input type="text" class="form-control" [(ngModel)]="newStatus" placeholder="Select Status">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Sr#</th>
+        <th>Quantity</th>
+        <th>Status</th>
+        <th>Product</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of orders; let i = index">
+        <td>{{ o.id }}</td>
+        <td>{{ o.quantity }}</td>
+        <td>{{ o.status }}</td>
+        <td>
+          <div>Name:{{ o.product?.name }}</div>
+          <div>Price:{{ o.product?.price }}</div>
+          <div>Description:{{ o.product?.description }}</div>
+        </td>
+        <td>
+          <button class="btn btn-primary btn-sm" (click)="processOrder(o.id)">Process Orders</button>
+        </td>
+      </tr>
+      <tr *ngIf="orders.length === 0">
+        <td colspan="5" class="text-center text-muted">No orders found.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="successMsg" class="alert alert-success mt-2">{{ successMsg }}</div>
+</div>

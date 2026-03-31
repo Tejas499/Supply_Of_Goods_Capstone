@@ -11,6 +11,9 @@ import { AuthService } from '../../services/auth.service';
 })
 export class CreateProductsComponent implements OnInit {
   itemForm!: FormGroup;
+  products: any[] = [];
+  successMsg: string = '';
+  editingId: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -27,13 +30,46 @@ export class CreateProductsComponent implements OnInit {
       price: ['', Validators.required],
       stockQuantity: ['', Validators.required]
     });
+    this.loadProducts();
+  }
+
+  loadProducts(): void {
+    const manufacturerId = localStorage.getItem('userId');
+    if (manufacturerId) {
+      this.httpService.getProductsByManufacturer(manufacturerId).subscribe((res: any) => {
+        this.products = res;
+      });
+    }
+  }
+
+  editProduct(p: any): void {
+    this.editingId = p.id;
+    this.itemForm.patchValue({
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      stockQuantity: p.stockQuantity,
+      manufacturerId: p.manufacturerId
+    });
   }
 
   onSubmit(): void {
     if (this.itemForm.valid) {
-      this.httpService.createProduct(this.itemForm.value).subscribe(() => {
-        this.router.navigate(['/dashboard']);
-      });
+      if (this.editingId) {
+        this.httpService.updateProduct(this.itemForm.value, this.editingId).subscribe(() => {
+          this.successMsg = 'Updated Successfully';
+          this.editingId = null;
+          this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') });
+          this.loadProducts();
+        });
+      } else {
+        this.httpService.createProduct(this.itemForm.value).subscribe(() => {
+          this.successMsg = 'Save Successfully';
+          this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') });
+          this.loadProducts();
+        });
+      }
+      setTimeout(() => this.successMsg = '', 3000);
     }
   }
 }

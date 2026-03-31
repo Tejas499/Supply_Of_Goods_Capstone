@@ -11,12 +11,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class AddInventoryComponent implements OnInit {
   itemForm!: FormGroup;
+  inventories: any[] = [];
+  successMsg: string = '';
+  editingId: any = null;
 
   constructor(
     private fb: FormBuilder,
     private httpService: HttpService,
-    private authService: AuthService,
-    private router: Router
+    // private authService: AuthService,
+    // private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -25,18 +28,51 @@ export class AddInventoryComponent implements OnInit {
       stockQuantity: ['', Validators.required],
       productId: ['', Validators.required]
     });
+    this.loadInventories();
+  }
+
+  loadInventories(): void {
+    const wholesalerId = localStorage.getItem('userId');
+    if (wholesalerId) {
+      this.httpService.getInventoryByWholesalers(wholesalerId).subscribe((res) => {
+        this.inventories = res;
+        console.log(this.inventories);
+        
+      });
+    }
+  }
+
+  editInventory(inv: any): void {
+    this.editingId = inv.id;
+    this.itemForm.patchValue({
+      stockQuantity: inv.stockQuantity,
+      productId: inv.product?.id
+    });
   }
 
   onSubmit(): void {
     if (this.itemForm.valid) {
-      const productId = this.itemForm.value.productId;
-      const details = {
-        wholesalerId: this.itemForm.value.wholesalerId,
-        stockQuantity: this.itemForm.value.stockQuantity
-      };
-      this.httpService.addInventory(details, productId).subscribe(() => {
-        this.router.navigate(['/dashboard']);
-      });
+      if (this.editingId) {
+        this.httpService.updateInventory(this.itemForm.value.stockQuantity, this.editingId).subscribe(() => {
+          this.successMsg = 'Updated Successfully';
+          this.editingId = null;
+          this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') });
+          this.loadInventories();
+          setTimeout(() => this.successMsg = '', 3000);
+        });
+      } else {
+        const productId = this.itemForm.value.productId;
+        const details = {
+          wholesalerId: this.itemForm.value.wholesalerId,
+          stockQuantity: this.itemForm.value.stockQuantity
+        };
+        this.httpService.addInventory(details, productId).subscribe(() => {
+          this.successMsg = 'Save Successfully';
+          this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') });
+          this.loadInventories();
+          setTimeout(() => this.successMsg = '', 3000);
+        });
+      }
     }
   }
 }
