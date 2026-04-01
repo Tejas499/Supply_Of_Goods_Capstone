@@ -13,42 +13,60 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Status</label>
-            <input type="text" class="form-control" formControlName="status" placeholder="Select Status">
+            <input type="text" class="form-control" formControlName="status" placeholder="e.g. Pending">
             <div *ngIf="itemForm.get('status')?.invalid && itemForm.get('status')?.touched" class="text-danger small">Required.</div>
+          </div>
+          <div class="col-md-4 d-flex align-items-end" *ngIf="selectedProductId">
+            <div class="alert alert-info mb-0 w-100 py-2">
+              Product ID selected: <strong>{{ selectedProductId }}</strong>
+            </div>
           </div>
         </div>
         <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+        <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
       </form>
     </div>
   </div>
 
+  <!-- Products Table — shows Manufacturer name to Wholesaler -->
   <div class="card">
-    <div class="card-header">Order Information</div>
+    <div class="card-header">Available Products</div>
     <div class="card-body p-0">
       <table class="table table-bordered mb-0">
-        <thead>
+        <thead class="table-light">
           <tr>
             <th>Sr#</th>
             <th>Product Name</th>
             <th>Price</th>
             <th>Stock Quantity</th>
-            <th>Description</th>
+            <!-- <th>Description</th> -->
+            <th>Manufactured By</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of products; let i = index">
+          <tr *ngFor="let p of products; let i = index"
+              [class.table-active]="selectedProductId === p.id">
             <td>{{ i + 1 }}</td>
             <td>{{ p.name }}</td>
             <td>{{ p.price }}</td>
             <td>{{ p.stockQuantity }}</td>
-            <td>{{ p.description }}</td>
+            <!-- <td>{{ p.description }}</td> -->
             <td>
-              <button class="btn btn-warning btn-sm" (click)="selectProduct(p)">Add For Order</button>
+              <!-- Manufacturer name visible to wholesaler -->
+              <span *ngIf="p.manufacturer" class="badge bg-secondary">
+                {{ p.manufacturer.username }}
+              </span>
+              <span *ngIf="!p.manufacturer" class="text-muted small">N/A</span>
+            </td>
+            <td>
+              <button class="btn btn-warning btn-sm" (click)="selectProduct(p)">
+                Add For Order
+              </button>
             </td>
           </tr>
           <tr *ngIf="products.length === 0">
-            <td colspan="6" class="text-center text-muted">No products available.</td>
+            <td colspan="7" class="text-center text-muted">No products available.</td>
           </tr>
         </tbody>
       </table>

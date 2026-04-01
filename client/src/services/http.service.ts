@@ -19,7 +19,8 @@ export class HttpService {
     });
   }
 
-  // Wholesaler
+  // ── WHOLESALER ──────────────────────────────────────────────
+  // Response includes product.manufacturer { id, username, email }
   getProductsByWholesaler(): Observable<any> {
     return this.http.get(`${this.serverName}/api/wholesalers/products`,
       { headers: this.getAuthHeaders() });
@@ -55,9 +56,17 @@ export class HttpService {
       null, { headers: this.getAuthHeaders() });
   }
 
-  // Consumer
+  // ── CONSUMER ─────────────────────────────────────────────────
+  // Response includes product.manufacturer { id, username, email }
   getProductsByConsumers(): Observable<any> {
     return this.http.get(`${this.serverName}/api/consumers/products`,
+      { headers: this.getAuthHeaders() });
+  }
+
+  // NEW — get wholesalers who carry a specific product
+  // Response includes inventory.wholesaler { id, username, email }
+  getWholesalersForProduct(productId: any): Observable<any> {
+    return this.http.get(`${this.serverName}/api/consumers/products/${productId}/wholesalers`,
       { headers: this.getAuthHeaders() });
   }
 
@@ -72,13 +81,11 @@ export class HttpService {
   }
 
   addConsumerFeedBack(id: any, userId: any, details: any): Observable<any> {
-    // console.log(id+" from httpService");
-    
     return this.http.post(`${this.serverName}/api/consumers/order/${id}/feedback?userId=${userId}`,
       details, { headers: this.getAuthHeaders() });
   }
 
-  // Manufacturer
+  // ── MANUFACTURER ──────────────────────────────────────────────
   getProductsByManufacturer(manufacturerId: any): Observable<any> {
     return this.http.get(`${this.serverName}/api/manufacturers/products?manufacturerId=${manufacturerId}`,
       { headers: this.getAuthHeaders() });
@@ -94,7 +101,7 @@ export class HttpService {
       details, { headers: this.getAuthHeaders() });
   }
 
-  // Auth
+  // ── AUTH ──────────────────────────────────────────────────────
   Login(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/user/login`, details,
       { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) });

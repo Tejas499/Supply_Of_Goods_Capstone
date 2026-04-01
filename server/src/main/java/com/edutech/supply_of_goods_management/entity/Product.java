@@ -1,7 +1,7 @@
 package com.edutech.supply_of_goods_management.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.util.List;
@@ -23,6 +23,12 @@ public class Product {
     private double price;
 
     private int stockQuantity;
+
+    // Wholesaler sees this — only expose id, username, email (not password, not orders)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manufacturerId", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"password", "orders", "feedbacks", "hibernateLazyInitializer"})
+    private User manufacturer;
 
     @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
@@ -51,6 +57,9 @@ public class Product {
 
     public int getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+
+    public User getManufacturer() { return manufacturer; }
+    public void setManufacturer(User manufacturer) { this.manufacturer = manufacturer; }
 
     public List<Order> getOrders() { return orders; }
     public void setOrders(List<Order> orders) { this.orders = orders; }

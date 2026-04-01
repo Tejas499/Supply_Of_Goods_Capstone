@@ -1,19 +1,19 @@
 package com.edutech.supply_of_goods_management.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.edutech.supply_of_goods_management.entity.Feedback;
+import com.edutech.supply_of_goods_management.entity.Inventory;
 import com.edutech.supply_of_goods_management.entity.Order;
 import com.edutech.supply_of_goods_management.entity.Product;
 import com.edutech.supply_of_goods_management.service.FeedbackService;
+import com.edutech.supply_of_goods_management.service.InventoryService;
 import com.edutech.supply_of_goods_management.service.OrderService;
 import com.edutech.supply_of_goods_management.service.ProductService;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/consumers")
@@ -28,16 +28,26 @@ public class ConsumerController {
     @Autowired
     private FeedbackService feedbackService;
 
+    @Autowired
+    private InventoryService inventoryService;
+
+    // Browse all products — response includes manufacturer { id, username, email }
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
+    }
+
+    // See which wholesalers carry a specific product — response includes wholesaler { id, username, email }
+    @GetMapping("/products/{productId}/wholesalers")
+    public ResponseEntity<List<Inventory>> getWholesalersForProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(inventoryService.getWholesalersByProductId(productId));
     }
 
     @PostMapping("/order")
     public ResponseEntity<Order> placeOrder(@RequestBody Order order,
                                              @RequestParam Long productId,
                                              @RequestParam Long userId) {
-        return ResponseEntity.ok(orderService.placeOrder(order, productId, userId));
+        return ResponseEntity.ok(orderService.placeConsumerOrder(order, productId, userId));
     }
 
     @GetMapping("/orders")
@@ -49,7 +59,6 @@ public class ConsumerController {
     public ResponseEntity<Feedback> addFeedback(@PathVariable Long orderId,
                                                  @RequestParam Long userId,
                                                  @RequestBody Feedback feedback) {
-                                                    //  System.out.println(orderId+"from controller." );
         return ResponseEntity.ok(feedbackService.addFeedback(orderId, userId, feedback));
     }
 }

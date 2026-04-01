@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.edutech.supply_of_goods_management.jwt.JwtRequestFilter;
 
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -48,20 +47,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
             .authorizeRequests()
                 .antMatchers("/api/user/register", "/api/user/login").permitAll()
-                .antMatchers(HttpMethod.POST,   "/api/manufacturers/product").hasAuthority("MANUFACTURER")
-                .antMatchers(HttpMethod.PUT,    "/api/manufacturers/product/**").hasAuthority("MANUFACTURER")
-                .antMatchers(HttpMethod.GET,    "/api/manufacturers/products").hasAuthority("MANUFACTURER")
-                .antMatchers(HttpMethod.GET,    "/api/wholesalers/products").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.POST,   "/api/wholesalers/order").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.PUT,    "/api/wholesalers/order/**").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.GET,    "/api/wholesalers/orders").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.POST,   "/api/wholesalers/inventories").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.PUT,    "/api/wholesalers/inventories/**").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.GET,    "/api/wholesalers/inventories").hasAuthority("WHOLESALER")
-                .antMatchers(HttpMethod.GET,    "/api/consumers/products").hasAuthority("CONSUMER")
-                .antMatchers(HttpMethod.POST,   "/api/consumers/order").hasAuthority("CONSUMER")
-                .antMatchers(HttpMethod.GET,    "/api/consumers/orders").hasAuthority("CONSUMER")
+
+                // Manufacturer endpoints
+                .antMatchers(HttpMethod.POST, "/api/manufacturers/product").hasAuthority("MANUFACTURER")
+                .antMatchers(HttpMethod.PUT,  "/api/manufacturers/product/**").hasAuthority("MANUFACTURER")
+                .antMatchers(HttpMethod.GET,  "/api/manufacturers/products").hasAuthority("MANUFACTURER")
+
+                // Wholesaler endpoints
+                .antMatchers(HttpMethod.GET,  "/api/wholesalers/products").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.POST, "/api/wholesalers/order").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.PUT,  "/api/wholesalers/order/**").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.GET,  "/api/wholesalers/orders").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.POST, "/api/wholesalers/inventories").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.PUT,  "/api/wholesalers/inventories/**").hasAuthority("WHOLESALER")
+                .antMatchers(HttpMethod.GET,  "/api/wholesalers/inventories").hasAuthority("WHOLESALER")
+
+                // Consumer endpoints
+                .antMatchers(HttpMethod.GET,  "/api/consumers/products").hasAuthority("CONSUMER")
+                .antMatchers(HttpMethod.GET,  "/api/consumers/products/*/wholesalers").hasAuthority("CONSUMER")
+                .antMatchers(HttpMethod.POST, "/api/consumers/order").hasAuthority("CONSUMER")
+                .antMatchers(HttpMethod.GET,  "/api/consumers/orders").hasAuthority("CONSUMER")
                 .antMatchers("/api/consumers/order/**/feedback").hasAuthority("CONSUMER")
+
                 .anyRequest().authenticated()
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
