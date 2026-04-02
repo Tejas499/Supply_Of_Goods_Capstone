@@ -13,18 +13,57 @@ export class LoginComponent implements OnInit {
   itemForm!: FormGroup;
   errorMsg: string = '';
 
+  num1: number = 0;
+  num2: number = 0;
+  operator:string=''
+  captchaAnswer: number = 0;
+  userAnswer: any = '';
+  isCaptchaValid: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private httpService: HttpService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.itemForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
+    this.generateCaptcha();
+  }
+
+  generateCaptcha() {
+  const operators = ['+', '-', '*', '/'];
+  this.operator = operators[Math.floor(Math.random() * operators.length)];
+  this.num1 = Math.floor(Math.random() * 10) + 1;
+  this.num2 = Math.floor(Math.random() * 10) + 1;
+  // Avoid decimal in division
+  if (this.operator === '/') {
+    this.num1 = this.num1 * this.num2;
+  }
+  switch (this.operator) {
+    case '+':
+      this.captchaAnswer = this.num1 + this.num2;
+      break;
+    case '-':
+      this.captchaAnswer = this.num1 - this.num2;
+      break;
+    case '*':
+      this.captchaAnswer = this.num1 * this.num2;
+      break;
+    case '/':
+      this.captchaAnswer = this.num1 / this.num2;
+      break;
+  }
+  this.userAnswer = '';
+  this.isCaptchaValid = false;
+}
+
+  validateCaptcha() {
+    this.isCaptchaValid = Number(this.userAnswer) === this.captchaAnswer;
   }
 
   onSubmit(): void {

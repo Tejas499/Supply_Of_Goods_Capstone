@@ -1,117 +1,124 @@
 <div class="container mt-4">
-  <h3 class="mb-4">Place Order</h3>
 
-  <!-- Order Form -->
-  <div class="card mb-4">
-    <div class="card-header">Place Order</div>
-    <div class="card-body">
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Quantity</label>
-            <input type="number" class="form-control" formControlName="quantity" placeholder="QTY">
-            <div *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="text-danger small">Required.</div>
-          </div>
-          <!-- <div class="col-md-4">
-            <label class="form-label">Status</label>
-            <input type="text" class="form-control" formControlName="status" placeholder="e.g. Pending">
-            <div *ngIf="itemForm.get('status')?.invalid && itemForm.get('status')?.touched" class="text-danger small">Required.</div>
-          </div> -->
-          <div class="col-md-4 d-flex align-items-end" *ngIf="selectedProduct">
-            <div class="alert alert-info mb-0 w-100 py-2">
-              Selected: <strong>{{ selectedProduct.name }}</strong>
-            </div>
-          </div>
+  <div class="modal-backdrop-custom" *ngIf="showConfirm">
+    <div class="modal-box">
+      <h5 class="fw-bold mb-3">🛒 Confirm Order</h5>
+      <p class="text-muted">{{ confirmMsg }}</p>
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="onConfirm()">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="fw-bold mb-4">🛍️ Browse &amp; Order Products</h3>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
+
+  <!-- Slide-in order form -->
+  <div class="order-form-panel" *ngIf="showOrderForm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-bold mb-0">
+        Order: <span class="text-primary">{{ selectedProduct?.name }}</span>
+        <span class="badge bg-secondary ms-2" *ngIf="selectedProduct?.manufacturer">by {{ selectedProduct?.manufacturer?.username }}</span>
+      </h6>
+      <button class="btn btn-sm btn-outline-secondary" (click)="closeOrderForm()">✕</button>
+    </div>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Quantity</label>
+          <input type="number" class="form-control" formControlName="quantity" placeholder="How many?" min="1">
+          <div *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="text-danger small mt-1">Min 1.</div>
         </div>
-        <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
-        <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
-      </form>
-    </div>
+        <div class="col-md-3">
+          <label class="form-label">Price per unit</label>
+          <input class="form-control" [value]="'₹' + selectedProduct?.price" disabled>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Available Stock</label>
+          <input class="form-control" [value]="selectedProduct?.stockQuantity + ' units'" disabled>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.invalid">🛒 Order Now</button>
+        </div>
+      </div>
+      <div class="mt-2"><span class="badge bg-warning text-dark">Status: ORDER PLACED</span></div>
+    </form>
   </div>
 
-  <!-- Products Table — shows Manufacturer name -->
-  <div class="card mb-4">
-    <div class="card-header">Available Products</div>
+  <!-- Wholesalers panel -->
+  <div class="card mb-4" *ngIf="selectedProduct && !showOrderForm && wholesalers !== null">
+    <div class="card-header">🏪 Wholesalers carrying <strong>{{ selectedProduct?.name }}</strong></div>
     <div class="card-body p-0">
-      <table class="table table-bordered mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Sr#</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <!-- <th>Description</th> -->
-            <th>Manufactured By</th>
-            <th>Action</th>
-          </tr>
-        </thead>
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Wholesaler</th><th>Email</th><th>Stock</th></tr></thead>
         <tbody>
-          <tr *ngFor="let p of products; let i = index"
-              [class.table-active]="selectedProduct?.id === p.id">
-            <td>{{ i + 1 }}</td>
-            <td>{{ p.name }}</td>
-            <td>{{ p.price }}</td>
-            <td>{{ p.stockQuantity }}</td>
-            <td>{{ p.description }}</td>
-            <td>
-              <!-- Manufacturer name visible to consumer -->
-              <span *ngIf="p.manufacturer" class="badge bg-secondary">
-                {{ p.manufacturer.username }}
-              </span>
-              <span *ngIf="!p.manufacturer" class="text-muted small">N/A</span>
-            </td>
-            <td>
-              <button class="btn btn-info btn-sm me-1" (click)="viewWholesalers(p)">
-                View Wholesalers
-              </button>
-              <button class="btn btn-warning btn-sm" (click)="selectProduct(p)">
-                Order
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="products.length === 0">
-            <td colspan="7" class="text-center text-muted">No products available.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Wholesalers for selected product -->
-  <div class="card" *ngIf="selectedProduct && wholesalers.length >= 0">
-    <div class="card-header">
-      Wholesalers carrying <strong>{{ selectedProduct?.name }}</strong>
-    </div>
-    <div class="card-body p-0">
-      <table class="table table-bordered mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Sr#</th>
-            <th>Wholesaler Name</th>
-            <th>Wholesaler Email</th>
-            <th>Stock Available</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let inv of wholesalers; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>
-              <!-- Wholesaler name visible to consumer -->
-              <span *ngIf="inv.wholesaler" class="fw-bold">{{ inv.wholesaler.username }}</span>
-              <span *ngIf="!inv.wholesaler" class="text-muted">Unknown</span>
-            </td>
-            <td>
-              <span *ngIf="inv.wholesaler">{{ inv.wholesaler.email }}</span>
-            </td>
-            <td>{{ inv.stockQuantity }}</td>
+          <tr *ngFor="let inv of wholesalers">
+            <td class="fw-semibold">{{ inv.wholesaler?.username }}</td>
+            <td class="text-muted small">{{ inv.wholesaler?.email }}</td>
+            <td><span class="badge bg-success">{{ inv.stockQuantity }} units</span></td>
           </tr>
           <tr *ngIf="wholesalers.length === 0">
-            <td colspan="4" class="text-center text-muted">
-              No wholesalers currently carry this product.
-            </td>
+            <td colspan="3" class="text-center text-muted py-3">No wholesalers currently carry this product.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Products table -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>📦 Available Products</span>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control form-control-sm" style="width:220px;padding-left:2rem"
+               placeholder="Search products..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Manufactured By</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paged" [class.table-active]="selectedProduct?.id===p.id">
+            <td>
+              <div class="fw-semibold">{{ p.name }}</div>
+              <div class="text-muted small">{{ p.description }}</div>
+            </td>
+            <td><span class="badge bg-secondary" *ngIf="p.manufacturer">{{ p.manufacturer.username }}</span></td>
+            <td class="text-success fw-semibold">₹{{ p.price | number:'1.0-0' }}</td>
+            <td>
+              <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' : p.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
+                {{ p.stockQuantity }} units
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-info btn-sm me-1"  (click)="viewWholesalers(p)">🏪 Wholesalers</button>
+              <button class="btn btn-primary btn-sm"    (click)="openOrderForm(p)" [disabled]="p.stockQuantity===0">➕ Add Order</button>
+            </td>
+          </tr>
+          <tr *ngIf="paged.length === 0">
+            <td colspan="5" class="text-center text-muted py-4">No products found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
+      <small class="text-muted">{{ filtered.length }} products</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
+        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
+        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
+      </ul>
     </div>
   </div>
 </div>

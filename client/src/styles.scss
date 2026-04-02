@@ -1,47 +1,171 @@
-/* Global Styles - Supply of Goods Management Platform */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* { box-sizing: border-box; }
 
 body {
-  background-color: #f8f9fa;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
 }
 
-/* Top navbar blue accent border */
+/* ── Navbar ── */
 nav.navbar {
-  border-top: 4px solid #0d6efd;
+  border-bottom: 3px solid #4f46e5;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  padding: 0.75rem 1.5rem;
 }
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+.nav-link { font-weight: 500; transition: color 0.2s; }
+.nav-link:hover { color: #a5b4fc !important; }
 
-/* Card styling */
+/* ── Cards ── */
 .card {
-  border-radius: 6px;
-  border: 1px solid #dee2e6;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
 }
-
 .card-header {
-  background-color: #f1f3f5;
-  font-weight: 500;
-  border-bottom: 1px solid #dee2e6;
-}
-
-/* Table */
-.table th {
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
   font-weight: 600;
-}
-
-/* Buttons */
-.btn-warning {
-  color: #000;
-}
-
-/* Login/Registration card shadow */
-.card.shadow {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  font-size: 0.95rem;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 0.85rem 1.25rem;
   border: none;
 }
 
-/* Alert success */
-.alert-success {
-  background-color: #d1e7dd;
-  border-color: #badbcc;
-  color: #0f5132;
+/* ── Tables ── */
+.table th {
+  background: #f8f9ff;
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6366f1;
+  border-bottom: 2px solid #e5e7eb;
+}
+.table td { vertical-align: middle; font-size: 0.9rem; }
+.table-hover tbody tr:hover { background: #f5f3ff; }
+
+/* ── Buttons ── */
+.btn { border-radius: 8px; font-weight: 500; font-size: 0.85rem; }
+.btn-primary   { background: #4f46e5; border-color: #4f46e5; }
+.btn-primary:hover { background: #3730a3; }
+.btn-success   { background: #059669; border-color: #059669; }
+.btn-warning   { background: #d97706; border-color: #d97706; color: #fff; }
+.btn-danger    { background: #dc2626; border-color: #dc2626; }
+.btn-info      { background: #0284c7; border-color: #0284c7; color: #fff; }
+.btn-outline-primary { border-color: #4f46e5; color: #4f46e5; }
+.btn-outline-primary:hover { background: #4f46e5; color: #fff; }
+
+/* ── Form controls ── */
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.85rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.form-label { font-weight: 500; font-size: 0.85rem; margin-bottom: 4px; color: #374151; }
+
+/* ── Badges ── */
+.badge { border-radius: 6px; font-size: 0.75rem; padding: 4px 8px; font-weight: 600; }
+
+/* ── Alerts ── */
+.alert { border-radius: 10px; border: none; font-size: 0.88rem; }
+.alert-success { background: #d1fae5; color: #065f46; }
+.alert-danger  { background: #fee2e2; color: #991b1b; }
+.alert-info    { background: #dbeafe; color: #1e40af; }
+
+/* ── Search bar ── */
+.search-box { position: relative; }
+.search-box input { padding-left: 2.4rem; }
+.search-box .search-icon {
+  position: absolute; left: 0.75rem; top: 50%;
+  transform: translateY(-50%); color: #9ca3af; font-size: 0.9rem;
+}
+
+/* ── Pagination ── */
+.pagination .page-link {
+  border-radius: 6px !important;
+  margin: 0 2px;
+  color: #4f46e5;
+  border-color: #e5e7eb;
+  font-size: 0.85rem;
+}
+.pagination .page-item.active .page-link {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+
+/* ── Modal confirm ── */
+.modal-confirm .modal-header { background: linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; border-radius:12px 12px 0 0; }
+.modal-content { border-radius: 12px; border: none; }
+
+/* ── Dashboard cards ── */
+.dash-card {
+  border-radius: 14px;
+  padding: 1.5rem;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+.dash-card.purple  { background: linear-gradient(135deg,#6366f1,#8b5cf6); }
+.dash-card.green   { background: linear-gradient(135deg,#059669,#10b981); }
+.dash-card.orange  { background: linear-gradient(135deg,#d97706,#f59e0b); }
+.dash-card.blue    { background: linear-gradient(135deg,#0284c7,#38bdf8); }
+.dash-card .icon   { font-size: 2.2rem; opacity: 0.85; }
+.dash-card .label  { font-size: 0.8rem; opacity: 0.85; font-weight: 500; text-transform: uppercase; }
+.dash-card .value  { font-size: 2rem; font-weight: 700; }
+
+/* ── Login page ── */
+.login-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#db2777 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* ── Modal overlay ── */
+.modal-backdrop-custom {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1040;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  z-index: 1050;
+}
+
+/* order form slide-in */
+.order-form-panel {
+  background: #f5f3ff;
+  border: 2px solid #c7d2fe;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  animation: slideDown 0.25s ease;
+}
+@keyframes slideDown {
+  from { opacity:0; transform:translateY(-10px); }
+  to   { opacity:1; transform:translateY(0); }
 }

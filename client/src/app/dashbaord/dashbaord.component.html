@@ -1,3 +1,152 @@
-<div class="row text-center mt-4">
-  <h1 class="text-capitalize text-uppercase">Supply-Of-Goods Management And Distribution Platform</h1>
+<div class="container mt-4">
+
+  <!-- Welcome Banner -->
+  <div class="card mb-4" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:16px;">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <h2 class="fw-bold mb-1">{{ greeting }}, {{ username }}! 👋</h2>
+          <p class="mb-2 opacity-75">Welcome to the Supply-of-Goods Management &amp; Distribution Platform</p>
+          <span class="badge" style="background:rgba(255,255,255,0.25);font-size:0.85rem;padding:6px 14px;">
+            {{ role | titlecase }} Dashboard
+          </span>
+        </div>
+        <div class="d-none d-md-block" style="font-size:4rem;opacity:0.6;">
+          <span *ngIf="role==='MANUFACTURER'">🏭</span>
+          <span *ngIf="role==='WHOLESALER'">🏪</span>
+          <span *ngIf="role==='CONSUMER'">🛒</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUFACTURER dashboard -->
+  <div *ngIf="role === 'MANUFACTURER'">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="dash-card purple">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="label">My Products</div>
+              <div class="value">Manage</div>
+            </div>
+            <div class="icon">📦</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="dash-card green">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="label">Stock Control</div>
+              <div class="value">Active</div>
+            </div>
+            <div class="icon">📊</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="dash-card orange">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="label">Platform</div>
+              <div class="value">Online</div>
+            </div>
+            <div class="icon">✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Quick Actions</div>
+      <div class="card-body">
+        <p class="text-muted mb-3">Use the navigation above to manage your products and track stock levels.</p>
+        <a routerLink="/create-product" class="btn btn-primary me-2">➕ Create Product</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHOLESALER dashboard -->
+  <div *ngIf="role === 'WHOLESALER'">
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="dash-card purple">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Orders</div><div class="value">Track</div></div>
+            <div class="icon">📋</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dash-card green">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Inventory</div><div class="value">Manage</div></div>
+            <div class="icon">🏪</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dash-card orange">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Products</div><div class="value">Browse</div></div>
+            <div class="icon">📦</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="dash-card blue">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Status</div><div class="value">Active</div></div>
+            <div class="icon">✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Quick Actions</div>
+      <div class="card-body">
+        <a routerLink="/place-product"  class="btn btn-primary me-2">🛒 Place Order</a>
+        <a routerLink="/get-orders"     class="btn btn-success me-2">📋 View Orders</a>
+        <a routerLink="/add-inventory"  class="btn btn-warning">📦 Manage Inventory</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSUMER dashboard -->
+  <div *ngIf="role === 'CONSUMER'">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="dash-card purple">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Browse</div><div class="value">Products</div></div>
+            <div class="icon">🛍️</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="dash-card green">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">My Orders</div><div class="value">Track</div></div>
+            <div class="icon">📦</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="dash-card orange">
+          <div class="d-flex justify-content-between align-items-start">
+            <div><div class="label">Feedback</div><div class="value">Share</div></div>
+            <div class="icon">💬</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Quick Actions</div>
+      <div class="card-body">
+        <a routerLink="/consumer-place-order" class="btn btn-primary me-2">🛒 Shop Now</a>
+        <a routerLink="/consumer-get-orders"  class="btn btn-success">📋 My Orders</a>
+      </div>
+    </div>
+  </div>
+
 </div>

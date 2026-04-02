@@ -1,57 +1,115 @@
 <div class="container mt-4">
-  <h3 class="mb-4">My Orders</h3>
 
-  <div class="card mb-4">
-    <div class="card-header">Provide Feedback</div>
-    <div class="card-body">
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Order ID</label>
-            <input type="number" class="form-control" formControlName="orderId" placeholder="Order ID">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Feedback</label>
-            <input type="text" class="form-control" formControlName="content" placeholder="Your feedback">
-          </div>
-          <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-outline-secondary">Submit Feedback</button>
-          </div>
-        </div>
-        <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
-      </form>
+  <div class="modal-backdrop-custom" *ngIf="showConfirm">
+    <div class="modal-box">
+      <h5 class="fw-bold mb-3">⚠️ Confirm Cancellation</h5>
+      <p class="text-muted">{{ confirmMsg }}</p>
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="btn btn-outline-secondary" (click)="onCancel()">No, keep it</button>
+        <button class="btn btn-danger" (click)="onConfirm()">Yes, cancel order</button>
+      </div>
     </div>
   </div>
 
+  <h3 class="fw-bold mb-4">📦 My Orders</h3>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
+
+  <!-- Inline feedback form -->
+  <div class="order-form-panel" *ngIf="showFeedbackFor">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-bold mb-0">💬 Feedback for Order #{{ showFeedbackFor.id }} — {{ showFeedbackFor.product?.name }}</h6>
+      <button class="btn btn-sm btn-outline-secondary" (click)="showFeedbackFor=null">✕</button>
+    </div>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <input type="text" class="form-control" formControlName="content" placeholder="Share your experience...">
+          <div *ngIf="itemForm.get('content')?.invalid && itemForm.get('content')?.touched" class="text-danger small mt-1">Please write your feedback.</div>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.get('content')?.invalid">Submit Feedback →</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <div class="card">
-    <div class="card-header">Order Information</div>
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>Order History</span>
+        <div class="d-flex gap-2">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-control form-control-sm" style="width:180px;padding-left:2rem"
+                   placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+          </div>
+          <select class="form-select form-select-sm" style="width:160px" [(ngModel)]="filterStatus" (change)="applyFilter()">
+            <option value="">All Statuses</option>
+            <option value="ORDER PLACED">Order Placed</option>
+            <option value="IN PROGRESS">In Progress</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div class="card-body p-0">
-      <table class="table table-bordered mb-0">
+      <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th>Sr#</th>
-            <th>Order ID</th>
-            <th>Quantity</th>
-            <th>Status</th>
+            <th>Order</th>
             <th>Product</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let o of orders; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ o.id }}</td>
-            <td>{{ o.quantity }}</td>
-            <td>{{ o.status }}</td>
+          <tr *ngFor="let o of paged">
+            <td class="fw-semibold text-primary">#{{ o.id }}</td>
             <td>
-              <div>Name: {{ o.product?.name }}</div>
-              <div>Price: {{ o.product?.price }}</div>
+              <div class="fw-semibold">{{ o.product?.name }}</div>
+              <div class="text-muted small">₹{{ o.product?.price }} per unit</div>
+            </td>
+            <td>{{ o.quantity }}</td>
+            <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
+            <td>
+              <span class="badge"
+                [ngClass]="{
+                  'bg-warning text-dark' : o.status === 'ORDER PLACED',
+                  'bg-primary'           : o.status === 'IN PROGRESS',
+                  'bg-success'           : o.status === 'DELIVERED',
+                  'bg-danger'            : o.status === 'CANCELLED'
+                }">
+                {{ o.status }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-1 flex-wrap">
+                <button class="btn btn-info btn-sm" (click)="openFeedback(o)"
+                        *ngIf="o.status === 'DELIVERED'">💬 Feedback</button>
+                <button class="btn btn-danger btn-sm" (click)="cancelOrder(o)"
+                        *ngIf="o.status === 'ORDER PLACED'">🚫 Cancel</button>
+                <span *ngIf="o.status === 'IN PROGRESS'" class="text-muted small">In transit...</span>
+                <span *ngIf="o.status === 'CANCELLED'" class="text-danger small">Cancelled</span>
+              </div>
             </td>
           </tr>
-          <tr *ngIf="orders.length === 0">
-            <td colspan="5" class="text-center text-muted">No orders found.</td>
+          <tr *ngIf="paged.length === 0">
+            <td colspan="6" class="text-center text-muted py-4">No orders found.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
+      <small class="text-muted">{{ filtered.length }} orders</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
+        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
+        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
+      </ul>
     </div>
   </div>
 </div>

@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-add-inventory',
@@ -12,67 +10,70 @@ import { AuthService } from '../../services/auth.service';
 export class AddInventoryComponent implements OnInit {
   itemForm!: FormGroup;
   inventories: any[] = [];
-  successMsg: string = '';
+  filtered: any[] = [];
+  searchTerm = '';
+  successMsg = ''; errorMsg = '';
   editingId: any = null;
+  showConfirm = false; confirmMsg = ''; confirmAction: any = null;
+  page = 1; pageSize = 5;
 
-  constructor(
-    private fb: FormBuilder,
-    private httpService: HttpService,
-    // private authService: AuthService,
-    // private router: Router
-  ) {}
+  constructor(private fb: FormBuilder, private httpService: HttpService) {}
 
   ngOnInit(): void {
     this.itemForm = this.fb.group({
-      wholesalerId: [localStorage.getItem('userId') || ''],
+      wholesalerId:  [localStorage.getItem('userId') || ''],
       stockQuantity: ['', Validators.required],
-      productId: ['', Validators.required]
+      productId:     ['', Validators.required]
     });
     this.loadInventories();
   }
 
   loadInventories(): void {
-    const wholesalerId = localStorage.getItem('userId');
-    if (wholesalerId) {
-      this.httpService.getInventoryByWholesalers(wholesalerId).subscribe((res) => {
-        this.inventories = res;
-        console.log(this.inventories);
-        
-      });
-    }
-  }
-
-  editInventory(inv: any): void {
-    this.editingId = inv.id;
-    this.itemForm.patchValue({
-      stockQuantity: inv.stockQuantity,
-      productId: inv.product?.id
+    const id = localStorage.getItem('userId');
+    if (id) this.httpService.getInventoryByWholesalers(id).subscribe((res: any) => {
+      this.inventories = res; this.applyFilter();
     });
   }
 
+  applyFilter(): void {
+    const t = this.searchTerm.toLowerCase();
+    this.filtered = this.inventories.filter(i => i.product?.name?.toLowerCase().includes(t));
+    this.page = 1;
+  }
+
+  get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
+  get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
+
+  editInventory(inv: any): void {
+    this.editingId = inv.id;
+    this.itemForm.patchValue({ stockQuantity: inv.stockQuantity, productId: inv.product?.name });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cancelEdit(): void { this.editingId = null; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); }
+
   onSubmit(): void {
-    if (this.itemForm.valid) {
+    if (this.itemForm.invalid) return;
+    this.confirmMsg = this.editingId ? 'Update inventory stock?' : 'Add this inventory record?';
+    this.confirmAction = () => {
       if (this.editingId) {
-        this.httpService.updateInventory(this.itemForm.value.stockQuantity, this.editingId).subscribe(() => {
-          this.successMsg = 'Updated Successfully';
-          this.editingId = null;
-          this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') });
-          this.loadInventories();
-          setTimeout(() => this.successMsg = '', 3000);
+        this.httpService.updateInventory(this.itemForm.value.stockQuantity, this.editingId).subscribe({
+          next: () => { this.successMsg = 'Inventory updated!'; this.editingId = null; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); this.loadInventories(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
         });
       } else {
-        const productId = this.itemForm.value.productId;
-        const details = {
-          wholesalerId: this.itemForm.value.wholesalerId,
-          stockQuantity: this.itemForm.value.stockQuantity
-        };
-        this.httpService.addInventory(details, productId).subscribe(() => {
-          this.successMsg = 'Save Successfully';
-          this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') });
-          this.loadInventories();
-          setTimeout(() => this.successMsg = '', 3000);
+        const details = { wholesalerId: this.itemForm.value.wholesalerId, stockQuantity: this.itemForm.value.stockQuantity };
+        this.httpService.addInventory(details, this.itemForm.value.productId).subscribe({
+          next: () => { this.successMsg = 'Inventory added!'; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); this.loadInventories(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Add failed.'; }
         });
       }
-    }
+      this.showConfirm = false;
+    };
+    this.showConfirm = true;
   }
+
+  onConfirm(): void { if (this.confirmAction) this.confirmAction(); }
+  onCancel(): void  { this.showConfirm = false; }
 }

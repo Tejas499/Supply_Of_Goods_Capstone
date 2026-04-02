@@ -1,14 +1,14 @@
 <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
   <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
     <h2 class="text-center text-uppercase fw-bold mb-1">Supply-of-Goods Management and Distribution Platform</h2>
-    <p class="text-center text-muted mb-4">Please enter your user and password!</p>
+    <p class="text-center text-muted mb-4">Please enter your username and password!</p>
 
     <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
     <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
       <div class="mb-3">
         <label class="form-label">Username</label>
-        <input type="text" class="form-control" formControlName="username" placeholder="name@example.com">
+        <input type="text" class="form-control" formControlName="username" placeholder="Username">
         <div *ngIf="itemForm.get('username')?.invalid && itemForm.get('username')?.touched" class="text-danger small">
           Username is required.
         </div>
@@ -22,11 +22,32 @@
         </div>
       </div>
 
-      <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid">Login</button>
+      <div class="mb-3">
+        <label class="form-label">Captcha</label>
+        <div class="d-flex align-items-center mb-2">
+          <div class="captcha-box me-2">
+            {{ num1 }} + {{ num2 }} = ?
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="generateCaptcha()">
+            ↻
+          </button>
+        </div>
+        <input type="number" class="form-control" [(ngModel)]="userAnswer" (input)="validateCaptcha()"
+          placeholder="Enter answer" />
+        <div *ngIf="userAnswer && !isCaptchaValid" class="text-danger small mt-1">
+          Incorrect answer
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 login-btn" [disabled]="itemForm.invalid || !isCaptchaValid">
+        Login
+      </button>
+
+      <!-- <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid || !isCaptchaValid">Login</button> -->
     </form>
 
     <p class="text-center mb-0">Don't have an account?
-      <a [routerLink]="['/registration']" class="fw-bold text-primary">Registration</a>
+      <a [routerLink]="['/registration']" class="fw-bold text-primary">Register</a>
     </p>
   </div>
 </div>

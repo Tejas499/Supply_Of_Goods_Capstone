@@ -1,46 +1,106 @@
 <div class="container mt-4">
-  <h3 class="mb-4">Orders</h3>
 
-  <div class="card mb-4">
-    <div class="card-header">Order Information</div>
-    <div class="card-body">
-      <div class="row mb-3">
-        <div class="col-md-4">
-          <label class="form-label">Status</label>
-          <input type="text" class="form-control" [(ngModel)]="newStatus" placeholder="Select Status">
-        </div>
+  <div class="modal-backdrop-custom" *ngIf="showConfirm">
+    <div class="modal-box">
+      <h5 class="fw-bold mb-3">⚠️ Confirm Action</h5>
+      <p class="text-muted">{{ confirmMsg }}</p>
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="btn btn-outline-secondary" (click)="onCancel()">No, go back</button>
+        <button class="btn btn-primary" (click)="onConfirm()">Yes, confirm</button>
       </div>
     </div>
   </div>
 
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Sr#</th>
-        <th>Quantity</th>
-        <th>Status</th>
-        <th>Product</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let o of orders; let i = index">
-        <td>{{ o.id }}</td>
-        <td>{{ o.quantity }}</td>
-        <td>{{ o.status }}</td>
-        <td>
-          <div>Name:{{ o.product?.name }}</div>
-          <div>Price:{{ o.product?.price }}</div>
-          <div>Description:{{ o.product?.description }}</div>
-        </td>
-        <td>
-          <button class="btn btn-primary btn-sm" (click)="processOrder(o.id)">Process Orders</button>
-        </td>
-      </tr>
-      <tr *ngIf="orders.length === 0">
-        <td colspan="5" class="text-center text-muted">No orders found.</td>
-      </tr>
-    </tbody>
-  </table>
-  <div *ngIf="successMsg" class="alert alert-success mt-2">{{ successMsg }}</div>
+  <h3 class="fw-bold mb-4">📋 My Orders</h3>
+  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>Order Management</span>
+        <div class="d-flex gap-2">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="form-control form-control-sm" style="width:180px;padding-left:2rem"
+                   placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+          </div>
+          <select class="form-select form-select-sm" style="width:150px" [(ngModel)]="filterStatus" (change)="applyFilter()">
+            <option value="">All Statuses</option>
+            <option value="ORDER PLACED">Order Placed</option>
+            <option value="IN PROGRESS">In Progress</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Update</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of paged">
+            <td class="fw-semibold text-primary">#{{ o.id }}</td>
+            <td>
+              <div class="fw-semibold">{{ o.product?.name }}</div>
+              <div class="text-muted small">{{ o.product?.description }}</div>
+            </td>
+            <td>{{ o.quantity }}</td>
+            <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
+            <td>
+              <span class="badge"
+                [ngClass]="{
+                  'bg-warning text-dark' : o.status === 'ORDER PLACED',
+                  'bg-primary'           : o.status === 'IN PROGRESS',
+                  'bg-success'           : o.status === 'DELIVERED',
+                  'bg-danger'            : o.status === 'CANCELLED'
+                }">
+                {{ o.status }}
+              </span>
+            </td>
+            <td style="min-width:160px">
+              <ng-container *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'">
+                <select class="form-select form-select-sm mb-1" [(ngModel)]="o.selectedStatus">
+                  <option value="">-- Select --</option>
+                  <option value="IN PROGRESS">In Progress</option>
+                  <option value="DELIVERED">Delivered</option>
+                </select>
+                <button class="btn btn-primary btn-sm w-100"
+                        [disabled]="!o.selectedStatus"
+                        (click)="processOrder(o.id, o.selectedStatus)">Update →</button>
+              </ng-container>
+              <span *ngIf="o.status==='DELIVERED'" class="text-success small">✔ Delivered</span>
+              <span *ngIf="o.status==='CANCELLED'" class="text-danger small">✖ Cancelled</span>
+            </td>
+            <td>
+              <button class="btn btn-danger btn-sm"
+                      *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'"
+                      (click)="cancelOrder(o)">🚫 Cancel</button>
+            </td>
+          </tr>
+          <tr *ngIf="paged.length === 0">
+            <td colspan="7" class="text-center text-muted py-4">No orders found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
+      <small class="text-muted">{{ filtered.length }} orders</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">></a></li>
+        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
+        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1"><</a></li>
+      </ul>
+    </div>
+  </div>
 </div>

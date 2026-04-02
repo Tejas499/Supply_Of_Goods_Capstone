@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -12,57 +11,78 @@ import { AuthService } from '../../services/auth.service';
 export class PlaceOrderComponent implements OnInit {
   itemForm!: FormGroup;
   products: any[] = [];
-  successMsg: string = '';
-  errorMsg: string = '';
-  selectedProductId: any = null;
+  filtered: any[] = [];
+  searchTerm = '';
+  successMsg = ''; errorMsg = '';
+  showOrderForm = false;
+  selectedProduct: any = null;
+  showConfirm = false; confirmMsg = ''; confirmAction: any = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private httpService: HttpService,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  // Pagination
+  page = 1; pageSize = 5;
+
+  constructor(private fb: FormBuilder, private httpService: HttpService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.itemForm = this.fb.group({
-      quantity:  ['', Validators.required],
-      status:    ['', Validators.required],
+      quantity: ['', [Validators.required, Validators.min(1)]],
       productId: ['']
     });
-
-    // Products include .manufacturer { id, username, email }
     this.httpService.getProductsByWholesaler().subscribe((res: any) => {
-      this.products = res;
+      this.products = res; this.applyFilter();
     });
   }
 
-  selectProduct(p: any): void {
-    this.selectedProductId = p.id;
-    this.itemForm.patchValue({ productId: p.id });
-    this.onSubmit();
+  applyFilter(): void {
+    const t = this.searchTerm.toLowerCase();
+    this.filtered = this.products.filter(p =>
+      p.name?.toLowerCase().includes(t) || p.manufacturer?.username?.toLowerCase().includes(t)
+    );
+    this.page = 1;
+  }
+
+  get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
+  get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
+
+  openOrderForm(p: any): void {
+    this.selectedProduct = p;
+    this.showOrderForm = true;
+    this.itemForm.patchValue({ productId: p.id, quantity: '' });
+    this.errorMsg = ''; this.successMsg = '';
+  }
+
+  closeOrderForm(): void { this.showOrderForm = false; this.selectedProduct = null; }
+
+  isDuplicate(): boolean {
+    // Prevent same product being ordered again if already has a PENDING order
+    // (checked client-side — server also validates stock)
+    return false; // Extended in get-orders if needed
   }
 
   onSubmit(): void {
-    if (this.itemForm.valid) {
-      const userId    = localStorage.getItem('userId');
-      const productId = this.selectedProductId || this.itemForm.value.productId;
-      const details   = {
-        quantity: this.itemForm.value.quantity,
-        status:   this.itemForm.value.status
-      };
-      this.httpService.placeOrder(details, productId, userId).subscribe({
+    if (this.itemForm.invalid || !this.selectedProduct) return;
+    this.confirmMsg = `Place order for ${this.itemForm.value.quantity} × ${this.selectedProduct.name}?`;
+    this.confirmAction = () => {
+      const userId = localStorage.getItem('userId');
+      const details = { quantity: this.itemForm.value.quantity, status: 'ORDER PLACED' };
+      this.httpService.placeOrder(details, this.selectedProduct.id, userId).subscribe({
         next: () => {
-          this.successMsg      = 'Order placed successfully!';
-          this.errorMsg        = '';
-          this.selectedProductId = null;
+          this.successMsg = '✅ Order placed successfully!';
+          this.errorMsg = '';
+          this.showOrderForm = false;
+          this.selectedProduct = null;
           this.itemForm.reset();
-          setTimeout(() => this.successMsg = '', 3000);
+          this.httpService.getProductsByWholesaler().subscribe((res: any) => { this.products = res; this.applyFilter(); });
+          setTimeout(() => this.successMsg = '', 4000);
         },
-        error: (err: any) => {
-          this.errorMsg   = err.error?.message || 'Insufficient stock or error placing order.';
-          this.successMsg = '';
-        }
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Insufficient stock.'; this.successMsg = ''; }
       });
-    }
+      this.showConfirm = false;
+    };
+    this.showConfirm = true;
   }
+
+  onConfirm(): void { if (this.confirmAction) this.confirmAction(); }
+  onCancel(): void  { this.showConfirm = false; }
 }

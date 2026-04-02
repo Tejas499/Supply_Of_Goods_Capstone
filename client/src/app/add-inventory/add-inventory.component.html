@@ -1,56 +1,91 @@
 <div class="container mt-4">
-  <h3 class="mb-4">Manage Product Inventory</h3>
+
+  <div class="modal-backdrop-custom" *ngIf="showConfirm">
+    <div class="modal-box">
+      <h5 class="fw-bold mb-3">⚠️ Confirm</h5>
+      <p class="text-muted">{{ confirmMsg }}</p>
+      <div class="d-flex gap-2 justify-content-end mt-3">
+        <button class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="onConfirm()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="fw-bold mb-4">📦 Manage Inventory</h3>
+  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
 
   <div class="card mb-4">
-    <div class="card-header">Add Product Inventory</div>
+    <div class="card-header">{{ editingId ? '✏️ Update Inventory' : '➕ Add Inventory' }}</div>
     <div class="card-body">
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        <div class="row mb-3">
+        <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label">Products</label>
-            <input type="text" class="form-control" formControlName="productId" placeholder="Choose Products">
-            <div *ngIf="itemForm.get('productId')?.invalid && itemForm.get('productId')?.touched" class="text-danger small">Required.</div>
+            <label class="form-label">Product ID</label>
+            <input type="text" class="form-control" formControlName="productId" placeholder="Product ID" [attr.disabled]="editingId ? '' : null">
+            <div *ngIf="itemForm.get('productId')?.invalid && itemForm.get('productId')?.touched" class="text-danger small mt-1">Required.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" formControlName="stockQuantity" placeholder="Stock Quantity">
-            <div *ngIf="itemForm.get('stockQuantity')?.invalid && itemForm.get('stockQuantity')?.touched" class="text-danger small">Required.</div>
+            <input type="number" class="form-control" formControlName="stockQuantity" placeholder="0">
+            <div *ngIf="itemForm.get('stockQuantity')?.invalid && itemForm.get('stockQuantity')?.touched" class="text-danger small mt-1">Required.</div>
           </div>
-          <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-outline-secondary" >Submit</button>
+          <div class="col-md-4 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid">
+              {{ editingId ? '💾 Update' : '➕ Add' }}
+            </button>
+            <button type="button" class="btn btn-outline-secondary" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
           </div>
         </div>
-        <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
       </form>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header">Order Information</div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>🗂️ Inventory Records</span>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control form-control-sm" style="width:200px;padding-left:2rem"
+               placeholder="Search product..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+      </div>
+    </div>
     <div class="card-body p-0">
-      <table class="table table-bordered mb-0">
+      <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th>Sr#</th>
             <th>Product</th>
+            <th>Manufacturer</th>
             <th>Stock Quantity</th>
-            <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let inv of inventories; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ inv.product?.name }}</td>
-            <td>{{ inv.stockQuantity }}</td>
+          <tr *ngFor="let inv of paged">
+            <td class="fw-semibold">{{ inv.product?.name }}</td>
+            <td><span class="badge bg-secondary" *ngIf="inv.product?.manufacturer">{{ inv.product?.manufacturer?.username }}</span></td>
             <td>
-              <button class="btn btn-warning btn-sm" (click)="editInventory(inv)">Edit</button>
+              <span class="badge" [ngClass]="inv.stockQuantity > 10 ? 'bg-success' : inv.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
+                {{ inv.stockQuantity }} units
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-warning btn-sm" (click)="editInventory(inv)">✏️ Edit</button>
             </td>
           </tr>
-          <tr *ngIf="inventories.length === 0">
-            <td colspan="4" class="text-center text-muted">No inventory records.</td>
+          <tr *ngIf="paged.length === 0">
+            <td colspan="4" class="text-center text-muted py-4">No inventory records.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
+      <small class="text-muted">{{ filtered.length }} records</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
+        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
+        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
+      </ul>
     </div>
   </div>
 </div>
