@@ -12,105 +12,185 @@
     </div>
   </div>
 
-  <div class="d-flex align-items-center justify-content-between mb-4">
-    <h3 class="fw-bold mb-0">🏭 Manage Products</h3>
-  </div>
-
+  <h3 class="fw-bold mb-4">🏭 Manufacturer Dashboard</h3>
   <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
   <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
 
-  <!-- Form Card -->
-  <div class="card mb-4">
-    <div class="card-header">{{ editingId ? '✏️ Edit Product' : '➕ Add New Product' }}</div>
-    <div class="card-body">
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Product Name</label>
-            <input type="text" class="form-control" formControlName="name" placeholder="e.g. Apple">
-            <div *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched" class="text-danger small mt-1">Required.</div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Price (₹)</label>
-            <div class="input-group">
-              <span class="input-group-text">₹</span>
-              <input type="number" class="form-control" formControlName="price" placeholder="0.00">
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab==='products'" (click)="activeTab='products'" style="cursor:pointer">
+        📦 My Products <span class="badge bg-primary ms-1">{{ products.length }}</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab==='orders'" (click)="activeTab='orders';loadOrders()" style="cursor:pointer">
+        📋 Wholesaler Orders <span class="badge bg-warning text-dark ms-1">{{ orders.length }}</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab==='feedback'" (click)="activeTab='feedback'" style="cursor:pointer">
+        💬 Feedback <span class="badge bg-info text-dark ms-1">{{ feedbacks.length }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- ═══ TAB 1: PRODUCTS ═══ -->
+  <div *ngIf="activeTab === 'products'">
+    <!-- Form -->
+    <div class="card mb-4">
+      <div class="card-header">{{ editingId ? '✏️ Edit Product' : '➕ Add New Product' }}</div>
+      <div class="card-body">
+        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Product Name</label>
+              <input type="text" class="form-control" formControlName="name" placeholder="e.g. Apple">
+              <div *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched" class="text-danger small mt-1">Required.</div>
             </div>
-            <div *ngIf="itemForm.get('price')?.invalid && itemForm.get('price')?.touched" class="text-danger small mt-1">Required.</div>
+            <div class="col-md-4">
+              <label class="form-label">Price (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" class="form-control" formControlName="price" placeholder="0.00">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Stock Quantity</label>
+              <input type="number" class="form-control" formControlName="stockQuantity" placeholder="0">
+            </div>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">Stock Quantity</label>
-            <input type="number" class="form-control" formControlName="stockQuantity" placeholder="0">
-            <div *ngIf="itemForm.get('stockQuantity')?.invalid && itemForm.get('stockQuantity')?.touched" class="text-danger small mt-1">Required.</div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" formControlName="description" rows="2" placeholder="Description"></textarea>
           </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid">{{ editingId ? '💾 Update' : '➕ Add Product' }}</button>
+            <button type="button" class="btn btn-outline-secondary" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Product List -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>📦 Product List</span>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-control form-control-sm" style="width:220px;padding-left:2rem"
+                 placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()">
         </div>
-        <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea class="form-control" formControlName="description" rows="2" placeholder="Product description"></textarea>
-          <div *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched" class="text-danger small mt-1">Required.</div>
-        </div>
-        <div class="d-flex gap-2">
-          <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid">
-            {{ editingId ? '💾 Update Product' : '➕ Add Product' }}
-          </button>
-          <button type="button" class="btn btn-outline-secondary" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
-        </div>
-      </form>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Product</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of paged">
+              <td class="fw-semibold">{{ p.name }}</td>
+              <td class="text-muted">{{ p.description }}</td>
+              <td class="fw-semibold text-success">₹{{ p.price | number:'1.0-0' }}</td>
+              <td>
+                <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' : p.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
+                  {{ p.stockQuantity }} units
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-warning btn-sm me-1" (click)="editProduct(p)">✏️ Edit</button>
+                <button class="btn btn-danger btn-sm"  (click)="deleteProduct(p)">🗑️ Delete</button>
+              </td>
+            </tr>
+            <tr *ngIf="paged.length === 0">
+              <td colspan="5" class="text-center text-muted py-4">No products yet. Add one above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
+        <small class="text-muted">{{ filtered.length }} products</small>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
+          <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
+          <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- Product List -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span>📦 Product List</span>
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="form-control form-control-sm" style="width:220px;padding-left:2rem"
-               placeholder="Search products..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+  <!-- ═══ TAB 2: WHOLESALER ORDERS (W2M) ═══ -->
+  <div *ngIf="activeTab === 'orders'">
+    <div class="alert alert-info" style="font-size:0.85rem;">
+      ℹ️ These are orders placed by wholesalers for your products. Update status to <strong>IN PROGRESS</strong> when processing, then <strong>OUT FOR DELIVERY</strong> when shipped. Wholesaler will mark as Received.
+    </div>
+    <div class="card">
+      <div class="card-header">📦 Orders from Wholesalers</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>Order</th><th>Product</th><th>Wholesaler</th><th>Qty</th><th>Amount</th><th>Status</th><th>Update Status</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of orders">
+              <td class="fw-semibold text-primary">#{{ o.id }}</td>
+              <td class="fw-semibold">{{ o.product?.name }}</td>
+              <td class="text-muted small">{{ o.user?.username }}</td>
+              <td>{{ o.quantity }}</td>
+              <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
+              <td>
+                <span class="badge"
+                  [ngClass]="{
+                    'bg-warning text-dark' : o.status === 'ORDER PLACED',
+                    'bg-primary'           : o.status === 'IN PROGRESS',
+                    'bg-info text-dark'    : o.status === 'OUT FOR DELIVERY',
+                    'bg-success'           : o.status === 'DELIVERED',
+                    'bg-danger'            : o.status === 'CANCELLED'
+                  }">{{ o.status }}</span>
+              </td>
+              <td style="min-width:180px">
+                <ng-container *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'">
+                  <select class="form-select form-select-sm mb-1" [(ngModel)]="o.selectedStatus">
+                    <option value="">-- Select --</option>
+                    <option value="IN PROGRESS"      *ngIf="o.status === 'ORDER PLACED'">In Progress</option>
+                    <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Out for Delivery</option>
+                  </select>
+                  <button class="btn btn-primary btn-sm w-100" [disabled]="!o.selectedStatus" (click)="updateOrderStatus(o)">Update →</button>
+                </ng-container>
+                <span *ngIf="o.status==='DELIVERED'" class="text-success small">✔ Received by wholesaler</span>
+                <span *ngIf="o.status==='CANCELLED'" class="text-danger small">✖ Cancelled</span>
+                <span *ngIf="o.status==='OUT FOR DELIVERY'" class="text-info small">🚚 Awaiting wholesaler confirmation</span>
+              </td>
+            </tr>
+            <tr *ngIf="orders.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">No wholesaler orders yet.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of paged">
-            <td class="fw-semibold">{{ p.name }}</td>
-            <td class="text-muted">{{ p.description }}</td>
-            <td class="fw-semibold text-success">₹{{ p.price | number:'1.0-0' }}</td>
-            <td>
-              <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' : p.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
-                {{ p.stockQuantity }} units
-              </span>
-            </td>
-            <td>
-              <button class="btn btn-warning btn-sm me-1" (click)="editProduct(p)">✏️ Edit</button>
-              <button class="btn btn-danger btn-sm"  (click)="confirmDelete(p)">🗑️ Delete</button>
-            </td>
-          </tr>
-          <tr *ngIf="paged.length === 0">
-            <td colspan="5" class="text-center text-muted py-4">No products found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- Pagination -->
-    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
-      <small class="text-muted">Showing {{ (page-1) * pageSize + 1 }} - 
-  {{ (page * pageSize > filtered.length) ? filtered.length : (page * pageSize) }} 
-  of {{ filtered.length }}</small>
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1"><</a></li>
-        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
-        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">></a></li>
-      </ul>
+  </div>
+
+  <!-- ═══ TAB 3: FEEDBACK ═══ -->
+  <div *ngIf="activeTab === 'feedback'">
+    <div class="card">
+      <div class="card-header">💬 Consumer Feedback on Your Products</div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Order</th><th>Product</th><th>Consumer</th><th>Feedback</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let f of feedbacks">
+              <td class="text-primary fw-semibold">#{{ f.order?.id }}</td>
+              <td>{{ f.order?.product?.name }}</td>
+              <td class="text-muted small">{{ f.user?.username }}</td>
+              <td>{{ f.content }}</td>
+            </tr>
+            <tr *ngIf="feedbacks.length === 0">
+              <td colspan="4" class="text-center text-muted py-4">No feedback yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

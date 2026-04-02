@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-create-products',
@@ -12,15 +11,16 @@ export class CreateProductsComponent implements OnInit {
   itemForm!: FormGroup;
   products: any[] = [];
   filtered: any[] = [];
-  searchTerm: string = '';
+  orders: any[] = [];
+  feedbacks: any[] = [];
+  searchTerm = '';
   successMsg = ''; errorMsg = '';
   editingId: any = null;
   showConfirm = false; confirmMsg = ''; confirmAction: any = null;
-
-  // Pagination
   page = 1; pageSize = 5;
+  activeTab = 'products'; // 'products' | 'orders' | 'feedback'
 
-  constructor(private fb: FormBuilder, private httpService: HttpService, private authService: AuthService) {}
+  constructor(private fb: FormBuilder, private httpService: HttpService) {}
 
   ngOnInit(): void {
     this.itemForm = this.fb.group({
@@ -30,7 +30,13 @@ export class CreateProductsComponent implements OnInit {
       price:          ['', Validators.required],
       stockQuantity:  ['', Validators.required]
     });
+    this.loadAll();
+  }
+
+  loadAll(): void {
     this.loadProducts();
+    this.loadOrders();
+    this.loadFeedbacks();
   }
 
   loadProducts(): void {
@@ -40,68 +46,87 @@ export class CreateProductsComponent implements OnInit {
     });
   }
 
+  loadOrders(): void {
+    const id = localStorage.getItem('userId');
+    if (id) this.httpService.getManufacturerOrders(id).subscribe({
+      next: (res: any) => { this.orders = res.map((o: any) => ({ ...o, selectedStatus: '' })); },
+      error: () => {}
+    });
+  }
+
+  loadFeedbacks(): void {
+    const id = localStorage.getItem('userId');
+    if (id) this.httpService.getManufacturerFeedbacks(id).subscribe({
+      next: (res: any) => { this.feedbacks = res; },
+      error: () => {}
+    });
+  }
+
   applyFilter(): void {
     const t = this.searchTerm.toLowerCase();
-    this.filtered = this.products.filter(p =>
-     ( p.name?.toLowerCase().includes(t) || p.description?.toLowerCase().includes(t)) && p.stockQuantity!==0
-    );
+    this.filtered = this.products.filter(p => p.name?.toLowerCase().includes(t) || p.description?.toLowerCase().includes(t));
     this.page = 1;
   }
 
-  get paged(): any[] {
-    const s = (this.page - 1) * this.pageSize;
-    return this.filtered.slice(s, s + this.pageSize);
-  }
+  get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
   get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
-  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i + 1); }
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
 
   editProduct(p: any): void {
     this.editingId = p.id;
     this.itemForm.patchValue({ name: p.name, description: p.description, price: p.price, stockQuantity: p.stockQuantity, manufacturerId: p.manufacturerId });
+    this.errorMsg = ''; this.activeTab = 'products';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  cancelEdit(): void { this.editingId = null; this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); }
+  cancelEdit(): void { this.editingId = null; this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); this.errorMsg = ''; }
 
-  confirmDelete(p: any): void {
-    this.confirmMsg = `Delete product "${p.name}"? This cannot be undone.`;
-    this.confirmAction = () => { this.doDelete(p); };
+  // Manufacturer updates W2M order status: IN PROGRESS or OUT FOR DELIVERY
+  updateOrderStatus(o: any): void {
+    if (!o.selectedStatus) return;
+    this.confirmMsg = `Update Order #${o.id} to "${o.selectedStatus}"?`;
+    this.confirmAction = () => {
+      this.httpService.updateManufacturerOrderStatus(o.id, o.selectedStatus).subscribe({
+        next: () => { this.successMsg = `Order #${o.id} → ${o.selectedStatus}`; this.loadOrders(); setTimeout(() => this.successMsg = '', 4000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
+      });
+      this.showConfirm = false;
+    };
     this.showConfirm = true;
   }
-
-  doDelete(p: any): void {
-    // Mark as deleted by setting stock to 0 (no delete endpoint — workaround)
-    const updated = { ...p, stockQuantity: 0, description: p.description };
-    this.httpService.updateProduct(updated, p.id).subscribe(() => {
-      this.successMsg = `Product "${p.name}" removed.`;
-      this.loadProducts();
-      setTimeout(() => this.successMsg = '', 3000);
-    });
-    this.showConfirm = false;
-  }
-
-  onConfirm(): void { if (this.confirmAction) this.confirmAction(); }
-  onCancel(): void  { this.showConfirm = false; this.confirmAction = null; }
 
   onSubmit(): void {
     if (this.itemForm.invalid) return;
     if (this.editingId) {
-      this.confirmMsg = 'Update this product?';
+      this.confirmMsg = `Update product "${this.itemForm.value.name}"?`;
       this.confirmAction = () => {
-        this.httpService.updateProduct(this.itemForm.value, this.editingId).subscribe(() => {
-          this.successMsg = 'Product updated!'; this.editingId = null;
-          this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') });
-          this.loadProducts(); setTimeout(() => this.successMsg = '', 3000);
+        this.httpService.updateProduct(this.itemForm.value, this.editingId).subscribe({
+          next: () => { this.successMsg = 'Product updated!'; this.cancelEdit(); this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
         });
         this.showConfirm = false;
       };
       this.showConfirm = true;
     } else {
-      this.httpService.createProduct(this.itemForm.value).subscribe(() => {
-        this.successMsg = 'Product created!';
-        this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') });
-        this.loadProducts(); setTimeout(() => this.successMsg = '', 3000);
+      this.httpService.createProduct(this.itemForm.value).subscribe({
+        next: () => { this.successMsg = 'Product created!'; this.errorMsg = ''; this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Product may already exist.'; }
       });
     }
   }
+
+  deleteProduct(p: any): void {
+    this.confirmMsg = `⚠️ Delete "${p.name}"? This removes it from ALL wholesaler inventories permanently.`;
+    this.confirmAction = () => {
+      this.httpService.deleteProduct(p.id).subscribe({
+        next: () => { this.successMsg = `"${p.name}" deleted from all inventories.`; this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Delete failed.'; }
+      });
+      this.showConfirm = false;
+    };
+    this.showConfirm = true;
+  }
+
+  onConfirm(): void { if (this.confirmAction) this.confirmAction(); }
+  onCancel(): void  { this.showConfirm = false; }
 }

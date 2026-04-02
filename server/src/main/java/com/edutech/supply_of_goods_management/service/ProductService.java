@@ -5,67 +5,66 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import com.edutech.supply_of_goods_management.entity.Inventory;
 import com.edutech.supply_of_goods_management.entity.Product;
+import com.edutech.supply_of_goods_management.repository.InventoryRepository;
 import com.edutech.supply_of_goods_management.repository.ProductRepository;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    @Autowired private ProductRepository   productRepository;
+    @Autowired private InventoryRepository inventoryRepository;
 
-    /**
-     * MANUFACTURER creates a new product with initial stockQuantity
-     */
     @Transactional
     public Product createProduct(Product product) {
-        if (product.getStockQuantity() < 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Stock quantity cannot be negative");
-        }
+        if (product.getStockQuantity() < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stock quantity cannot be negative");
+
+        Optional<Product> existing = productRepository
+                .findByNameIgnoreCaseAndManufacturerId(product.getName(), product.getManufacturerId());
+        if (existing.isPresent())
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Product '" + product.getName() + "' already exists for this manufacturer. Use Edit to update.");
+
         return productRepository.save(product);
     }
 
-    /**
-     * MANUFACTURER updates product — if stockQuantity is increased,
-     * it means manufacturer produced more units (stock goes up)
-     * if decreased, it means stock was adjusted/removed
-     */
     @Transactional
     public Product updateProduct(Long id, Product updatedProduct) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Product not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + id));
 
-        int oldStock = existing.getStockQuantity();
-        int newStock = updatedProduct.getStockQuantity();
-        int stockDifference = newStock - oldStock;
+        if (!existing.getName().equalsIgnoreCase(updatedProduct.getName())) {
+            Optional<Product> dup = productRepository
+                    .findByNameIgnoreCaseAndManufacturerId(updatedProduct.getName(), existing.getManufacturerId());
+            if (dup.isPresent() && !dup.get().getId().equals(id))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Another product named '" + updatedProduct.getName() + "' already exists.");
+        }
 
-        // Update all fields
         existing.setName(updatedProduct.getName());
         existing.setDescription(updatedProduct.getDescription());
         existing.setPrice(updatedProduct.getPrice());
-        existing.setStockQuantity(newStock);
+        existing.setStockQuantity(updatedProduct.getStockQuantity());
         existing.setManufacturerId(updatedProduct.getManufacturerId());
+        return productRepository.save(existing);
+    }
 
-        Product saved = productRepository.save(existing);
+    // DELETE — removes product AND all its inventory records everywhere
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + id));
 
-        // Log stock change for clarity
-        if (stockDifference > 0) {
-            System.out.println("Manufacturer added " + stockDifference
-                    + " units to product [" + existing.getName() + "]. "
-                    + "New total stock: " + newStock);
-        } else if (stockDifference < 0) {
-            System.out.println("Manufacturer reduced stock by " + Math.abs(stockDifference)
-                    + " units for product [" + existing.getName() + "]. "
-                    + "New total stock: " + newStock);
-        }
+        // Remove all inventory records for this product across all wholesalers
+        List<Inventory> inventories = inventoryRepository.findByProductId(id);
+        inventoryRepository.deleteAll(inventories);
 
-        return saved;
+        // Delete the product itself (cascades to orders/feedbacks via CascadeType.ALL)
+        productRepository.delete(product);
     }
 
     public List<Product> getProductsByManufacturerId(Long manufacturerId) {

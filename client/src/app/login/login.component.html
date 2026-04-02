@@ -26,15 +26,15 @@
         <label class="form-label">Captcha</label>
         <div class="d-flex align-items-center mb-2">
           <div class="captcha-box me-2">
-            {{ num1 }} + {{ num2 }} = ?
+            {{ num1 }} {{ operator }} {{ num2 }} = ?
           </div>
           <button type="button" class="btn btn-sm btn-outline-secondary" (click)="generateCaptcha()">
             ↻
           </button>
         </div>
-        <input type="number" class="form-control" [(ngModel)]="userAnswer" (input)="validateCaptcha()"
+        <input type="number" class="form-control"  formControlName="captcha" (input)="validateCaptcha()"
           placeholder="Enter answer" />
-        <div *ngIf="userAnswer && !isCaptchaValid" class="text-danger small mt-1">
+        <div *ngIf="itemForm.get('captcha')?.value && !isCaptchaValid" class="text-danger small mt-1">
           Incorrect answer
         </div>
       </div>

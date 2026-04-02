@@ -1,11 +1,10 @@
 package com.edutech.supply_of_goods_management.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.util.List;
-
 
 @Entity
 @Table(name = "orders") // do not change the table name ( do not change this line)
@@ -19,16 +18,23 @@ public class Order {
 
     private String status;
 
+    // WHO placed this order and TO WHOM
+    // "W2M" = Wholesaler placed order to Manufacturer
+    // "C2W" = Consumer placed order to Wholesaler
+    private String orderType;
+
     @JsonIgnore
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<Feedback> feedbacks;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"password","orders","feedbacks","hibernateLazyInitializer"})
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonIgnoreProperties({"orders","inventories","hibernateLazyInitializer"})
     private Product product;
 
     public Order() {}
@@ -41,6 +47,9 @@ public class Order {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getOrderType() { return orderType; }
+    public void setOrderType(String orderType) { this.orderType = orderType; }
 
     public List<Feedback> getFeedbacks() { return feedbacks; }
     public void setFeedbacks(List<Feedback> feedbacks) { this.feedbacks = feedbacks; }

@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.edutech.supply_of_goods_management.entity.Inventory;
 import com.edutech.supply_of_goods_management.entity.Order;
 import com.edutech.supply_of_goods_management.entity.Product;
@@ -14,9 +13,9 @@ import com.edutech.supply_of_goods_management.repository.InventoryRepository;
 import com.edutech.supply_of_goods_management.repository.OrderRepository;
 import com.edutech.supply_of_goods_management.repository.ProductRepository;
 import com.edutech.supply_of_goods_management.repository.UserRepository;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -26,152 +25,230 @@ public class OrderService {
     @Autowired private UserRepository      userRepository;
     @Autowired private InventoryRepository inventoryRepository;
 
-    // ─────────────────────────────────────────────────────────
-    // WHOLESALER places order
-    // Step 1 — validate stock
-    // Step 2 — deduct from Product.stockQuantity  (manufacturer pool ↓)
-    // Step 3 — add to Inventory.stockQuantity     (wholesaler stock ↑)
-    // Step 4 — save order with status = PENDING
-    // All atomic via @Transactional
-    // ─────────────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // WHOLESALER → MANUFACTURER  (orderType = W2M)
+    // Wholesaler places order for product from manufacturer
+    // Status flow: ORDER PLACED → IN PROGRESS → OUT FOR DELIVERY → DELIVERED
+    // Manufacturer updates: IN PROGRESS, OUT FOR DELIVERY
+    // Wholesaler clicks "Mark as Received" when OUT FOR DELIVERY → DELIVERED
+    //   → adds quantity to wholesaler's inventory
+    // ════════════════════════════════════════════════════════════
     @Transactional
     public Order placeOrder(Order order, Long productId, Long userId) {
-
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Product not found: " + productId));
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + productId));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User not found: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + userId));
 
-        if (product.getStockQuantity() < order.getQuantity()) {
+        if (product.getStockQuantity() < order.getQuantity())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Insufficient stock. Available: " + product.getStockQuantity()
+                    "Insufficient manufacturer stock. Available: " + product.getStockQuantity()
                     + ", Requested: " + order.getQuantity());
-        }
 
-        // Deduct from manufacturer pool
+        // Deduct from manufacturer stock immediately
         product.setStockQuantity(product.getStockQuantity() - order.getQuantity());
         productRepository.save(product);
 
-        // Add to wholesaler inventory (create record if first time)
-        Optional<Inventory> existing =
-                inventoryRepository.findByWholesalerIdAndProductId(userId, productId);
+        // Inventory is NOT updated yet — will be updated when wholesaler marks DELIVERED
+        order.setProduct(product);
+        order.setUser(user);
+        order.setStatus("ORDER PLACED");
+        order.setOrderType("W2M"); // Wholesaler to Manufacturer
+        return orderRepository.save(order);
+    }
 
+    // ════════════════════════════════════════════════════════════
+    // CONSUMER → WHOLESALER  (orderType = C2W)
+    // Consumer orders from wholesaler inventory
+    // Deducts from wholesaler inventory immediately
+    // ════════════════════════════════════════════════════════════
+    @Transactional
+    public Order placeConsumerOrder(Order order, Long productId, Long userId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + productId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + userId));
+
+        // Validate against WHOLESALER INVENTORY stock
+        List<Inventory> wholesalerInventories = inventoryRepository.findByProductId(productId);
+        int totalWholesalerStock = wholesalerInventories.stream().mapToInt(Inventory::getStockQuantity).sum();
+
+        if (totalWholesalerStock < order.getQuantity())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Insufficient wholesaler stock. Available: " + totalWholesalerStock
+                    + ", Requested: " + order.getQuantity());
+
+        // Deduct from wholesaler inventories
+        int remaining = order.getQuantity();
+        for (Inventory inv : wholesalerInventories) {
+            if (remaining <= 0) break;
+            int deduct = Math.min(inv.getStockQuantity(), remaining);
+            inv.setStockQuantity(inv.getStockQuantity() - deduct);
+            inventoryRepository.save(inv);
+            remaining -= deduct;
+        }
+
+        order.setProduct(product);
+        order.setUser(user);
+        order.setStatus("ORDER PLACED");
+        order.setOrderType("C2W"); // Consumer to Wholesaler
+        return orderRepository.save(order);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // MANUFACTURER updates W2M order status
+    // Allowed: ORDER PLACED → IN PROGRESS → OUT FOR DELIVERY
+    // Manufacturer CANNOT mark as DELIVERED (only wholesaler can via markReceived)
+    // ════════════════════════════════════════════════════════════
+    @Transactional
+    public Order updateOrderStatusByManufacturer(Long id, String newStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
+
+        if (!"W2M".equals(order.getOrderType()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This is not a wholesaler order.");
+
+        String prev = order.getStatus();
+        if ("DELIVERED".equalsIgnoreCase(prev) || "CANCELLED".equalsIgnoreCase(prev))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a " + prev + " order.");
+
+        // Manufacturer can only set IN PROGRESS or OUT FOR DELIVERY
+        if (!"IN PROGRESS".equalsIgnoreCase(newStatus) && !"OUT FOR DELIVERY".equalsIgnoreCase(newStatus))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Manufacturer can only set: IN PROGRESS or OUT FOR DELIVERY");
+
+        order.setStatus(newStatus.toUpperCase());
+        return orderRepository.save(order);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // WHOLESALER marks W2M order as RECEIVED (DELIVERED)
+    // Only allowed when status = OUT FOR DELIVERY
+    // → Sets status to DELIVERED
+    // → Adds quantity to wholesaler's inventory
+    // ════════════════════════════════════════════════════════════
+    @Transactional
+    public Order markOrderReceived(Long id, Long wholesalerId) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
+
+        if (!"W2M".equals(order.getOrderType()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only wholesaler orders can be marked as received.");
+
+        if (!"OUT FOR DELIVERY".equalsIgnoreCase(order.getStatus()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Order must be OUT FOR DELIVERY to mark as received. Current status: " + order.getStatus());
+
+        // Set to DELIVERED
+        order.setStatus("DELIVERED");
+        orderRepository.save(order);
+
+        // Add to wholesaler inventory NOW (goods physically received)
+        Product product = order.getProduct();
+        Optional<Inventory> existing = inventoryRepository.findByWholesalerIdAndProductId(wholesalerId, product.getId());
         if (existing.isPresent()) {
             Inventory inv = existing.get();
             inv.setStockQuantity(inv.getStockQuantity() + order.getQuantity());
             inventoryRepository.save(inv);
         } else {
             Inventory newInv = new Inventory();
-            newInv.setWholesalerId(userId);
+            newInv.setWholesalerId(wholesalerId);
             newInv.setProduct(product);
             newInv.setStockQuantity(order.getQuantity());
             inventoryRepository.save(newInv);
         }
 
-        order.setProduct(product);
-        order.setUser(user);
-        order.setStatus("ORDER PLACED");          // always starts as PENDING
-        return orderRepository.save(order);
+        return order;
     }
 
-    // ─────────────────────────────────────────────────────────
-    // WHOLESALER / MANUFACTURER updates order status
-    //
-    // Status lifecycle:
-    //   PENDING → CONFIRMED → SHIPPED → COMPLETED
-    //                       ↘ CANCELLED
-    //
-    // When status = COMPLETED:
-    //   No extra stock change — stock was already moved when
-    //   the order was placed. COMPLETED just confirms delivery.
-    //
-    // When status = CANCELLED:
-    //   Stock must be RESTORED:
-    //   → Product.stockQuantity goes back UP   (manufacturer gets stock back)
-    //   → Inventory.stockQuantity goes back DOWN (wholesaler loses the reserved stock)
-    // ─────────────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // CANCEL — only allowed before IN PROGRESS
+    // Restores stock appropriately
+    // ════════════════════════════════════════════════════════════
     @Transactional
-    public Order updateOrderStatus(Long id, String newStatus) {
-
+    public Order cancelOrder(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Order not found: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
 
-        String previousStatus = order.getStatus();
-
-        // Prevent updating an already completed or cancelled order
-        if ("DELIVERED".equalsIgnoreCase(previousStatus) ||
-            "CANCELLED".equalsIgnoreCase(previousStatus)) {
+        if (!"ORDER PLACED".equalsIgnoreCase(order.getStatus()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot update a " + previousStatus + " order.");
-        }
+                    "Order can only be cancelled before IN PROGRESS. Current: " + order.getStatus());
 
-        // ── CANCELLATION: reverse the stock changes ──────────
-        if ("CANCELLED".equalsIgnoreCase(newStatus)) {
+        Product product = order.getProduct();
 
-            Product product = order.getProduct();
-            Long    userId  = order.getUser().getId();
-
-            // Give stock back to manufacturer pool
+        if ("W2M".equals(order.getOrderType())) {
+            // Restore manufacturer stock
             product.setStockQuantity(product.getStockQuantity() + order.getQuantity());
             productRepository.save(product);
-
-            // Remove from wholesaler inventory
-            Optional<Inventory> invOpt =
-                    inventoryRepository.findByWholesalerIdAndProductId(
-                            userId, product.getId());
-
-            if (invOpt.isPresent()) {
-                Inventory inv = invOpt.get();
-                int restored = inv.getStockQuantity() - order.getQuantity();
-                // If inventory would go to 0 or below, set to 0
-                inv.setStockQuantity(Math.max(0, restored));
+        } else {
+            // Restore wholesaler inventory
+            List<Inventory> invList = inventoryRepository.findByProductId(product.getId());
+            if (!invList.isEmpty()) {
+                Inventory inv = invList.get(0);
+                inv.setStockQuantity(inv.getStockQuantity() + order.getQuantity());
                 inventoryRepository.save(inv);
             }
         }
 
-        // ── COMPLETED: just mark it — stock already moved at order placement ──
-        // No stock change needed. The quantity was already deducted from
-        // Product and added to Inventory when placeOrder() was called.
+        order.setStatus("CANCELLED");
+        return orderRepository.save(order);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // GENERIC STATUS UPDATE (for wholesaler updating C2W orders)
+    // ════════════════════════════════════════════════════════════
+    @Transactional
+    public Order updateOrderStatus(Long id, String newStatus) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
+
+        String prev = order.getStatus();
+        if ("DELIVERED".equalsIgnoreCase(prev) || "CANCELLED".equalsIgnoreCase(prev))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a " + prev + " order.");
 
         order.setStatus(newStatus.toUpperCase());
         return orderRepository.save(order);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // CONSUMER places order
-    // Deducts from Product.stockQuantity only — no inventory record
-    // ─────────────────────────────────────────────────────────
-    @Transactional
-    public Order placeConsumerOrder(Order order, Long productId, Long userId) {
+    // ════════════════════════════════════════════════════════════
+    // GET METHODS
+    // ════════════════════════════════════════════════════════════
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Product not found: " + productId));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User not found: " + userId));
-
-        if (product.getStockQuantity() < order.getQuantity()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Insufficient stock. Available: " + product.getStockQuantity()
-                    + ", Requested: " + order.getQuantity());
-        }
-
-        product.setStockQuantity(product.getStockQuantity() - order.getQuantity());
-        productRepository.save(product);
-
-        order.setProduct(product);
-        order.setUser(user);
-        order.setStatus("ORDER PLACED");
-        return orderRepository.save(order);
+    // Wholesaler's own PLACED orders (W2M — placed to manufacturer)
+    public List<Order> getWholesalerPlacedOrders(Long userId) {
+        return orderRepository.findByUserIdAndOrderType(userId, "W2M");
     }
 
+    // Orders RECEIVED by wholesaler from consumers (C2W — consumer placed to this wholesaler's products)
+    public List<Order> getWholesalerReceivedOrders(Long wholesalerId) {
+        // Get all products in this wholesaler's inventory
+        List<Inventory> inventories = inventoryRepository.findByWholesalerId(wholesalerId);
+        List<Long> productIds = inventories.stream()
+                .map(inv -> inv.getProduct().getId())
+                .distinct()
+                .collect(Collectors.toList());
+        if (productIds.isEmpty()) return java.util.Collections.emptyList();
+        return orderRepository.findByProductIdInAndOrderType(productIds, "C2W");
+    }
+
+    // Consumer's own orders
     public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId);
+    }
+
+    // All W2M orders for manufacturer to manage
+    public List<Order> getAllW2MOrders() {
+        return orderRepository.findAll().stream()
+                .filter(o -> "W2M".equals(o.getOrderType()))
+                .collect(Collectors.toList());
+    }
+
+    // W2M orders for a specific manufacturer's products
+    public List<Order> getW2MOrdersForManufacturer(Long manufacturerId) {
+        return orderRepository.findAll().stream()
+                .filter(o -> "W2M".equals(o.getOrderType())
+                        && o.getProduct() != null
+                        && manufacturerId.equals(o.getProduct().getManufacturerId()))
+                .collect(Collectors.toList());
     }
 }

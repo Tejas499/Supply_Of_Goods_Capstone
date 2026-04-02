@@ -15,9 +15,8 @@ export class LoginComponent implements OnInit {
 
   num1: number = 0;
   num2: number = 0;
-  operator:string=''
+  operator: string = ''
   captchaAnswer: number = 0;
-  userAnswer: any = '';
   isCaptchaValid: boolean = false;
 
   constructor(
@@ -30,7 +29,8 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.itemForm = this.fb.group({
       username: ['', Validators.required],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      captcha:['',Validators.required]
     });
     this.generateCaptcha();
   }
@@ -40,7 +40,6 @@ export class LoginComponent implements OnInit {
   this.operator = operators[Math.floor(Math.random() * operators.length)];
   this.num1 = Math.floor(Math.random() * 10) + 1;
   this.num2 = Math.floor(Math.random() * 10) + 1;
-  // Avoid decimal in division
   if (this.operator === '/') {
     this.num1 = this.num1 * this.num2;
   }
@@ -58,12 +57,13 @@ export class LoginComponent implements OnInit {
       this.captchaAnswer = this.num1 / this.num2;
       break;
   }
-  this.userAnswer = '';
+  this.itemForm.get('captcha')?.setValue('');
   this.isCaptchaValid = false;
 }
 
   validateCaptcha() {
-    this.isCaptchaValid = Number(this.userAnswer) === this.captchaAnswer;
+    const value = this.itemForm.get('captcha')?.value;
+    this.isCaptchaValid = Number(value) === this.captchaAnswer;
   }
 
   onSubmit(): void {
@@ -79,6 +79,7 @@ export class LoginComponent implements OnInit {
         },
         error: () => {
           this.errorMsg = 'Invalid username or password.';
+          this.generateCaptcha();
         }
       });
     }

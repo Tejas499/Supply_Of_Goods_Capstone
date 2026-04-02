@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository;
 import com.edutech.supply_of_goods_management.entity.Product;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByManufacturerId(Long manufacturerId);
+     Optional<Product> findByNameIgnoreCaseAndManufacturerId(String name, Long manufacturerId);
+
 }
