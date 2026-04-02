@@ -14,16 +14,32 @@
       <div class="mb-3">
         <label class="form-label">Email</label>
         <input type="email" class="form-control" formControlName="email" placeholder="email@example.com">
-        <div *ngIf="itemForm.get('email')?.invalid && itemForm.get('email')?.touched" class="text-danger small">
-          Valid email is required.
+        <div
+          *ngIf="itemForm.get('email')?.hasError('required') && (itemForm.get('email')?.touched || itemForm.get('email')?.dirty)"
+          class="text-danger small">
+          Email is required.
+        </div>
+        <div
+          *ngIf="itemForm.get('email')?.hasError('email') && (itemForm.get('email')?.touched || itemForm.get('email')?.dirty)"
+          class="text-danger small">
+          Enter a valid email address.
         </div>
       </div>
 
+      <!-- Password -->
       <div class="mb-3">
         <label class="form-label">Password</label>
         <input type="password" class="form-control" formControlName="password" placeholder="••••••••">
-        <div *ngIf="itemForm.get('password')?.invalid && itemForm.get('password')?.touched" class="text-danger small">
+        <div
+          *ngIf="itemForm.get('password')?.hasError('required') && (itemForm.get('password')?.touched || itemForm.get('password')?.dirty)"
+          class="text-danger small">
           Password is required.
+        </div>
+        <div
+          *ngIf="itemForm.get('password')?.hasError('pattern') && (itemForm.get('password')?.touched || itemForm.get('password')?.dirty)"
+          class="text-danger small">
+          Password must be at least 8 characters long, include one uppercase, one lowercase, one number, and one special
+          character.
         </div>
       </div>
 
