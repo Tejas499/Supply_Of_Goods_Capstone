@@ -15,7 +15,7 @@
   <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
   <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
 
-  <div class="card mb-4">
+  <!-- <div class="card mb-4">
     <div class="card-header">{{ editingId ? '✏️ Update Inventory' : '➕ Add Inventory' }}</div>
     <div class="card-body">
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
@@ -39,7 +39,7 @@
         </div>
       </form>
     </div>
-  </div>
+  </div> -->
 
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -57,7 +57,7 @@
             <th>Product</th>
             <th>Manufacturer</th>
             <th>Stock Quantity</th>
-            <th>Actions</th>
+            <!-- <th>Actions</th> -->
           </tr>
         </thead>
         <tbody>
@@ -69,9 +69,9 @@
                 {{ inv.stockQuantity }} units
               </span>
             </td>
-            <td>
+            <!-- <td>
               <button class="btn btn-warning btn-sm" (click)="editInventory(inv)">✏️ Edit</button>
-            </td>
+            </td> -->
           </tr>
           <tr *ngIf="paged.length === 0">
             <td colspan="4" class="text-center text-muted py-4">No inventory records.</td>

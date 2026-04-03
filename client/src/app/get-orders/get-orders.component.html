@@ -30,7 +30,7 @@
         <span class="badge bg-success ms-1">{{ receivedOrders.length }}</span>
       </a>
     </li>
-    <li class="nav-item" *ngIf="feedbacks.length > 0">
+    <li class="nav-item">
       <a class="nav-link" [class.active]="activeTab==='feedback'" (click)="activeTab='feedback'" style="cursor:pointer">
         💬 Feedback
         <span class="badge bg-warning text-dark ms-1">{{ feedbacks.length }}</span>

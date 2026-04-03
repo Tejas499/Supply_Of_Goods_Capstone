@@ -41,6 +41,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/api/user/register", "/api/user/login").permitAll()
 
+                // Payment — public (Razorpay callback needs no auth)
+                .antMatchers("/payment/**").permitAll()
+
                 // Manufacturer
                 .antMatchers(HttpMethod.POST,   "/api/manufacturers/product").hasAuthority("MANUFACTURER")
                 .antMatchers(HttpMethod.PUT,    "/api/manufacturers/product/**").hasAuthority("MANUFACTURER")
@@ -49,9 +52,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET,    "/api/manufacturers/orders").hasAuthority("MANUFACTURER")
                 .antMatchers(HttpMethod.PUT,    "/api/manufacturers/order/**").hasAuthority("MANUFACTURER")
                 .antMatchers(HttpMethod.GET,    "/api/manufacturers/feedbacks").hasAuthority("MANUFACTURER")
-
-                // Payment
-                .antMatchers("/payment/**").permitAll()
 
                 // Wholesaler
                 .antMatchers(HttpMethod.GET,  "/api/wholesalers/products").hasAuthority("WHOLESALER")
@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/consumers/order").hasAuthority("CONSUMER")
                 .antMatchers(HttpMethod.GET,  "/api/consumers/orders").hasAuthority("CONSUMER")
                 .antMatchers(HttpMethod.PUT,  "/api/consumers/order/*/cancel").hasAuthority("CONSUMER")
-                .antMatchers("/api/consumers/order/**/feedback").hasAuthority("CONSUMER")
+                .antMatchers(HttpMethod.POST, "/api/consumers/order/*/feedback").hasAuthority("CONSUMER")
 
                 .anyRequest().authenticated()
             .and()

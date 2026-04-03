@@ -19,25 +19,16 @@ import java.util.List;
 @RequestMapping("/api/consumers")
 public class ConsumerController {
 
-    @Autowired
-    private ProductService productService;
+    @Autowired private ProductService  productService;
+    @Autowired private OrderService    orderService;
+    @Autowired private FeedbackService feedbackService;
+    @Autowired private InventoryService inventoryService;
 
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private FeedbackService feedbackService;
-
-    @Autowired
-    private InventoryService inventoryService;
-
-    // Browse all products — response includes manufacturer { id, username, email }
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    // See which wholesalers carry a specific product — response includes wholesaler { id, username, email }
     @GetMapping("/products/{productId}/wholesalers")
     public ResponseEntity<List<Inventory>> getWholesalersForProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(inventoryService.getWholesalersByProductId(productId));
@@ -55,6 +46,13 @@ public class ConsumerController {
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
 
+    // Consumer cancels their own order — uses shared cancelOrder() which handles stock restore
+    @PutMapping("/order/{id}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.cancelOrder(id));
+    }
+
+    // Feedback — only allowed when order is DELIVERED
     @PostMapping("/order/{orderId}/feedback")
     public ResponseEntity<Feedback> addFeedback(@PathVariable Long orderId,
                                                  @RequestParam Long userId,

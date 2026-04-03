@@ -1,5 +1,6 @@
 <div class="container mt-4">
 
+  <!-- Confirm Modal -->
   <div class="modal-backdrop-custom" *ngIf="showConfirm">
     <div class="modal-box">
       <h5 class="fw-bold mb-3">⚠️ Confirm Cancellation</h5>
@@ -12,28 +13,38 @@
   </div>
 
   <h3 class="fw-bold mb-4">📦 My Orders</h3>
-  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
-  <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
 
-  <!-- Inline feedback form -->
+  <!-- Feedback Form (inline panel) -->
   <div class="order-form-panel" *ngIf="showFeedbackFor">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h6 class="fw-bold mb-0">💬 Feedback for Order #{{ showFeedbackFor.id }} — {{ showFeedbackFor.product?.name }}</h6>
+      <h6 class="fw-bold mb-0">
+        💬 Feedback for <span class="text-primary">{{ showFeedbackFor.product?.name }}</span>
+      </h6>
       <button class="btn btn-sm btn-outline-secondary" (click)="showFeedbackFor=null">✕</button>
     </div>
     <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
       <div class="row g-3">
-        <div class="col-md-8">
-          <input type="text" class="form-control" formControlName="content" placeholder="Share your experience...">
-          <div *ngIf="itemForm.get('content')?.invalid && itemForm.get('content')?.touched" class="text-danger small mt-1">Please write your feedback.</div>
+        <div class="col-md-9">
+          <input type="text" class="form-control" formControlName="content"
+                 placeholder="Share your experience with this product...">
+          <div *ngIf="itemForm.get('content')?.invalid && itemForm.get('content')?.touched"
+               class="text-danger small mt-1">
+            Please write at least 3 characters of feedback.
+          </div>
         </div>
-        <div class="col-md-4">
-          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.get('content')?.invalid">Submit Feedback →</button>
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary w-100"
+                  [disabled]="itemForm.get('content')?.invalid">
+            Submit Feedback →
+          </button>
         </div>
       </div>
     </form>
   </div>
 
+  <!-- Orders Table -->
   <div class="card">
     <div class="card-header">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -41,24 +52,28 @@
         <div class="d-flex gap-2">
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" class="form-control form-control-sm" style="width:180px;padding-left:2rem"
-                   placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+            <input type="text" class="form-control form-control-sm"
+                   style="width:180px;padding-left:2rem"
+                   placeholder="Search by product..."
+                   [(ngModel)]="searchTerm" (input)="applyFilter()">
           </div>
-          <select class="form-select form-select-sm" style="width:160px" [(ngModel)]="filterStatus" (change)="applyFilter()">
+          <select class="form-select form-select-sm" style="width:175px"
+                  [(ngModel)]="filterStatus" (change)="applyFilter()">
             <option value="">All Statuses</option>
             <option value="ORDER PLACED">Order Placed</option>
             <option value="IN PROGRESS">In Progress</option>
+            <option value="OUT FOR DELIVERY">Out for Delivery</option>
             <option value="DELIVERED">Delivered</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
       </div>
     </div>
+
     <div class="card-body p-0">
       <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th>Order</th>
             <th>Product</th>
             <th>Qty</th>
             <th>Total</th>
@@ -68,7 +83,6 @@
         </thead>
         <tbody>
           <tr *ngFor="let o of paged">
-            <td class="fw-semibold text-primary">#{{ o.id }}</td>
             <td>
               <div class="fw-semibold">{{ o.product?.name }}</div>
               <div class="text-muted small">₹{{ o.product?.price }} per unit</div>
@@ -80,6 +94,7 @@
                 [ngClass]="{
                   'bg-warning text-dark' : o.status === 'ORDER PLACED',
                   'bg-primary'           : o.status === 'IN PROGRESS',
+                  'bg-info text-dark'    : o.status === 'OUT FOR DELIVERY',
                   'bg-success'           : o.status === 'DELIVERED',
                   'bg-danger'            : o.status === 'CANCELLED'
                 }">
@@ -88,27 +103,54 @@
             </td>
             <td>
               <div class="d-flex gap-1 flex-wrap">
-                <button class="btn btn-info btn-sm" (click)="openFeedback(o)"
-                        *ngIf="o.status === 'DELIVERED'">💬 Feedback</button>
-                <button class="btn btn-danger btn-sm" (click)="cancelOrder(o)"
-                        *ngIf="o.status === 'ORDER PLACED'">🚫 Cancel</button>
-                <span *ngIf="o.status === 'IN PROGRESS'" class="text-muted small">In transit...</span>
-                <span *ngIf="o.status === 'CANCELLED'" class="text-danger small">Cancelled</span>
+
+                <!-- Cancel — only when ORDER PLACED -->
+                <button class="btn btn-danger btn-sm"
+                        *ngIf="canCancel(o)"
+                        (click)="cancelOrder(o)">
+                  🚫 Cancel
+                </button>
+
+                <!-- Status info when processing -->
+                <span *ngIf="o.status === 'IN PROGRESS'"
+                      class="text-muted small">Processing...</span>
+
+                <!-- Status info when out for delivery -->
+                <span *ngIf="o.status === 'OUT FOR DELIVERY'"
+                      class="text-info small fw-semibold">🚚 On the way!</span>
+
+                <!-- Feedback — only after DELIVERED by wholesaler -->
+                <button class="btn btn-info btn-sm"
+                        *ngIf="canLeaveFeedback(o)"
+                        (click)="openFeedback(o)">
+                  💬 Leave Feedback
+                </button>
+
+                <!-- Already cancelled -->
+                <span *ngIf="o.status === 'CANCELLED'"
+                      class="text-danger small">Cancelled</span>
               </div>
             </td>
           </tr>
           <tr *ngIf="paged.length === 0">
-            <td colspan="6" class="text-center text-muted py-4">No orders found.</td>
+            <td colspan="5" class="text-center text-muted py-4">No orders found.</td>
           </tr>
         </tbody>
       </table>
     </div>
+
     <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
       <small class="text-muted">{{ filtered.length }} orders</small>
       <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
-        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
-        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
+        <li class="page-item" [class.disabled]="page===1">
+          <a class="page-link" (click)="page=page-1">‹</a>
+        </li>
+        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page">
+          <a class="page-link" (click)="page=p">{{p}}</a>
+        </li>
+        <li class="page-item" [class.disabled]="page===totalPages">
+          <a class="page-link" (click)="page=page+1">›</a>
+        </li>
       </ul>
     </div>
   </div>

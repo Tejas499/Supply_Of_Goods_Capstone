@@ -170,6 +170,11 @@ export class ConsumerPlaceOrderComponent implements OnInit {
       this.closeOrderForm();
     }, 4000);
   }
+  //====================wholesalers==============
+   viewWholesalers(p: any): void {
+    this.selectedProduct = p; this.wholesalers = [];
+    this.httpService.getWholesalersForProduct(p.id).subscribe((res: any) => { this.wholesalers = res; });
+  }
   // ================= MODAL =================
   onConfirm(): void {
     if (this.confirmAction) this.confirmAction();

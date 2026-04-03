@@ -1,7 +1,9 @@
 package com.edutech.supply_of_goods_management.entity;
 
-
+// import com.fasterxml.jackson.annotation.JsonFormat;
 // import java.sql.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,7 +19,9 @@ public class Feedback {
 
     private String content;
 
-    @Temporal(TemporalType.TIMESTAMP)
+
+@Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Kolkata")
     private Date timestamp;
 
     @ManyToOne
