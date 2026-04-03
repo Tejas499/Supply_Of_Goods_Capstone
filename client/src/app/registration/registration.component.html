@@ -6,9 +6,23 @@
       <div class="mb-3">
         <label class="form-label">Username</label>
         <input type="text" class="form-control" formControlName="username" placeholder="Username">
-        <div *ngIf="itemForm.get('username')?.invalid && itemForm.get('username')?.touched" class="text-danger small">
-          Username is required.
-        </div>
+        <div *ngIf="itemForm.get('username')?.dirty" class="text-danger small">
+
+  <span *ngIf="itemForm.get('username')?.hasError('required')">
+    Username is required.
+  </span>
+
+  <span *ngIf="!itemForm.get('username')?.hasError('required') && itemForm.get('username')?.hasError('pattern')">
+    Must start with letter and contain only letters/numbers.
+  </span>
+
+  <span *ngIf="!itemForm.get('username')?.hasError('required') 
+               && !itemForm.get('username')?.hasError('pattern') 
+               && itemForm.get('username')?.hasError('maxlength')">
+    Maximum 10 characters allowed.
+  </span>
+
+</div>
       </div>
 
       <div class="mb-3">
@@ -57,6 +71,9 @@
       </div>
 
       <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid">Register</button>
+      <div *ngIf="errorMsg" class="text-danger small text-center mb-2">
+  {{ errorMsg }}
+</div>
     </form>
 
     <p class="text-center mb-0">Already have an account?

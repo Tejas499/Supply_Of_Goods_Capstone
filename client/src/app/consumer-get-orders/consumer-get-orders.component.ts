@@ -99,6 +99,21 @@ export class ConsumerGetOrdersComponent implements OnInit {
     };
     this.showConfirm = true;
   }
+  markReceived(o: any): void {
+  const userId = localStorage.getItem('userId');
+  if (!confirm("Mark this order as received?")) return;
+
+  this.httpService.markConsumerOrderReceived(o.id, userId).subscribe({
+    next: () => {
+      this.successMsg = "Order marked as delivered";
+      this.loadOrders();
+      setTimeout(() => this.successMsg = '', 3000);
+    },
+    error: (err: any) => {
+      this.errorMsg = err.error?.message || "Failed to update";
+    }
+  });
+}
 
   onSubmit(): void {
     if (this.itemForm.invalid) return;

@@ -27,8 +27,12 @@ export class CreateProductsComponent implements OnInit {
       manufacturerId: [localStorage.getItem('userId') || ''],
       name:           ['', Validators.required],
       description:    ['', Validators.required],
-      price:          ['', Validators.required],
-      stockQuantity:  ['', Validators.required]
+      price:          ['', [Validators.required,Validators.min(1)]],
+      stockQuantity: ['', [
+  Validators.required,
+  Validators.min(1),
+  Validators.pattern("^[0-9]+$")  
+]]
     });
     this.loadAll();
   }

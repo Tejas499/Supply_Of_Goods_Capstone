@@ -59,4 +59,11 @@ public class ConsumerController {
                                                  @RequestBody Feedback feedback) {
         return ResponseEntity.ok(feedbackService.addFeedback(orderId, userId, feedback));
     }
+
+    @PutMapping("/order/{id}/received")
+public ResponseEntity<Order> markReceived(@PathVariable Long id,
+                                          @RequestParam Long userId) {
+    return ResponseEntity.ok(orderService.markConsumerOrderReceived(id, userId));
+}
+
 }

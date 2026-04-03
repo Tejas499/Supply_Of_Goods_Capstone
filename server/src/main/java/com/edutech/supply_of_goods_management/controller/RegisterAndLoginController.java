@@ -35,10 +35,19 @@ public class RegisterAndLoginController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        User saved = userService.registerUser(user);
-        return ResponseEntity.ok(saved);
+public ResponseEntity<?> register(@RequestBody User user) {
+
+    // ✅ Check duplicate
+    if (userService.existsByUsernameOrEmail(user.getUsername(), user.getEmail())) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Username or Email already exists"
+        );
     }
+
+    User saved = userService.registerUser(user);
+    return ResponseEntity.ok(saved);
+}
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {

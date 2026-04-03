@@ -53,6 +53,8 @@ public class InventoryService {
         return inventoryRepository.save(inventory);
     }
 
+    
+
     /**
      * WHOLESALER updates their inventory stock quantity manually.
      * Adjusts Product.stockQuantity by the difference:

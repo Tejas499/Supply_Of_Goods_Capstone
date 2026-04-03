@@ -7,10 +7,11 @@ import { HttpService } from '../../services/http.service';
 @Component({
   selector: 'app-registration',
   templateUrl: './registration.component.html'
- 
+
 })
 export class RegistrationComponent {
   itemForm!: FormGroup;
+  errorMsg= '';
 
   constructor(
     private fb: FormBuilder,
@@ -18,18 +19,25 @@ export class RegistrationComponent {
     private router: Router
   ) {
     this.itemForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', [Validators.required , Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
-      email: ['', [Validators.required, Validators.email , Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
+      username: [
+        '',[Validators.required,Validators.maxLength(10),Validators.pattern(/^[A-Za-z][A-Za-z0-9]*$/)]
+      ],
+      password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]],
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
       role: ['', Validators.required]
     });
   }
 
-  onSubmit(): void {
-    if (this.itemForm.valid) {
-      this.httpService.registerUser(this.itemForm.value).subscribe(() => {
+onSubmit(): void {
+  if (this.itemForm.valid) {
+    this.httpService.registerUser(this.itemForm.value).subscribe({
+      next: () => {
         this.router.navigate(['/login']);
-      });
-    }
+      },
+      error: (err) => {
+        this.errorMsg = err.error?.message || "Registration failed";
+      }
+    });
   }
+}
 }

@@ -7,8 +7,10 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "products") // do not change table name ( do not change this line)
-public class Product {
+@Table(name = "products")
+ // do not change table name ( do not change this line)
+
+ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

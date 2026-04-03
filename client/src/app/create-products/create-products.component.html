@@ -54,10 +54,12 @@
                 <span class="input-group-text">₹</span>
                 <input type="number" class="form-control" formControlName="price" placeholder="0.00">
               </div>
+              <div *ngIf="itemForm.get('price')?.hasError('price') && itemForm.get('price')?.touched || itemForm.get('price')?.dirty" class="text-danger small mt-1">Valid Price Please</div>
             </div>
             <div class="col-md-4">
               <label class="form-label">Stock Quantity</label>
               <input type="number" class="form-control" formControlName="stockQuantity" placeholder="0">
+              <div *ngIf="itemForm.get('stockQuantity')?.hasError('stockQuantity') && itemForm.get('stockQuantity')?.touched ||itemForm.get('stockQuantity')?.dirty" class="text-danger small mt-1">Quantity should be positive</div>
             </div>
           </div>
           <div class="mb-3">

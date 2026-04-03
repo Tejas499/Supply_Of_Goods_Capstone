@@ -193,12 +193,17 @@
                   <select class="form-select form-select-sm mb-1" [(ngModel)]="o.selectedStatus">
                     <option value="">-- Select --</option>
                     <option value="IN PROGRESS" *ngIf="o.status === 'ORDER PLACED'">In Progress</option>
-                    <option value="DELIVERED"   *ngIf="o.status === 'IN PROGRESS'">Delivered</option>
+                    <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Out for Delivery</option>
                   </select>
                   <button class="btn btn-primary btn-sm w-100"
                           [disabled]="!o.selectedStatus"
                           (click)="updateReceivedOrder(o.id, o.selectedStatus)">Update →</button>
-                </ng-container>
+                  <button class="btn btn-danger btn-sm w-100 mt-1"
+            *ngIf="o.status === 'ORDER PLACED' || o.status === 'IN PROGRESS'"
+            (click)="cancelReceivedOrder(o)">
+      Cancel
+    </button>
+                        </ng-container>
                 <span *ngIf="o.status==='DELIVERED'" class="text-success small">✔ Delivered</span>
                 <span *ngIf="o.status==='CANCELLED'" class="text-danger small">✖ Cancelled</span>
               </td>

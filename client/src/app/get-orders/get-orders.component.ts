@@ -89,6 +89,20 @@ export class GetOrdersComponent implements OnInit {
     };
     this.showConfirm = true;
   }
+  cancelReceivedOrder(o: any): void {
+  if (!confirm(`Cancel order #${o.id}? Stock will be restored.`)) return;
+
+  this.httpService.cancelWholesalerOrder(o.id).subscribe({
+    next: () => {
+      this.successMsg = `Order #${o.id} cancelled successfully`;
+      this.loadAll(); // reload list
+      setTimeout(() => this.successMsg = '', 3000);
+    },
+    error: (err: any) => {
+      this.errorMsg = err.error?.message || "Cannot cancel this order";
+    }
+  });
+}
 
   // Update received order (C2W) status
   updateReceivedOrder(orderId: any, status: string): void {

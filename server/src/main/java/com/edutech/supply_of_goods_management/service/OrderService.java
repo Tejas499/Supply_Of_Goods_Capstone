@@ -196,21 +196,36 @@ public class OrderService {
 
     // ════════════════════════════════════════════════════════════
     // GENERIC STATUS UPDATE (for wholesaler updating C2W orders)
+    // ═══════════════════════════════════════════════════════════
     // ════════════════════════════════════════════════════════════
     @Transactional
     public Order updateOrderStatus(Long id, String newStatus) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
-
+    
         String prev = order.getStatus();
+    
         if ("DELIVERED".equalsIgnoreCase(prev) || "CANCELLED".equalsIgnoreCase(prev))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a " + prev + " order.");
-
-        order.setStatus(newStatus.toUpperCase());
+    
+        if ("C2W".equals(order.getOrderType())) {
+    
+            if ("ORDER PLACED".equals(prev) && "IN PROGRESS".equalsIgnoreCase(newStatus)) {
+                order.setStatus("IN PROGRESS");
+    
+            } else if ("IN PROGRESS".equals(prev) && "OUT FOR DELIVERY".equalsIgnoreCase(newStatus)) {
+                order.setStatus("OUT FOR DELIVERY");
+    
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status transition");
+            }
+    
+        } else {
+            order.setStatus(newStatus.toUpperCase());
+        }
+    
         return orderRepository.save(order);
     }
-
-    // ════════════════════════════════════════════════════════════
     // GET METHODS
     // ════════════════════════════════════════════════════════════
 
@@ -230,6 +245,25 @@ public class OrderService {
         if (productIds.isEmpty()) return java.util.Collections.emptyList();
         return orderRepository.findByProductIdInAndOrderType(productIds, "C2W");
     }
+    @Transactional
+public Order markConsumerOrderReceived(Long id, Long consumerId) {
+    Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found: " + id));
+
+    if (!"C2W".equals(order.getOrderType()))
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only consumer orders allowed.");
+
+    if (!order.getUser().getId().equals(consumerId))
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not your order.");
+
+    if (!"OUT FOR DELIVERY".equalsIgnoreCase(order.getStatus()))
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Order must be OUT FOR DELIVERY.");
+
+    order.setStatus("DELIVERED");
+
+    return orderRepository.save(order);
+}
+
 
     // Consumer's own orders
     public List<Order> getOrdersByUserId(Long userId) {
@@ -257,5 +291,5 @@ public class OrderService {
     Order order = orderRepository.findById(orderId).orElseThrow();
     order.setPaymentStatus(status);
     orderRepository.save(order);
-}
+ }
 }

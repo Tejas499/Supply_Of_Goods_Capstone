@@ -14,7 +14,7 @@
 
   <h3 class="fw-bold mb-4">📦 My Orders</h3>
   <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
-  <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
+  <div *ngIf="errorMsg" class="alert alert-danger">❌ {{ errorMsg }}</div>
 
   <!-- Feedback Form (inline panel) -->
   <div class="order-form-panel" *ngIf="showFeedbackFor">
@@ -28,15 +28,14 @@
       <div class="row g-3">
         <div class="col-md-9">
           <input type="text" class="form-control" formControlName="content"
-                 placeholder="Share your experience with this product...">
+            placeholder="Share your experience with this product...">
           <div *ngIf="itemForm.get('content')?.invalid && itemForm.get('content')?.touched"
-               class="text-danger small mt-1">
+            class="text-danger small mt-1">
             Please write at least 3 characters of feedback.
           </div>
         </div>
         <div class="col-md-3">
-          <button type="submit" class="btn btn-primary w-100"
-                  [disabled]="itemForm.get('content')?.invalid">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.get('content')?.invalid">
             Submit Feedback →
           </button>
         </div>
@@ -52,13 +51,11 @@
         <div class="d-flex gap-2">
           <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" class="form-control form-control-sm"
-                   style="width:180px;padding-left:2rem"
-                   placeholder="Search by product..."
-                   [(ngModel)]="searchTerm" (input)="applyFilter()">
+            <input type="text" class="form-control form-control-sm" style="width:180px;padding-left:2rem"
+              placeholder="Search by product..." [(ngModel)]="searchTerm" (input)="applyFilter()">
           </div>
-          <select class="form-select form-select-sm" style="width:175px"
-                  [(ngModel)]="filterStatus" (change)="applyFilter()">
+          <select class="form-select form-select-sm" style="width:175px" [(ngModel)]="filterStatus"
+            (change)="applyFilter()">
             <option value="">All Statuses</option>
             <option value="ORDER PLACED">Order Placed</option>
             <option value="IN PROGRESS">In Progress</option>
@@ -90,8 +87,7 @@
             <td>{{ o.quantity }}</td>
             <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
             <td>
-              <span class="badge"
-                [ngClass]="{
+              <span class="badge" [ngClass]="{
                   'bg-warning text-dark' : o.status === 'ORDER PLACED',
                   'bg-primary'           : o.status === 'IN PROGRESS',
                   'bg-info text-dark'    : o.status === 'OUT FOR DELIVERY',
@@ -105,30 +101,26 @@
               <div class="d-flex gap-1 flex-wrap">
 
                 <!-- Cancel — only when ORDER PLACED -->
-                <button class="btn btn-danger btn-sm"
-                        *ngIf="canCancel(o)"
-                        (click)="cancelOrder(o)">
+                <button class="btn btn-danger btn-sm" *ngIf="canCancel(o)" (click)="cancelOrder(o)">
                   🚫 Cancel
                 </button>
 
                 <!-- Status info when processing -->
-                <span *ngIf="o.status === 'IN PROGRESS'"
-                      class="text-muted small">Processing...</span>
+                <span *ngIf="o.status === 'IN PROGRESS'" class="text-muted small">Processing...</span>
 
                 <!-- Status info when out for delivery -->
-                <span *ngIf="o.status === 'OUT FOR DELIVERY'"
-                      class="text-info small fw-semibold">🚚 On the way!</span>
+                <button class="btn btn-success btn-sm" *ngIf="o.status === 'OUT FOR DELIVERY'"
+                  (click)="markReceived(o)">
+                  ✅ Mark as Received
+                </button>
 
                 <!-- Feedback — only after DELIVERED by wholesaler -->
-                <button class="btn btn-info btn-sm"
-                        *ngIf="canLeaveFeedback(o)"
-                        (click)="openFeedback(o)">
+                <button class="btn btn-info btn-sm" *ngIf="canLeaveFeedback(o)" (click)="openFeedback(o)">
                   💬 Leave Feedback
                 </button>
 
                 <!-- Already cancelled -->
-                <span *ngIf="o.status === 'CANCELLED'"
-                      class="text-danger small">Cancelled</span>
+                <span *ngIf="o.status === 'CANCELLED'" class="text-danger small">Cancelled</span>
               </div>
             </td>
           </tr>

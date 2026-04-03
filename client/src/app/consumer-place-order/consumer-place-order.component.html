@@ -119,7 +119,7 @@
             <td>{{ p.manufacturer?.username }}</td>
             <td class="text-success">₹{{ p.price }}</td>
             <td>
-              <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' :
+              <span class="badge bg-secondary ms-2" [ngClass]="p.stockQuantity > 10 ? 'bg-success' :
                            p.stockQuantity > 0 ? 'bg-warning text-dark' :
                            'bg-danger'">
                 {{ p.stockQuantity }}

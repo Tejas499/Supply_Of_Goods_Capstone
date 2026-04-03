@@ -9,4 +9,6 @@ import com.edutech.supply_of_goods_management.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
+     boolean existsByUsernameOrEmail(String username, String email);
+
 }
