@@ -1,8 +1,15 @@
 <div class="container mt-4">
-
+  <!-- ✅ Payment Status -->
+  <div *ngIf="paymentSuccess" class="alert alert-success">
+    Payment successful & Order placed!
+  </div>
+  <div *ngIf="paymentError" class="alert alert-danger">
+    {{ paymentError }}
+  </div>
+  <!-- ✅ Confirm Modal -->
   <div class="modal-backdrop-custom" *ngIf="showConfirm">
     <div class="modal-box">
-      <h5 class="fw-bold mb-3">🛒 Confirm Order</h5>
+      <h5 class="fw-bold mb-3">Confirm Order</h5>
       <p class="text-muted">{{ confirmMsg }}</p>
       <div class="d-flex gap-2 justify-content-end mt-3">
         <button class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
@@ -10,17 +17,39 @@
       </div>
     </div>
   </div>
-
-  <h3 class="fw-bold mb-4">🛍️ Browse &amp; Order Products</h3>
+  <!-- ✅ PAYMENT OPTIONS -->
+  <div class="modal-backdrop-custom" *ngIf="showPaymentOptions">
+    <div class="modal-box">
+      <h5 class="fw-bold mb-3">Choose Payment Method</h5>
+      <div class="d-flex flex-column gap-2">
+        <!-- ✅ PAY ONLINE (FIXED) -->
+        <button class="btn btn-success" (click)="payNow()" [disabled]="processingPayment">
+          <span *ngIf="processingPayment" class="spinner-border spinner-border-sm me-1"></span>
+          Pay Online
+        </button>
+        <!-- COD -->
+        <button class="btn btn-warning" (click)="confirmWithCOD()">
+          Cash on Delivery
+        </button>
+        <!-- CANCEL -->
+        <button class="btn btn-outline-secondary" (click)="showPaymentOptions=false">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- TITLE -->
+  <h3 class="fw-bold mb-4">Browse & Order Products</h3>
   <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
-  <div *ngIf="errorMsg"   class="alert alert-danger">{{ errorMsg }}</div>
-
-  <!-- Slide-in order form -->
+  <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+  <!-- ✅ ORDER FORM -->
   <div class="order-form-panel" *ngIf="showOrderForm">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h6 class="fw-bold mb-0">
         Order: <span class="text-primary">{{ selectedProduct?.name }}</span>
-        <span class="badge bg-secondary ms-2" *ngIf="selectedProduct?.manufacturer">by {{ selectedProduct?.manufacturer?.username }}</span>
+        <span class="badge bg-secondary ms-2" *ngIf="selectedProduct?.manufacturer">
+          by {{ selectedProduct?.manufacturer?.username }}
+        </span>
       </h6>
       <button class="btn btn-sm btn-outline-secondary" (click)="closeOrderForm()">✕</button>
     </div>
@@ -28,97 +57,67 @@
       <div class="row g-3">
         <div class="col-md-3">
           <label class="form-label">Quantity</label>
-          <input type="number" class="form-control" formControlName="quantity" placeholder="How many?" min="1">
-          <div *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="text-danger small mt-1">Min 1.</div>
+          <input type="number" class="form-control" formControlName="quantity" min="1">
         </div>
         <div class="col-md-3">
-          <label class="form-label">Price per unit</label>
+          <label class="form-label">Price</label>
           <input class="form-control" [value]="'₹' + selectedProduct?.price" disabled>
         </div>
         <div class="col-md-3">
-          <label class="form-label">Available Stock</label>
+          <label class="form-label">Stock</label>
           <input class="form-control" [value]="selectedProduct?.stockQuantity + ' units'" disabled>
         </div>
         <div class="col-md-3 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.invalid">🛒 Order Now</button>
+          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.invalid">
+            Order Now
+          </button>
         </div>
       </div>
-      <div class="mt-2"><span class="badge bg-warning text-dark">Status: ORDER PLACED</span></div>
     </form>
   </div>
-
-  <!-- Wholesalers panel -->
-  <div class="card mb-4" *ngIf="selectedProduct && !showOrderForm && wholesalers !== null">
-    <div class="card-header">🏪 Wholesalers carrying <strong>{{ selectedProduct?.name }}</strong></div>
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead><tr><th>Wholesaler</th><th>Email</th><th>Stock</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let inv of wholesalers">
-            <td class="fw-semibold">{{ inv.wholesaler?.username }}</td>
-            <td class="text-muted small">{{ inv.wholesaler?.email }}</td>
-            <td><span class="badge bg-success">{{ inv.stockQuantity }} units</span></td>
-          </tr>
-          <tr *ngIf="wholesalers.length === 0">
-            <td colspan="3" class="text-center text-muted py-3">No wholesalers currently carry this product.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Products table -->
+  <!-- ✅ PRODUCTS TABLE -->
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span>📦 Available Products</span>
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="form-control form-control-sm" style="width:220px;padding-left:2rem"
-               placeholder="Search products..." [(ngModel)]="searchTerm" (input)="applyFilter()">
-      </div>
+    <div class="card-header d-flex justify-content-between">
+      <span>Available Products</span>
+      <input type="text" class="form-control form-control-sm" style="width:220px" placeholder="Search..."
+        [(ngModel)]="searchTerm" [ngModelOptions]="{standalone: true}" (input)="applyFilter()">
     </div>
     <div class="card-body p-0">
       <table class="table table-hover mb-0">
         <thead>
           <tr>
             <th>Product</th>
-            <th>Manufactured By</th>
+            <th>Manufacturer</th>
             <th>Price</th>
             <th>Stock</th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of paged" [class.table-active]="selectedProduct?.id===p.id">
+          <tr *ngFor="let p of paged">
+            <td>{{ p.name }}</td>
+            <td>{{ p.manufacturer?.username }}</td>
+            <td class="text-success">₹{{ p.price }}</td>
             <td>
-              <div class="fw-semibold">{{ p.name }}</div>
-              <div class="text-muted small">{{ p.description }}</div>
-            </td>
-            <td><span class="badge bg-secondary" *ngIf="p.manufacturer">{{ p.manufacturer.username }}</span></td>
-            <td class="text-success fw-semibold">₹{{ p.price | number:'1.0-0' }}</td>
-            <td>
-              <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' : p.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
-                {{ p.stockQuantity }} units
+              <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' :
+                           p.stockQuantity > 0 ? 'bg-warning text-dark' :
+                           'bg-danger'">
+                {{ p.stockQuantity }}
               </span>
             </td>
             <td>
-              <button class="btn btn-info btn-sm me-1"  (click)="viewWholesalers(p)">🏪 Wholesalers</button>
-              <button class="btn btn-primary btn-sm"    (click)="openOrderForm(p)" [disabled]="p.stockQuantity===0">➕ Add Order</button>
+              <button class="btn btn-primary btn-sm" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">
+                Order
+              </button>
             </td>
           </tr>
           <tr *ngIf="paged.length === 0">
-            <td colspan="5" class="text-center text-muted py-4">No products found.</td>
+            <td colspan="5" class="text-center text-muted py-3">
+              No products found
+            </td>
           </tr>
         </tbody>
       </table>
-    </div>
-    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
-      <small class="text-muted">{{ filtered.length }} products</small>
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
-        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
-        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
-      </ul>
     </div>
   </div>
 </div>

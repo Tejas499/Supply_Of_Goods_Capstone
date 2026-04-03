@@ -251,4 +251,11 @@ public class OrderService {
                         && manufacturerId.equals(o.getProduct().getManufacturerId()))
                 .collect(Collectors.toList());
     }
+
+    // Payment
+    public void updatePaymentStatus(Long orderId, String status) {
+    Order order = orderRepository.findById(orderId).orElseThrow();
+    order.setPaymentStatus(status);
+    orderRepository.save(order);
+}
 }

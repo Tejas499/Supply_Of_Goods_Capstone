@@ -37,7 +37,30 @@ public class Order {
     @JsonIgnoreProperties({"orders","inventories","hibernateLazyInitializer"})
     private Product product;
 
+    private String paymentStatus;
+    private String razorpayOrderId;
+    private String razorpayPaymentId;
+
     public Order() {}
+
+    public String getPaymentStatus() {
+    return paymentStatus;
+}
+public void setPaymentStatus(String paymentStatus) {
+    this.paymentStatus = paymentStatus;
+}
+public String getRazorpayOrderId() {
+    return razorpayOrderId;
+}
+public void setRazorpayOrderId(String razorpayOrderId) {
+    this.razorpayOrderId = razorpayOrderId;
+}
+public String getRazorpayPaymentId() {
+    return razorpayPaymentId;
+}
+public void setRazorpayPaymentId(String razorpayPaymentId) {
+    this.razorpayPaymentId = razorpayPaymentId;
+}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
