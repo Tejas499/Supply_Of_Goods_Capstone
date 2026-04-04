@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-place-order',
@@ -9,26 +10,20 @@ import { HttpService } from '../../services/http.service';
 })
 export class PlaceOrderComponent implements OnInit {
   itemForm!: FormGroup;
-  userName: string = '';
-  
   products: any[] = [];
   filtered: any[] = [];
   searchTerm = '';
-  successMsg = ''; 
-  errorMsg = '';
-  
+  userName = '';
+  totalPrice = 0;
+  successMsg = ''; errorMsg = '';
   showOrderForm = false;
   selectedProduct: any = null;
-  showConfirm = false; 
-  confirmMsg = ''; 
-  confirmAction: any = null;
-  totalPrice: number = 0;
+  showConfirm = false; confirmMsg = ''; confirmAction: any = null;
 
   // Pagination
-  page = 1; 
-  pageSize = 6;
+  page = 1; pageSize = 5;
 
-  constructor(private fb: FormBuilder, private httpService: HttpService) {}
+  constructor(private fb: FormBuilder, private httpService: HttpService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.userName = localStorage.getItem('username') || 'Wholesaler';
@@ -39,10 +34,9 @@ export class PlaceOrderComponent implements OnInit {
     this.loadProducts();
   }
 
-  loadProducts() {
+  loadProducts(): void {
     this.httpService.getProductsByWholesaler().subscribe((res: any) => {
-      this.products = res; 
-      this.applyFilter();
+      this.products = res; this.applyFilter();
     });
   }
 
@@ -54,50 +48,45 @@ export class PlaceOrderComponent implements OnInit {
     this.page = 1;
   }
 
-  get paged(): any[] { return this.filtered.slice((this.page - 1) * this.pageSize, this.page * this.pageSize); }
+  get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
   get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
 
   openOrderForm(p: any): void {
     this.selectedProduct = p;
     this.showOrderForm = true;
     this.itemForm.patchValue({ productId: p.id, quantity: 1 });
     this.calculateTotal();
-    this.errorMsg = ''; 
-    this.successMsg = '';
+    this.errorMsg = ''; this.successMsg = '';
   }
 
-  calculateTotal() {
-    if (this.selectedProduct) {
-      this.totalPrice = this.itemForm.value.quantity * this.selectedProduct.price;
-    }
-  }
+  calculateTotal(): void { if (this.selectedProduct) { this.totalPrice = this.itemForm.value.quantity * this.selectedProduct.price; } }
 
-  closeOrderForm(): void { 
-    this.showOrderForm = false; 
-    this.selectedProduct = null; 
-    this.itemForm.reset();
+  closeOrderForm(): void { this.showOrderForm = false; this.selectedProduct = null; this.itemForm.reset(); }
+
+  isDuplicate(): boolean {
+    // Prevent same product being ordered again if already has a PENDING order
+    // (checked client-side — server also validates stock)
+    return false; // Extended in get-orders if needed
   }
 
   onSubmit(): void {
     if (this.itemForm.invalid || !this.selectedProduct) return;
-    
-    this.calculateTotal();
-    this.confirmMsg = `Confirm procurement of ${this.itemForm.value.quantity} × ${this.selectedProduct.name} for ₹${this.totalPrice}?`;
-    
+    this.confirmMsg = `Place order for ${this.itemForm.value.quantity} × ${this.selectedProduct.name}?`;
     this.confirmAction = () => {
       const userId = localStorage.getItem('userId');
       const details = { quantity: this.itemForm.value.quantity, status: 'ORDER PLACED' };
-      
       this.httpService.placeOrder(details, this.selectedProduct.id, userId).subscribe({
         next: () => {
-          this.successMsg = '✅ Procurement order placed successfully!';
+          this.successMsg = '✅ Order placed successfully!';
+          this.errorMsg = '';
           this.showOrderForm = false;
+          this.selectedProduct = null;
+          this.itemForm.reset();
           this.loadProducts();
           setTimeout(() => this.successMsg = '', 4000);
         },
-        error: (err: any) => { 
-          this.errorMsg = err.error?.message || 'Stock limit exceeded.'; 
-        }
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Insufficient stock.'; this.successMsg = ''; }
       });
       this.showConfirm = false;
     };

@@ -37,16 +37,25 @@
     <div *ngIf="successMsg" class="toast success">{{ successMsg }}</div>
     <div *ngIf="errorMsg" class="toast error">{{ errorMsg }}</div>
 
-    <!-- Filter Bar (Context Sensitive) -->
-    <div class="filter-bar" *ngIf="activeTab !== 'feedback'">
+    <!-- Filter Bar for Placed Tab -->
+    <div class="filter-bar" *ngIf="activeTab === 'placed'">
       <div class="search-box">
-        <input type="text" 
-               [placeholder]="activeTab === 'placed' ? 'Search placed orders...' : 'Search received...'"
-               [(ngModel)]="activeTab === 'placed' ? placedSearch : receivedSearch"
-               (input)="activeTab === 'placed' ? applyPlacedFilter() : applyReceivedFilter()">
+        <input type="text" placeholder="Search placed orders..." [(ngModel)]="placedSearch" (input)="applyPlacedFilter()">
       </div>
-      <select [(ngModel)]="activeTab === 'placed' ? placedFilterStatus : receivedFilterStatus"
-              (change)="activeTab === 'placed' ? applyPlacedFilter() : applyReceivedFilter()">
+      <select [(ngModel)]="placedFilterStatus" (change)="applyPlacedFilter()">
+        <option value="">All Statuses</option>
+        <option value="ORDER PLACED">Order Placed</option>
+        <option value="IN PROGRESS">In Progress</option>
+        <option value="OUT FOR DELIVERY">Out for Delivery</option>
+        <option value="DELIVERED">Delivered</option>
+      </select>
+    </div>
+    <!-- Filter Bar for Received Tab -->
+    <div class="filter-bar" *ngIf="activeTab === 'received'">
+      <div class="search-box">
+        <input type="text" placeholder="Search received orders..." [(ngModel)]="receivedSearch" (input)="applyReceivedFilter()">
+      </div>
+      <select [(ngModel)]="receivedFilterStatus" (change)="applyReceivedFilter()">
         <option value="">All Statuses</option>
         <option value="ORDER PLACED">Order Placed</option>
         <option value="IN PROGRESS">In Progress</option>
@@ -89,6 +98,60 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Received Orders Tab (C2W) -->
+    <table class="flow-table" *ngIf="activeTab === 'received'">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Product Details</th>
+          <th>Qty</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Update Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of receivedPaged">
+          <td><span class="id-tag">#{{ o.id }}</span></td>
+          <td>
+            <div class="p-name">{{ o.product?.name }}</div>
+            <div class="p-sub text-muted">Consumer: {{ o.user?.username }}</div>
+          </td>
+          <td class="qty">x {{ o.quantity }}</td>
+          <td class="total">₹{{ (o.quantity * o.product?.price) | number }}</td>
+          <td>
+            <span class="status-pill" [ngClass]="o.status.toLowerCase().replace(' ', '-')">
+              {{ o.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <div *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'" style="display:flex;gap:6px;">
+              <select [(ngModel)]="o.selectedStatus" style="padding:6px;border-radius:8px;border:1px solid #e2e8f0;font-weight:700;">
+                <option value="">Update</option>
+                <option value="IN PROGRESS" *ngIf="o.status === 'ORDER PLACED'">In Progress</option>
+                <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Out for Delivery</option>
+                <option value="DELIVERED" *ngIf="o.status === 'OUT FOR DELIVERY'">Delivered</option>
+              </select>
+              <button class="btn-received" (click)="updateReceivedOrder(o.id, o.selectedStatus)" [disabled]="!o.selectedStatus">✓</button>
+            </div>
+            <span *ngIf="o.status === 'DELIVERED'" style="color:#10b981;font-weight:700;">✓ Fulfilled</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Pagination for received -->
+    <div class="pagination" *ngIf="activeTab === 'received' && receivedTotalPages > 1">
+      <button (click)="receivedPage = receivedPage - 1" [disabled]="receivedPage === 1">Prev</button>
+      <span>Page {{ receivedPage }} of {{ receivedTotalPages }}</span>
+      <button (click)="receivedPage = receivedPage + 1" [disabled]="receivedPage === receivedTotalPages">Next</button>
+    </div>
+    <!-- Pagination for placed -->
+    <div class="pagination" *ngIf="activeTab === 'placed' && placedTotalPages > 1">
+      <button (click)="placedPage = placedPage - 1" [disabled]="placedPage === 1">Prev</button>
+      <span>Page {{ placedPage }} of {{ placedTotalPages }}</span>
+      <button (click)="placedPage = placedPage + 1" [disabled]="placedPage === placedTotalPages">Next</button>
+    </div>
 
     <!-- Feedback View (Simplified) -->
     <div class="feedback-grid" *ngIf="activeTab === 'feedback'">

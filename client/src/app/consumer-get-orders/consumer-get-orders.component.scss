@@ -99,3 +99,10 @@ $white: #ffffff;
 
 .animate { animation: fadeIn 0.8s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.pagination { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #f1f5f9; button { padding: 8px 18px; border-radius: 10px; border: 2px solid #f1f5f9; background: #fff; font-weight: 700; cursor: pointer; &:disabled { opacity: 0.4; } } span { font-weight: 700; color: #64748b; } }
+.toast { position: fixed; top: 100px; right: 30px; padding: 15px 30px; border-radius: 12px; color: #fff; font-weight: 800; z-index: 1000; &.success { background: #10b981; } &.error { background: #ef4444; } }
+.animate-up { animation: fadeIn 0.8s ease-out; }
+.txt-muted { color: #94a3b8; font-size: 12px; }
+.txt-danger { color: #ef4444; font-size: 12px; font-weight: 700; }
+.mt-3 { margin-top: 12px; }

@@ -11,9 +11,9 @@ export class AddInventoryComponent implements OnInit {
   itemForm!: FormGroup;
   inventories: any[] = [];
   filtered: any[] = [];
-  userName: string = ''; // Added for greeting
   searchTerm = '';
   successMsg = ''; errorMsg = '';
+  userName = '';
   editingId: any = null;
   showConfirm = false; confirmMsg = ''; confirmAction: any = null;
   page = 1; pageSize = 5;
@@ -24,7 +24,7 @@ export class AddInventoryComponent implements OnInit {
     this.userName = localStorage.getItem('username') || 'Wholesaler';
     this.itemForm = this.fb.group({
       wholesalerId:  [localStorage.getItem('userId') || ''],
-      stockQuantity: ['', [Validators.required, Validators.min(1)]],
+      stockQuantity: ['', Validators.required],
       productId:     ['', Validators.required]
     });
     this.loadInventories();
@@ -33,8 +33,7 @@ export class AddInventoryComponent implements OnInit {
   loadInventories(): void {
     const id = localStorage.getItem('userId');
     if (id) this.httpService.getInventoryByWholesalers(id).subscribe((res: any) => {
-      this.inventories = res; 
-      this.applyFilter();
+      this.inventories = res; this.applyFilter();
     });
   }
 
@@ -46,22 +45,30 @@ export class AddInventoryComponent implements OnInit {
 
   get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
   get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
-  
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
+
+  editInventory(inv: any): void {
+    this.editingId = inv.id;
+    this.itemForm.patchValue({ stockQuantity: inv.stockQuantity, productId: inv.product?.name });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  cancelEdit(): void { this.editingId = null; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); }
+
   onSubmit(): void {
     if (this.itemForm.invalid) return;
-    this.confirmMsg = this.editingId ? 'Update this inventory record?' : 'Add this new product to inventory?';
+    this.confirmMsg = this.editingId ? 'Update inventory stock?' : 'Add this inventory record?';
     this.confirmAction = () => {
-      const id = localStorage.getItem('userId');
       if (this.editingId) {
         this.httpService.updateInventory(this.itemForm.value.stockQuantity, this.editingId).subscribe({
-          next: () => this.handleSuccess('Inventory updated successfully!'),
-          error: (err) => this.errorMsg = err.error?.message || 'Update failed.'
+          next: () => { this.successMsg = 'Inventory updated!'; this.editingId = null; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); this.loadInventories(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
         });
       } else {
-        const details = { wholesalerId: id, stockQuantity: this.itemForm.value.stockQuantity };
+        const details = { wholesalerId: this.itemForm.value.wholesalerId, stockQuantity: this.itemForm.value.stockQuantity };
         this.httpService.addInventory(details, this.itemForm.value.productId).subscribe({
-          next: () => this.handleSuccess('New inventory record added!'),
-          error: (err) => this.errorMsg = err.error?.message || 'Add failed.'
+          next: () => { this.successMsg = 'Inventory added!'; this.itemForm.reset({ wholesalerId: localStorage.getItem('userId') }); this.loadInventories(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Add failed.'; }
         });
       }
       this.showConfirm = false;

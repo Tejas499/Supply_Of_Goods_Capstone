@@ -45,3 +45,17 @@ $white: #ffffff;
 
 .animate { animation: fadeIn 0.8s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.pagination { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; button { padding: 8px 18px; border-radius: 10px; border: 2px solid #f1f5f9; background: #fff; font-weight: 700; cursor: pointer; &:disabled { opacity: 0.4; } } span { font-weight: 700; color: #64748b; } }
+.m-badge { background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+.btn-icon { padding: 8px 12px; border-radius: 10px; border: 1px solid #f1f5f9; background: #fff; cursor: pointer; transition: 0.3s; &:hover { background: #f1f5f9; } }
+.btn-action { padding: 8px 18px; border-radius: 10px; border: none; background: #0F172A; color: #fff; font-weight: 700; cursor: pointer; transition: 0.3s; &:hover:not(:disabled) { background: #F59E0B; } &:disabled { opacity: 0.4; cursor: not-allowed; } }
+.btns { display: flex; gap: 8px; }
+.order-card, .wholesaler-card { background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; button { background: none; border: none; font-size: 16px; cursor: pointer; color: #94a3b8; } } }
+.p-details { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 5px; font-weight: 700; span { font-size: 12px; color: #64748b; } }
+.input-group { margin-bottom: 20px; label { display: block; font-weight: 700; font-size: 12px; margin-bottom: 8px; } input { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #f1f5f9; &:focus { border-color: #F59E0B; outline: none; } } }
+.w-list .w-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; .w-info { display: flex; flex-direction: column; gap: 3px; strong { font-weight: 800; } span { font-size: 12px; color: #94a3b8; } } .stock-tag { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; } }
+.btn-text { background: none; border: none; color: #94a3b8; font-weight: 700; cursor: pointer; margin-top: 15px; display: block; width: 100%; text-align: center; }
+.full-width { width: 100%; }
+.loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

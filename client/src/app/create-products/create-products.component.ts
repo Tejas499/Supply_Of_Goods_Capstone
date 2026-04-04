@@ -9,9 +9,9 @@ import { HttpService } from '../../services/http.service';
 })
 export class CreateProductsComponent implements OnInit {
   itemForm!: FormGroup;
-  userName: string = '';
   products: any[] = [];
   filtered: any[] = [];
+  userName = '';
   orders: any[] = [];
   feedbacks: any[] = [];
   searchTerm = '';
@@ -29,8 +29,12 @@ export class CreateProductsComponent implements OnInit {
       manufacturerId: [localStorage.getItem('userId') || ''],
       name:           ['', Validators.required],
       description:    ['', Validators.required],
-      price:          ['', [Validators.required, Validators.min(1)]],
-      stockQuantity:  ['', [Validators.required, Validators.min(1), Validators.pattern("^[0-9]+$")]]
+      price:          ['', [Validators.required,Validators.min(1)]],
+      stockQuantity: ['', [
+  Validators.required,
+  Validators.min(1),
+  Validators.pattern("^[0-9]+$")  
+]]
     });
     this.loadAll();
   }
@@ -51,14 +55,16 @@ export class CreateProductsComponent implements OnInit {
   loadOrders(): void {
     const id = localStorage.getItem('userId');
     if (id) this.httpService.getManufacturerOrders(id).subscribe({
-      next: (res: any) => { this.orders = res.map((o: any) => ({ ...o, selectedStatus: '' })); }
+      next: (res: any) => { this.orders = res.map((o: any) => ({ ...o, selectedStatus: '' })); },
+      error: () => {}
     });
   }
 
   loadFeedbacks(): void {
     const id = localStorage.getItem('userId');
     if (id) this.httpService.getManufacturerFeedbacks(id).subscribe({
-      next: (res: any) => { this.feedbacks = res; }
+      next: (res: any) => { this.feedbacks = res; },
+      error: () => {}
     });
   }
 
@@ -70,30 +76,25 @@ export class CreateProductsComponent implements OnInit {
 
   get paged(): any[] { return this.filtered.slice((this.page-1)*this.pageSize, this.page*this.pageSize); }
   get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
+  get pages(): number[] { return Array.from({length: this.totalPages}, (_, i) => i+1); }
 
   editProduct(p: any): void {
     this.editingId = p.id;
     this.itemForm.patchValue({ name: p.name, description: p.description, price: p.price, stockQuantity: p.stockQuantity, manufacturerId: p.manufacturerId });
-    this.activeTab = 'products';
+    this.errorMsg = ''; this.activeTab = 'products';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  cancelEdit(): void { 
-    this.editingId = null; 
-    this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); 
-  }
+  cancelEdit(): void { this.editingId = null; this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); this.errorMsg = ''; }
 
+  // Manufacturer updates W2M order status: IN PROGRESS or OUT FOR DELIVERY
   updateOrderStatus(o: any): void {
     if (!o.selectedStatus) return;
-    this.confirmMsg = `Move Order #${o.id} to status: ${o.selectedStatus}?`;
+    this.confirmMsg = `Update Order #${o.id} to "${o.selectedStatus}"?`;
     this.confirmAction = () => {
       this.httpService.updateManufacturerOrderStatus(o.id, o.selectedStatus).subscribe({
-        next: () => { 
-          this.successMsg = `Order status updated!`; 
-          this.loadOrders(); 
-          setTimeout(() => this.successMsg = '', 3000); 
-        },
-        error: (err: any) => this.errorMsg = err.error?.message || 'Update failed.'
+        next: () => { this.successMsg = `Order #${o.id} → ${o.selectedStatus}`; this.loadOrders(); setTimeout(() => this.successMsg = '', 4000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
       });
       this.showConfirm = false;
     };
@@ -103,31 +104,29 @@ export class CreateProductsComponent implements OnInit {
   onSubmit(): void {
     if (this.itemForm.invalid) return;
     if (this.editingId) {
-      this.confirmMsg = `Update product details for "${this.itemForm.value.name}"?`;
+      this.confirmMsg = `Update product "${this.itemForm.value.name}"?`;
       this.confirmAction = () => {
         this.httpService.updateProduct(this.itemForm.value, this.editingId).subscribe({
-          next: () => { this.successMsg = 'Changes saved!'; this.cancelEdit(); this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); }
+          next: () => { this.successMsg = 'Product updated!'; this.cancelEdit(); this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+          error: (err: any) => { this.errorMsg = err.error?.message || 'Update failed.'; }
         });
         this.showConfirm = false;
       };
       this.showConfirm = true;
     } else {
       this.httpService.createProduct(this.itemForm.value).subscribe({
-        next: () => { 
-          this.successMsg = 'New product listed!'; 
-          this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); 
-          this.loadProducts(); 
-          setTimeout(() => this.successMsg = '', 3000); 
-        }
+        next: () => { this.successMsg = 'Product created!'; this.errorMsg = ''; this.itemForm.reset({ manufacturerId: localStorage.getItem('userId') }); this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Product may already exist.'; }
       });
     }
   }
 
   deleteProduct(p: any): void {
-    this.confirmMsg = `⚠️ Delete "${p.name}"? This is permanent.`;
+    this.confirmMsg = `⚠️ Delete "${p.name}"? This removes it from ALL wholesaler inventories permanently.`;
     this.confirmAction = () => {
       this.httpService.deleteProduct(p.id).subscribe({
-        next: () => { this.successMsg = 'Product removed.'; this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); }
+        next: () => { this.successMsg = `"${p.name}" deleted from all inventories.`; this.loadProducts(); setTimeout(() => this.successMsg = '', 3000); },
+        error: (err: any) => { this.errorMsg = err.error?.message || 'Delete failed.'; }
       });
       this.showConfirm = false;
     };

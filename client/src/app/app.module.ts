@@ -7,6 +7,7 @@ import { LoginComponent } from './login/login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegistrationComponent } from './registration/registration.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
 import { HttpService } from '../services/http.service';
 import { DashbaordComponent } from './dashbaord/dashbaord.component';
 
@@ -41,7 +42,7 @@ import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-o
     ReactiveFormsModule,
     HttpClientModule 
   ],
-  providers: [HttpService,HttpClientModule ],
+  providers: [HttpService, HttpClientModule, DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

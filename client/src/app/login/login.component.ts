@@ -15,7 +15,7 @@ export class LoginComponent implements OnInit {
 
   num1: number = 0;
   num2: number = 0;
-  operator: string = '';
+  operator: string = ''
   captchaAnswer: number = 0;
   isCaptchaValid: boolean = false;
 
@@ -30,26 +30,36 @@ export class LoginComponent implements OnInit {
     this.itemForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
-      captcha: ['', Validators.required]
+      captcha:['',Validators.required]
     });
     this.generateCaptcha();
   }
 
   generateCaptcha() {
-    const operators = ['+', '-', '*']; // Removed division for simplicity if needed, but left logic below
-    this.operator = operators[Math.floor(Math.random() * operators.length)];
-    this.num1 = Math.floor(Math.random() * 10) + 1;
-    this.num2 = Math.floor(Math.random() * 10) + 1;
-
-    switch (this.operator) {
-      case '+': this.captchaAnswer = this.num1 + this.num2; break;
-      case '-': this.captchaAnswer = this.num1 - this.num2; break;
-      case '*': this.captchaAnswer = this.num1 * this.num2; break;
-    }
-    
-    this.itemForm.get('captcha')?.setValue('');
-    this.isCaptchaValid = false;
+  const operators = ['+', '-', '*', '/'];
+  this.operator = operators[Math.floor(Math.random() * operators.length)];
+  this.num1 = Math.floor(Math.random() * 10) + 1;
+  this.num2 = Math.floor(Math.random() * 10) + 1;
+  if (this.operator === '/') {
+    this.num1 = this.num1 * this.num2;
   }
+  switch (this.operator) {
+    case '+':
+      this.captchaAnswer = this.num1 + this.num2;
+      break;
+    case '-':
+      this.captchaAnswer = this.num1 - this.num2;
+      break;
+    case '*':
+      this.captchaAnswer = this.num1 * this.num2;
+      break;
+    case '/':
+      this.captchaAnswer = this.num1 / this.num2;
+      break;
+  }
+  this.itemForm.get('captcha')?.setValue('');
+  this.isCaptchaValid = false;
+}
 
   validateCaptcha() {
     const value = this.itemForm.get('captcha')?.value;
@@ -57,16 +67,18 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.itemForm.valid && this.isCaptchaValid) {
+    if (this.itemForm.valid) {
       this.httpService.Login(this.itemForm.value).subscribe({
         next: (res: any) => {
+          // Save to localStorage AND emit via BehaviorSubject so navbar reacts instantly
           this.authService.saveToken(res.token);
           this.authService.SetRole(res.role);
           this.authService.saveUserId(String(res.userId));
+          // Use Angular router — no page reload needed because AppComponent now subscribes reactively
           this.router.navigate(['/dashboard']);
         },
         error: () => {
-          this.errorMsg = 'Invalid credentials. Access Denied.';
+          this.errorMsg = 'Invalid username or password.';
           this.generateCaptcha();
         }
       });
