@@ -12,17 +12,14 @@ export class AppComponent {
   roleName: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) {
-    // Reactively update navbar whenever login/logout/role changes
-    this.authService.isLoggedIn$.subscribe(status => {
-      this.IsLoggin = status;
-    });
-    this.authService.currentRole$.subscribe(role => {
-      this.roleName = role;
-    });
+    this.authService.isLoggedIn$.subscribe(status => this.IsLoggin = status);
+    this.authService.currentRole$.subscribe(role => this.roleName = role);
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    // replaceUrl: true — replaces the history entry so clicking back
+    // after logout does NOT go back to the protected page
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

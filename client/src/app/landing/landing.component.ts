@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 interface Feature { title: string; desc: string; }
 interface Testimonial { name: string; text: string; }
@@ -9,6 +10,8 @@ interface Testimonial { name: string; text: string; }
   styleUrls: ['./landing.component.scss']
 })
 export class LandingComponent implements OnInit, AfterViewInit {
+  constructor(private router: Router,
+    private route: ActivatedRoute ){}
   isScrolled = false;
   statsStarted = false;
 
@@ -36,7 +39,13 @@ export class LandingComponent implements OnInit, AfterViewInit {
     const newCount = currentVisits + 1;
     localStorage.setItem('vCount', newCount.toString());
   }
+  login(){
+    this.router.navigateByUrl('/login');
+  }
 
+registration(){
+   this.router.navigateByUrl('/registration');
+}
   ngAfterViewInit() {
     this.initScrollObserver();
   }

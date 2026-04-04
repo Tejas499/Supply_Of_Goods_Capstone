@@ -1,4 +1,3 @@
-
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -6,47 +5,92 @@ import { LoginComponent } from './login/login.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { DashbaordComponent } from './dashbaord/dashbaord.component';
 import { CreateProductsComponent } from './create-products/create-products.component';
-
 import { PlaceOrderComponent } from './place-order/place-order.component';
 import { GetOrdersComponent } from './get-orders/get-orders.component';
-
 import { AddInventoryComponent } from './add-inventory/add-inventory.component';
 import { ConsumerPlaceOrderComponent } from './consumer-place-order/consumer-place-order.component';
 import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-orders.component';
 
-// ✅ ADD THIS
+import { AuthGuard } from './auth.guard';
 import { LandingComponent } from './landing/landing.component';
+// import { NoAuthGuard } from './auth.guard';
 
 const routes: Routes = [
 
-  // ✅ Landing Page FIRST
-  { path: '', component: LandingComponent },
+  // ✅ DEFAULT PATH → Landing Component
+  {
+    path: '',
+    component: LandingComponent,
+    pathMatch:'full'
+  },
 
-  // Auth
-  { path: 'login', component: LoginComponent },
-  { path: 'registration', component: RegistrationComponent },
+  // Public (no-auth)
+  {
+    path: 'login',
+    component: LoginComponent,
+   
+  },
+  {
+    path: 'registration',
+    component: RegistrationComponent,
 
-  // Dashboard
-  { path: 'dashboard', component: DashbaordComponent },
+  },
 
-  // Product & Inventory
-  { path: 'create-product', component: CreateProductsComponent },
-  { path: 'add-inventory', component: AddInventoryComponent },
+  // Protected
+  {
+    path: 'dashboard',
+    component: DashbaordComponent,
+    canActivate: [AuthGuard]
+  },
 
-  // Orders
-  { path: 'place-product', component: PlaceOrderComponent },
-  { path: 'get-orders', component: GetOrdersComponent },
+  {
+    path: 'create-product',
+    component: CreateProductsComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['MANUFACTURER'] }
+  },
 
-  // Consumer
-  { path: 'consumer-place-order', component: ConsumerPlaceOrderComponent },
-  { path: 'consumer-get-orders', component: ConsumerGetOrdersComponent },
+  {
+    path: 'place-product',
+    component: PlaceOrderComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['WHOLESALER'] }
+  },
 
-  // ❌ REMOVE old redirect
-  // { path: '', redirectTo: '/login', pathMatch: 'full' },
+  {
+    path: 'add-inventory',
+    component: AddInventoryComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['WHOLESALER'] }
+  },
 
-  // ✅ Wildcard (fallback)
-  { path: '**', redirectTo: '' }
+  {
+    path: 'get-orders',
+    component: GetOrdersComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['MANUFACTURER', 'WHOLESALER'] }
+  },
 
+  {
+    path: 'consumer-place-order',
+    component: ConsumerPlaceOrderComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['CONSUMER'] }
+  },
+
+  {
+    path: 'consumer-get-orders',
+    component: ConsumerGetOrdersComponent,
+    canActivate: [AuthGuard],
+    data: { roles: ['CONSUMER'] }
+  },
+
+  // ✅ Wildcard → back to landing
+  {
+    path: '**',
+    redirectTo: '',
+    pathMatch: 'full'
+  }
 ];
 
 @NgModule({

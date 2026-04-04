@@ -1,48 +1,52 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegistrationComponent } from './registration/registration.component';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
-import { HttpService } from '../services/http.service';
 import { DashbaordComponent } from './dashbaord/dashbaord.component';
-
-
 import { CreateProductsComponent } from './create-products/create-products.component';
-
 import { PlaceOrderComponent } from './place-order/place-order.component';
 import { GetOrdersComponent } from './get-orders/get-orders.component';
-import { LandingComponent } from './landing/landing.component';
 import { AddInventoryComponent } from './add-inventory/add-inventory.component';
 import { ConsumerPlaceOrderComponent } from './consumer-place-order/consumer-place-order.component';
 import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-orders.component';
+
+import { HttpService } from '../services/http.service';
+import { AuthInterceptor } from './auth.interceptor';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-      RegistrationComponent,
-      DashbaordComponent,     
-      CreateProductsComponent,
-    LandingComponent,
-      PlaceOrderComponent,
-      GetOrdersComponent,
-      AddInventoryComponent,
-      ConsumerPlaceOrderComponent,
-      ConsumerGetOrdersComponent
+    RegistrationComponent,
+    DashbaordComponent,
+    CreateProductsComponent,
+    PlaceOrderComponent,
+    GetOrdersComponent,
+    AddInventoryComponent,
+    ConsumerPlaceOrderComponent,
+    ConsumerGetOrdersComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule 
+    HttpClientModule,
   ],
-  providers: [HttpService, HttpClientModule, DatePipe],
-  bootstrap: [AppComponent]
+  providers: [
+    HttpService,
+    // Intercepts every HTTP response — auto-logout on 401
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
+  ],
+  bootstrap: [AppComponent],
 })
 export class AppModule { }
