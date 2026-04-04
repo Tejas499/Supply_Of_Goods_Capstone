@@ -1,6 +1,6 @@
-
 <div class="dash-wrapper">
-  <!-- Greeting Header -->
+
+  <!-- Header -->
   <header class="dash-header animate">
     <div class="greeting">
       <h1>Hello, <span>{{ userName }}</span></h1>
@@ -8,12 +8,12 @@
     </div>
     <div class="tab-pills">
       <button [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">📦 Products</button>
-      <button [class.active]="activeTab === 'orders'" (click)="activeTab = 'orders'; loadOrders()">📋 Orders</button>
+      <button [class.active]="activeTab === 'orders'"   (click)="activeTab = 'orders'; loadOrders()">📋 Orders</button>
       <button [class.active]="activeTab === 'feedback'" (click)="activeTab = 'feedback'">💬 Feedback</button>
     </div>
   </header>
 
-  <!-- Global Confirm Modal -->
+  <!-- Confirm Modal -->
   <div class="glass-overlay" *ngIf="showConfirm">
     <div class="modal-box animate-pop">
       <h3>⚠️ Confirm Action</h3>
@@ -26,12 +26,13 @@
   </div>
 
   <div *ngIf="successMsg" class="toast success animate-up">{{ successMsg }}</div>
-  <div *ngIf="errorMsg" class="toast error animate-up">{{ errorMsg }}</div>
+  <div *ngIf="errorMsg"   class="toast error   animate-up">{{ errorMsg }}</div>
 
-  <!-- TAB: PRODUCTS -->
+  <!-- ════════ TAB: PRODUCTS ════════ -->
   <div class="tab-content" *ngIf="activeTab === 'products'">
     <div class="split-layout">
-      <!-- Add/Edit Form -->
+
+      <!-- Left: Add / Edit form (unchanged) -->
       <div class="side-form animate-left">
         <div class="card-head">
           <h3>{{ editingId ? 'Update Product' : 'List New Product' }}</h3>
@@ -56,23 +57,49 @@
             <textarea formControlName="description" rows="3"></textarea>
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">{{ editingId ? 'Save Changes' : 'Confirm Production' }}</button>
+            <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">
+              {{ editingId ? 'Save Changes' : 'Confirm Production' }}
+            </button>
             <button type="button" class="btn-text" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
           </div>
         </form>
       </div>
 
-      <!-- List -->
+      <!-- Right: Table with multi-delete -->
       <div class="main-list animate-right">
-        <div class="list-search">
+
+        <!-- Toolbar -->
+        <div class="list-toolbar">
           <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Filter products...">
+
+          <!-- Bulk delete bar — only shows when something is checked -->
+          <div class="bulk-bar" *ngIf="selectionCount > 0">
+            <span class="sel-count">{{ selectionCount }} selected</span>
+            <button class="btn-bulk-del" (click)="deleteSelected()">🗑️ Delete Selected</button>
+            <button class="btn-clear-sel" (click)="clearSelection()">✕ Clear</button>
+          </div>
         </div>
+
+        <!-- Table -->
         <table class="flow-table">
           <thead>
-            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Action</th></tr>
+            <tr>
+              <th class="col-check">
+                <!-- Select all on current page -->
+                <input type="checkbox" [checked]="allPageSelected" (change)="toggleSelectAll()"
+                       title="Select all on this page">
+              </th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Action</th>
+            </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let p of paged">
+            <tr *ngFor="let p of paged" [class.row-selected]="selectedIds.has(p.id)">
+              <td class="col-check">
+                <input type="checkbox" [checked]="selectedIds.has(p.id)" (change)="toggleSelect(p.id)">
+              </td>
               <td>
                 <div class="name">{{ p.name }}</div>
                 <div class="desc">{{ p.description }}</div>
@@ -81,16 +108,26 @@
               <td><span class="stock-pill" [ngClass]="{'low': p.stockQuantity < 5}">{{ p.stockQuantity }} units</span></td>
               <td class="btns">
                 <button class="edit" (click)="editProduct(p)">✏️</button>
-                <button class="del" (click)="deleteProduct(p)">🗑️</button>
+                <button class="del"  (click)="deleteProduct(p)">🗑️</button>
               </td>
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button (click)="page = page - 1" [disabled]="page === 1">Prev</button>
+          <span>Page {{ page }} of {{ totalPages }}</span>
+          <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
+        </div>
+
+        <div class="empty-state" *ngIf="filtered.length === 0">No products found.</div>
+
       </div>
     </div>
   </div>
 
-  <!-- TAB: ORDERS -->
+  <!-- ════════ TAB: ORDERS ════════ -->
   <div class="tab-content animate-up" *ngIf="activeTab === 'orders'">
     <div class="orders-card">
       <table class="flow-table">
@@ -108,7 +145,7 @@
               <div class="status-update" *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'">
                 <select [(ngModel)]="o.selectedStatus">
                   <option value="">Update State</option>
-                  <option value="IN PROGRESS" *ngIf="o.status === 'ORDER PLACED'">Processing</option>
+                  <option value="IN PROGRESS"      *ngIf="o.status === 'ORDER PLACED'">Processing</option>
                   <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Shipping</option>
                 </select>
                 <button class="btn-mini" (click)="updateOrderStatus(o)" [disabled]="!o.selectedStatus">✓</button>
@@ -117,10 +154,11 @@
           </tr>
         </tbody>
       </table>
+      <div class="empty-state" *ngIf="orders.length === 0">No incoming orders yet.</div>
     </div>
   </div>
 
-  <!-- TAB: FEEDBACK -->
+  <!-- ════════ TAB: FEEDBACK ════════ -->
   <div class="tab-content animate-up" *ngIf="activeTab === 'feedback'">
     <div class="feedback-grid">
       <div class="feedback-item" *ngFor="let f of feedbacks">
@@ -133,4 +171,5 @@
       <div *ngIf="feedbacks.length === 0" class="empty-state">No consumer feedback logged yet.</div>
     </div>
   </div>
+
 </div>

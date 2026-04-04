@@ -37,8 +37,9 @@ public class ConsumerController {
     @PostMapping("/order")
     public ResponseEntity<Order> placeOrder(@RequestBody Order order,
                                              @RequestParam Long productId,
-                                             @RequestParam Long userId) {
-        return ResponseEntity.ok(orderService.placeConsumerOrder(order, productId, userId));
+                                             @RequestParam Long userId,
+                                             @RequestParam Long wholesalerId) {
+        return ResponseEntity.ok(orderService.placeConsumerOrder(order, productId, userId, wholesalerId));
     }
 
     @GetMapping("/orders")

@@ -1,9 +1,9 @@
 <div class="order-wrapper">
-  <!-- Hello User Header -->
+
+  <!-- Header -->
   <header class="page-header animate">
     <div class="greeting">
-      <!-- <h1>Hello, <span>{{ userName }}</span></h1> -->
-      <p>Browse the global catalog and place your orders securely.</p>
+      <p>Browse products and choose a wholesaler to order from.</p>
     </div>
     <div class="header-actions">
       <div class="search-bar">
@@ -15,6 +15,7 @@
 
   <!-- Modals Layer -->
   <div class="glass-overlay" *ngIf="showConfirm || showPaymentOptions">
+
     <!-- Order Confirmation -->
     <div class="flow-modal animate-pop" *ngIf="showConfirm">
       <h3>📦 Confirm Order</h3>
@@ -46,72 +47,87 @@
 
   <!-- Main Content Grid -->
   <div class="content-layout">
-    
-    <!-- Left Column: Wholesaler Info / Order Form -->
-    <div class="side-panel animate-left" *ngIf="showOrderForm || (wholesalers.length > 0)">
-      
-      <!-- Order Form -->
-      <div class="order-card" *ngIf="showOrderForm">
-        <div class="card-head">
-          <h3>Order Details</h3>
-          <button (click)="closeOrderForm()">✕</button>
-        </div>
-        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-          <div class="p-details">
-            <strong>{{ selectedProduct?.name }}</strong>
-            <span>₹{{ selectedProduct?.price }} per unit</span>
-          </div>
-          <div class="input-group">
-            <label>Quantity</label>
-            <input type="number" formControlName="quantity" placeholder="0">
-          </div>
-          <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">Place Order</button>
-        </form>
-      </div>
 
-      <!-- Wholesalers List -->
-      <div class="wholesaler-card" *ngIf="wholesalers.length > 0 && !showOrderForm">
+    <!-- Left Panel: Wholesaler List → then Order Form -->
+    <div class="side-panel animate-left" *ngIf="selectedProduct">
+
+      <!-- STEP 1: Wholesaler Selection -->
+      <div class="wholesaler-card" *ngIf="!showOrderForm">
         <div class="card-head">
-          <h3>Nearby Wholesalers</h3>
-          <button (click)="wholesalers = []">✕</button>
+          <div>
+            <h3>🏪 Wholesalers for <em>{{ selectedProduct.name }}</em></h3>
+            <small>Click a wholesaler to place your order with them</small>
+          </div>
+          <button (click)="closeSidePanel()">✕</button>
         </div>
-        <div class="w-list">
-          <div class="w-item" *ngFor="let w of wholesalers">
+
+        <div *ngIf="wholesalers.length === 0 && !errorMsg" class="loading-hint">Loading wholesalers...</div>
+
+        <div class="w-list" *ngIf="wholesalers.length > 0">
+          <div class="w-item clickable" *ngFor="let w of wholesalers" (click)="selectWholesaler(w)">
             <div class="w-info">
               <strong>{{ w.wholesaler?.username }}</strong>
               <span>{{ w.wholesaler?.email }}</span>
             </div>
-            <span class="stock-tag">{{ w.stockQuantity }} in stock</span>
+            <div class="w-right">
+              <span class="stock-tag">{{ w.stockQuantity }} in stock</span>
+              <span class="order-hint">Order →</span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- STEP 2: Order Form (wholesaler selected) -->
+      <div class="order-card" *ngIf="showOrderForm && selectedWholesaler">
+        <div class="card-head">
+          <div>
+            <h3>📦 Place Order</h3>
+            <small>via <strong>{{ selectedWholesaler.wholesaler?.username }}</strong></small>
+          </div>
+          <button (click)="closeSidePanel()">✕</button>
+        </div>
+
+        <div class="p-details">
+          <strong>{{ selectedProduct?.name }}</strong>
+          <span>₹{{ selectedProduct?.price }} per unit</span>
+          <span class="avail-stock">Available: {{ selectedWholesaler.stockQuantity }} units</span>
+        </div>
+
+        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+          <div class="input-group">
+            <label>Quantity</label>
+            <input type="number" formControlName="quantity" placeholder="0"
+                   [max]="selectedWholesaler.stockQuantity">
+          </div>
+          <div class="form-btns">
+            <button type="button" class="btn-sec" (click)="backToWholesalers()">← Back</button>
+            <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">Place Order</button>
+          </div>
+        </form>
+      </div>
+
     </div>
 
     <!-- Right Column: Product Table -->
-    <div class="table-card animate-right" [class.full-width]="!showOrderForm && wholesalers.length === 0">
+    <div class="table-card animate-right" [class.full-width]="!selectedProduct">
       <table>
         <thead>
           <tr>
-            <th>Product Name</th>
+            <th>Product</th>
             <th>Manufacturer</th>
             <th>Price</th>
-            <th>Stock</th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of paged">
-            <td><strong>{{ p.name }}</strong></td>
+          <tr *ngFor="let p of paged" [class.selected-row]="selectedProduct?.id === p.id">
+            <td><strong>{{ p.name }}</strong><br><small>{{ p.description }}</small></td>
             <td><span class="m-badge">{{ p.manufacturer?.username }}</span></td>
             <td><span class="price-tag">₹{{ p.price }}</span></td>
             <td>
-              <div class="stock-lvl" [ngClass]="{'low': p.stockQuantity < 5}">
-                {{ p.stockQuantity }} units
-              </div>
-            </td>
-            <td class="btns">
-              <button class="btn-icon" (click)="viewWholesalers(p)" title="View Wholesalers">🏪</button>
-              <button class="btn-action" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">Order</button>
+              <button class="btn-action" (click)="selectProduct(p)">
+                View Wholesalers
+              </button>
             </td>
           </tr>
         </tbody>
@@ -124,5 +140,6 @@
         <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
       </div>
     </div>
+
   </div>
 </div>

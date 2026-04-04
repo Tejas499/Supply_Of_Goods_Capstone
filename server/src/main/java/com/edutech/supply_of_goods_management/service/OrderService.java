@@ -63,30 +63,25 @@ public class OrderService {
     // Deducts from wholesaler inventory immediately
     // ════════════════════════════════════════════════════════════
     @Transactional
-    public Order placeConsumerOrder(Order order, Long productId, Long userId) {
+    public Order placeConsumerOrder(Order order, Long productId, Long userId, Long wholesalerId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found: " + productId));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + userId));
 
-        // Validate against WHOLESALER INVENTORY stock
-        List<Inventory> wholesalerInventories = inventoryRepository.findByProductId(productId);
-        int totalWholesalerStock = wholesalerInventories.stream().mapToInt(Inventory::getStockQuantity).sum();
+        // Find the specific wholesaler's inventory for this product
+        Inventory inv = inventoryRepository.findByWholesalerIdAndProductId(wholesalerId, productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "This wholesaler does not stock the selected product."));
 
-        if (totalWholesalerStock < order.getQuantity())
+        if (inv.getStockQuantity() < order.getQuantity())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Insufficient wholesaler stock. Available: " + totalWholesalerStock
+                    "Insufficient stock at this wholesaler. Available: " + inv.getStockQuantity()
                     + ", Requested: " + order.getQuantity());
 
-        // Deduct from wholesaler inventories
-        int remaining = order.getQuantity();
-        for (Inventory inv : wholesalerInventories) {
-            if (remaining <= 0) break;
-            int deduct = Math.min(inv.getStockQuantity(), remaining);
-            inv.setStockQuantity(inv.getStockQuantity() - deduct);
-            inventoryRepository.save(inv);
-            remaining -= deduct;
-        }
+        // Deduct from this specific wholesaler's inventory
+        inv.setStockQuantity(inv.getStockQuantity() - order.getQuantity());
+        inventoryRepository.save(inv);
 
         order.setProduct(product);
         order.setUser(user);

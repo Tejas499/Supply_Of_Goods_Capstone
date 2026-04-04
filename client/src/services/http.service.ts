@@ -46,7 +46,7 @@ export class HttpService {
   getProductsByConsumers(): Observable<any> { return this.http.get(`${this.serverName}/api/consumers/products`, { headers: this.h() }); }
   getWholesalersForProduct(pId: any): Observable<any> { return this.http.get(`${this.serverName}/api/consumers/products/${pId}/wholesalers`, { headers: this.h() }); }
   getOrderConsumer(userId: any): Observable<any> { return this.http.get(`${this.serverName}/api/consumers/orders?userId=${userId}`, { headers: this.h() }); }
-  consumerPlaceOrder(d: any, pId: any, uId: any): Observable<any> { return this.http.post(`${this.serverName}/api/consumers/order?productId=${pId}&userId=${uId}`, d, { headers: this.h() }); }
+  consumerPlaceOrder(d: any, pId: any, uId: any, wId: any): Observable<any> { return this.http.post(`${this.serverName}/api/consumers/order?productId=${pId}&userId=${uId}&wholesalerId=${wId}`, d, { headers: this.h() }); }
   cancelConsumerOrder(id: any): Observable<any> { return this.http.put(`${this.serverName}/api/consumers/order/${id}/cancel`, null, { headers: this.h() }); }
   addConsumerFeedBack(id: any, uId: any, d: any): Observable<any> { return this.http.post(`${this.serverName}/api/consumers/order/${id}/feedback?userId=${uId}`, d, { headers: this.h() }); }
   markConsumerOrderReceived(id: any, userId: any): Observable<any> {
