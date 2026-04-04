@@ -1,0 +1,47 @@
+$primary: #F59E0B;
+$dark: #0F172A;
+$white: #ffffff;
+
+@mixin flex-center { display: flex; align-items: center; justify-content: center; }
+
+.order-wrapper {
+  padding: 40px; background: #fcfcfc; min-height: 100vh;
+
+  .page-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+    h1 { font-size: 2.5rem; font-weight: 950; color: $dark; span { color: $primary; text-transform: capitalize; } }
+    .search-bar { position: relative; input { padding: 12px 40px 12px 20px; border-radius: 50px; border: 1px solid #e2e8f0; width: 320px; } .icon { position: absolute; right: 15px; top: 12px; } }
+  }
+
+  .content-layout { display: flex; gap: 30px; 
+    .side-panel { width: 350px; flex-shrink: 0; }
+    .table-card { flex-grow: 1; background: $white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
+  }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    th { text-align: left; padding: 20px; color: #94a3b8; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #f1f5f9; }
+    td { padding: 20px; border-bottom: 1px solid #f1f5f9; }
+    .price-tag { font-weight: 800; color: #10b981; }
+    .stock-lvl { display: inline-block; padding: 4px 12px; background: #dcfce7; color: #166534; border-radius: 50px; font-weight: 700; font-size: 11px; &.low { background: #fee2e2; color: #991b1b; } }
+  }
+
+  .glass-overlay {
+    position: fixed; inset: 0; background: rgba($dark, 0.7); backdrop-filter: blur(10px); z-index: 1000; @include flex-center;
+    .flow-modal { background: $white; padding: 40px; border-radius: 30px; width: 450px; text-align: center; }
+  }
+
+  .payment-grid {
+    display: flex; flex-direction: column; gap: 15px; margin: 25px 0;
+    .pay-btn { padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s;
+      &.online { background: #10b981; color: #fff; &:hover { background: #059669; } }
+      &.cod { background: $primary; color: #fff; &:hover { background: #d97706; } }
+    }
+  }
+
+  .btn-pri { width: 100%; padding: 14px; background: $dark; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; &:hover { background: $primary; } }
+  .toast { position: fixed; top: 100px; right: 40px; padding: 15px 30px; border-radius: 12px; color: #fff; font-weight: 700; z-index: 1100; &.success { background: #10b981; } &.error { background: #ef4444; } }
+}
+
+.animate { animation: fadeIn 0.8s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

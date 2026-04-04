@@ -1,53 +1,61 @@
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
-    <h2 class="text-center text-uppercase fw-bold mb-1">Supply-of-Goods Management and Distribution Platform</h2>
-    <p class="text-center text-muted mb-4">Please enter your username and password!</p>
+<div class="auth-wrapper">
+  <div class="auth-card animate">
+    <div class="auth-header">
+      <div class="logo" routerLink="/">FLOW<span>.</span></div>
+      <h2>Welcome Back</h2>
+      <p>Securely manage your goods and distribution.</p>
+    </div>
 
-    <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+    <div *ngIf="errorMsg" class="server-error">{{ errorMsg }}</div>
 
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input type="text" class="form-control" formControlName="username" placeholder="Username">
-        <div *ngIf="itemForm.get('username')?.invalid && itemForm.get('username')?.touched" class="text-danger small">
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="auth-form">
+      
+      <!-- Username -->
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-container">
+          <input type="text" formControlName="username" placeholder="Enter your username">
+        </div>
+        <div *ngIf="itemForm.get('username')?.invalid && itemForm.get('username')?.touched" class="error-msg">
           Username is required.
         </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-control" formControlName="password" placeholder="••••••••">
-        <div *ngIf="itemForm.get('password')?.invalid && itemForm.get('password')?.touched" class="text-danger small">
+      <!-- Password -->
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-container">
+          <input type="password" formControlName="password" placeholder="••••••••">
+        </div>
+        <div *ngIf="itemForm.get('password')?.invalid && itemForm.get('password')?.touched" class="error-msg">
           Password is required.
         </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Captcha</label>
-        <div class="d-flex align-items-center mb-2">
-          <div class="captcha-box me-2">
-            {{ num1 }} {{ operator }} {{ num2 }} = ?
+      <!-- Captcha Section -->
+      <div class="form-group captcha-section">
+        <label>Security Verification</label>
+        <div class="captcha-wrapper">
+          <div class="captcha-display">
+            <span>{{ num1 }} {{ operator }} {{ num2 }}</span>
+            <button type="button" class="refresh-btn" (click)="generateCaptcha()" title="Refresh Captcha">↻</button>
           </div>
-          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="generateCaptcha()">
-            ↻
-          </button>
+          <input type="number" formControlName="captcha" (input)="validateCaptcha()" placeholder="Answer">
         </div>
-        <input type="number" class="form-control"  formControlName="captcha" (input)="validateCaptcha()"
-          placeholder="Enter answer" />
-        <div *ngIf="itemForm.get('captcha')?.value && !isCaptchaValid" class="text-danger small mt-1">
-          Incorrect answer
+        <div *ngIf="itemForm.get('captcha')?.value && !isCaptchaValid" class="error-msg">
+          Incorrect security answer.
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary w-100 login-btn" [disabled]="itemForm.invalid || !isCaptchaValid">
-        Login
+      <!-- Login Button -->
+      <button type="submit" class="btn-primary" [disabled]="itemForm.invalid || !isCaptchaValid">
+        Login to Dashboard
       </button>
-
-      <!-- <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid || !isCaptchaValid">Login</button> -->
     </form>
 
-    <p class="text-center mb-0">Don't have an account?
-      <a [routerLink]="['/registration']" class="fw-bold text-primary">Register</a>
-    </p>
+    <div class="auth-footer">
+      Don't have an account? 
+      <a [routerLink]="['/registration']">Register Now</a>
+    </div>
   </div>
 </div>

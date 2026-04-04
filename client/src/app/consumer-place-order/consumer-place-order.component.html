@@ -1,152 +1,128 @@
-<div class="container mt-4">
-  <!-- ✅ Payment Status -->
-  <div *ngIf="paymentSuccess" class="alert alert-success">
-    Payment successful & Order placed!
-  </div>
-  <div *ngIf="paymentError" class="alert alert-danger">
-    {{ paymentError }}
-  </div>
-  <!-- ✅ Confirm Modal -->
-  <div class="modal-backdrop-custom" *ngIf="showConfirm">
-    <div class="modal-box">
-      <h5 class="fw-bold mb-3">Confirm Order</h5>
-      <p class="text-muted">{{ confirmMsg }}</p>
-      <div class="d-flex gap-2 justify-content-end mt-3">
-        <button class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
-        <button class="btn btn-primary" (click)="onConfirm()">Place Order</button>
+<div class="order-wrapper">
+  <!-- Hello User Header -->
+  <header class="page-header animate">
+    <div class="greeting">
+      <h1>Hello, <span>{{ userName }}</span></h1>
+      <p>Browse the global catalog and place your orders securely.</p>
+    </div>
+    <div class="header-actions">
+      <div class="search-bar">
+        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Search products or manufacturers...">
+        <span class="icon">🔍</span>
       </div>
     </div>
-  </div>
-  <!-- ✅ PAYMENT OPTIONS -->
-  <div class="modal-backdrop-custom" *ngIf="showPaymentOptions">
-    <div class="modal-box">
-      <h5 class="fw-bold mb-3">Choose Payment Method</h5>
-      <div class="d-flex flex-column gap-2">
-        <!-- ✅ PAY ONLINE (FIXED) -->
-        <button class="btn btn-success" (click)="payNow()" [disabled]="processingPayment">
-          <span *ngIf="processingPayment" class="spinner-border spinner-border-sm me-1"></span>
-          Pay Online
-        </button>
-        <!-- COD -->
-        <button class="btn btn-warning" (click)="confirmWithCOD()">
-          Cash on Delivery
-        </button>
-        <!-- CANCEL -->
-        <button class="btn btn-outline-secondary" (click)="showPaymentOptions=false">
-          Cancel
-        </button>
+  </header>
+
+  <!-- Modals Layer -->
+  <div class="glass-overlay" *ngIf="showConfirm || showPaymentOptions">
+    <!-- Order Confirmation -->
+    <div class="flow-modal animate-pop" *ngIf="showConfirm">
+      <h3>📦 Confirm Order</h3>
+      <p>{{ confirmMsg }}</p>
+      <div class="modal-btns">
+        <button class="btn-sec" (click)="onCancel()">Cancel</button>
+        <button class="btn-pri" (click)="onConfirm()">Proceed to Payment</button>
       </div>
     </div>
+
+    <!-- Payment Selection -->
+    <div class="flow-modal animate-pop" *ngIf="showPaymentOptions">
+      <h3>💳 Payment Method</h3>
+      <p>Total Amount: <strong>₹{{ finalAmount }}</strong></p>
+      <div class="payment-grid">
+        <button class="pay-btn online" (click)="payNow()" [disabled]="processingPayment">
+          <span *ngIf="processingPayment" class="loader"></span>
+          Pay Online (Razorpay)
+        </button>
+        <button class="pay-btn cod" (click)="confirmWithCOD()">Cash on Delivery</button>
+      </div>
+      <button class="btn-text" (click)="showPaymentOptions=false">Go Back</button>
+    </div>
   </div>
-  <!-- Wholesalers DAta -->
-   <div class="card mb-4" *ngIf="selectedProduct && !showOrderForm && wholesalers !== null">
-      <div class="card-header">🏪 Wholesalers carrying <strong>{{ selectedProduct?.name }}</strong></div>
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead><tr><th>Wholesaler</th><th>Email</th><th>Stock</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let inv of wholesalers">
-            <td class="fw-semibold">{{ inv.wholesaler?.username }}</td>
-            <td class="text-muted small">{{ inv.wholesaler?.email }}</td>
-            <td><span class="badge bg-success">{{ inv.stockQuantity }} units</span></td>
-          </tr>
-          <tr *ngIf="wholesalers.length === 0">
-            <td colspan="3" class="text-center text-muted py-3">No wholesalers currently carry this product.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    </div>
-  
-  <!-- TITLE -->
-  <h3 class="fw-bold mb-4">Browse & Order Products</h3>
-  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
-  <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
-  <!-- ✅ ORDER FORM -->
-  <div class="order-form-panel" *ngIf="showOrderForm">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h6 class="fw-bold mb-0">
-        Order: <span class="text-primary">{{ selectedProduct?.name }}</span>
-        <span class="badge bg-secondary ms-2" *ngIf="selectedProduct?.manufacturer">
-          by {{ selectedProduct?.manufacturer?.username }}
-        </span>
-      </h6>
-      <button class="btn btn-sm btn-outline-secondary" (click)="closeOrderForm()">✕</button>
-    </div>
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Quantity</label>
-          <input type="number" class="form-control" formControlName="quantity" min="1">
+
+  <!-- Messages -->
+  <div *ngIf="successMsg" class="toast success animate-up">{{ successMsg }}</div>
+  <div *ngIf="errorMsg" class="toast error animate-up">{{ errorMsg }}</div>
+
+  <!-- Main Content Grid -->
+  <div class="content-layout">
+    
+    <!-- Left Column: Wholesaler Info / Order Form -->
+    <div class="side-panel animate-left" *ngIf="showOrderForm || (wholesalers.length > 0)">
+      
+      <!-- Order Form -->
+      <div class="order-card" *ngIf="showOrderForm">
+        <div class="card-head">
+          <h3>Order Details</h3>
+          <button (click)="closeOrderForm()">✕</button>
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Price</label>
-          <input class="form-control" [value]="'₹' + selectedProduct?.price" disabled>
+        <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+          <div class="p-details">
+            <strong>{{ selectedProduct?.name }}</strong>
+            <span>₹{{ selectedProduct?.price }} per unit</span>
+          </div>
+          <div class="input-group">
+            <label>Quantity</label>
+            <input type="number" formControlName="quantity" placeholder="0">
+          </div>
+          <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">Place Order</button>
+        </form>
+      </div>
+
+      <!-- Wholesalers List -->
+      <div class="wholesaler-card" *ngIf="wholesalers.length > 0 && !showOrderForm">
+        <div class="card-head">
+          <h3>Nearby Wholesalers</h3>
+          <button (click)="wholesalers = []">✕</button>
         </div>
-        <div class="col-md-3">
-          <label class="form-label">Stock</label>
-          <input class="form-control" [value]="selectedProduct?.stockQuantity + ' units'" disabled>
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.invalid">
-            Order Now
-          </button>
+        <div class="w-list">
+          <div class="w-item" *ngFor="let w of wholesalers">
+            <div class="w-info">
+              <strong>{{ w.wholesaler?.username }}</strong>
+              <span>{{ w.wholesaler?.email }}</span>
+            </div>
+            <span class="stock-tag">{{ w.stockQuantity }} in stock</span>
+          </div>
         </div>
       </div>
-    </form>
-  </div>
-  <!-- ✅ PRODUCTS TABLE -->
-  <div class="card">
-    <div class="card-header d-flex justify-content-between">
-      <span>Available Products</span>
-      <input type="text" class="form-control form-control-sm" style="width:220px" placeholder="Search..."
-        [(ngModel)]="searchTerm" [ngModelOptions]="{standalone: true}" (input)="applyFilter()">
     </div>
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
+
+    <!-- Right Column: Product Table -->
+    <div class="table-card animate-right" [class.full-width]="!showOrderForm && wholesalers.length === 0">
+      <table>
         <thead>
           <tr>
-            <th>Product</th>
+            <th>Product Name</th>
             <th>Manufacturer</th>
             <th>Price</th>
             <th>Stock</th>
-            <th>Action</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let p of paged">
-            <td>{{ p.name }}</td>
-            <td>{{ p.manufacturer?.username }}</td>
-            <td class="text-success">₹{{ p.price }}</td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td><span class="m-badge">{{ p.manufacturer?.username }}</span></td>
+            <td><span class="price-tag">₹{{ p.price }}</span></td>
             <td>
-              <span class="badge bg-secondary ms-2" [ngClass]="p.stockQuantity > 10 ? 'bg-success' :
-                           p.stockQuantity > 0 ? 'bg-warning text-dark' :
-                           'bg-danger'">
-                {{ p.stockQuantity }}
-              </span>
+              <div class="stock-lvl" [ngClass]="{'low': p.stockQuantity < 5}">
+                {{ p.stockQuantity }} units
+              </div>
             </td>
-            <td>
-               <button class="btn btn-info btn-sm me-1"  (click)="viewWholesalers(p)">🏪 Wholesalers</button>
-              <button class="btn btn-primary btn-sm" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">
-                Order
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="paged.length === 0">
-            <td colspan="5" class="text-center text-muted py-3">
-              No products found
+            <td class="btns">
+              <button class="btn-icon" (click)="viewWholesalers(p)" title="View Wholesalers">🏪</button>
+              <button class="btn-action" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">Order</button>
             </td>
           </tr>
         </tbody>
       </table>
-    </div>
-     <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
-      <small class="text-muted">{{ filtered.length }} products</small>
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
-        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
-        <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
-      </ul>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button (click)="page = page - 1" [disabled]="page === 1">Prev</button>
+        <span>Page {{page}} of {{totalPages}}</span>
+        <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
+      </div>
     </div>
   </div>
 </div>

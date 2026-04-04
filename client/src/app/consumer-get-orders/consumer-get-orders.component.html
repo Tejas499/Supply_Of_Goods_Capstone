@@ -1,149 +1,95 @@
-<div class="container mt-4">
+<div class="orders-wrapper">
+  <!-- Hello User Header -->
+  <header class="page-header animate">
+    <div class="greeting">
+      <h1>Hello, <span>{{ userName }}</span></h1>
+      <p>Track your active shipments and view your purchase history.</p>
+    </div>
+    <div class="header-filters">
+      <div class="search-box">
+        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Search products...">
+        <span class="icon">🔍</span>
+      </div>
+      <select class="status-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
+        <option value="">All Statuses</option>
+        <option value="ORDER PLACED">Order Placed</option>
+        <option value="IN PROGRESS">In Progress</option>
+        <option value="OUT FOR DELIVERY">Out for Delivery</option>
+        <option value="DELIVERED">Delivered</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
+  </header>
 
-  <!-- Confirm Modal -->
-  <div class="modal-backdrop-custom" *ngIf="showConfirm">
-    <div class="modal-box">
-      <h5 class="fw-bold mb-3">⚠️ Confirm Cancellation</h5>
-      <p class="text-muted">{{ confirmMsg }}</p>
-      <div class="d-flex gap-2 justify-content-end mt-3">
-        <button class="btn btn-outline-secondary" (click)="onCancel()">No, keep it</button>
-        <button class="btn btn-danger" (click)="onConfirm()">Yes, cancel order</button>
+  <!-- Modal Overlays -->
+  <div class="glass-overlay" *ngIf="showConfirm">
+    <div class="confirm-modal animate-pop">
+      <h3>⚠️ Confirm Cancellation</h3>
+      <p>{{ confirmMsg }}</p>
+      <div class="modal-btns">
+        <button class="btn-sec" (click)="onCancel()">Keep Order</button>
+        <button class="btn-danger" (click)="onConfirm()">Yes, Cancel</button>
       </div>
     </div>
   </div>
 
-  <h3 class="fw-bold mb-4">📦 My Orders</h3>
-  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
-  <div *ngIf="errorMsg" class="alert alert-danger">❌ {{ errorMsg }}</div>
-
-  <!-- Feedback Form (inline panel) -->
-  <div class="order-form-panel" *ngIf="showFeedbackFor">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h6 class="fw-bold mb-0">
-        💬 Feedback for <span class="text-primary">{{ showFeedbackFor.product?.name }}</span>
-      </h6>
-      <button class="btn btn-sm btn-outline-secondary" (click)="showFeedbackFor=null">✕</button>
+  <div class="glass-overlay" *ngIf="showFeedbackFor">
+    <div class="feedback-modal animate-pop">
+      <h3>💬 Rate your Experience</h3>
+      <p>Product: <strong>{{ showFeedbackFor.product?.name }}</strong></p>
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        <textarea formControlName="content" placeholder="How was the quality and delivery?"></textarea>
+        <div class="modal-btns mt-3">
+          <button type="button" class="btn-sec" (click)="showFeedbackFor=null">Dismiss</button>
+          <button type="submit" class="btn-pri" [disabled]="itemForm.get('content')?.invalid">Submit Feedback</button>
+        </div>
+      </form>
     </div>
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="row g-3">
-        <div class="col-md-9">
-          <input type="text" class="form-control" formControlName="content"
-            placeholder="Share your experience with this product...">
-          <div *ngIf="itemForm.get('content')?.invalid && itemForm.get('content')?.touched"
-            class="text-danger small mt-1">
-            Please write at least 3 characters of feedback.
-          </div>
-        </div>
-        <div class="col-md-3">
-          <button type="submit" class="btn btn-primary w-100" [disabled]="itemForm.get('content')?.invalid">
-            Submit Feedback →
-          </button>
-        </div>
-      </div>
-    </form>
   </div>
 
-  <!-- Orders Table -->
-  <div class="card">
-    <div class="card-header">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span>Order History</span>
-        <div class="d-flex gap-2">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="form-control form-control-sm" style="width:180px;padding-left:2rem"
-              placeholder="Search by product..." [(ngModel)]="searchTerm" (input)="applyFilter()">
-          </div>
-          <select class="form-select form-select-sm" style="width:175px" [(ngModel)]="filterStatus"
-            (change)="applyFilter()">
-            <option value="">All Statuses</option>
-            <option value="ORDER PLACED">Order Placed</option>
-            <option value="IN PROGRESS">In Progress</option>
-            <option value="OUT FOR DELIVERY">Out for Delivery</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
-      </div>
-    </div>
+  <!-- Main Content Table -->
+  <div class="orders-card animate-up">
+    <div *ngIf="successMsg" class="toast success">{{ successMsg }}</div>
+    <div *ngIf="errorMsg" class="toast error">{{ errorMsg }}</div>
 
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let o of paged">
-            <td>
-              <div class="fw-semibold">{{ o.product?.name }}</div>
-              <div class="text-muted small">₹{{ o.product?.price }} per unit</div>
-            </td>
-            <td>{{ o.quantity }}</td>
-            <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
-            <td>
-              <span class="badge" [ngClass]="{
-                  'bg-warning text-dark' : o.status === 'ORDER PLACED',
-                  'bg-primary'           : o.status === 'IN PROGRESS',
-                  'bg-info text-dark'    : o.status === 'OUT FOR DELIVERY',
-                  'bg-success'           : o.status === 'DELIVERED',
-                  'bg-danger'            : o.status === 'CANCELLED'
-                }">
-                {{ o.status }}
-              </span>
-            </td>
-            <td>
-              <div class="d-flex gap-1 flex-wrap">
+    <table class="flow-table">
+      <thead>
+        <tr>
+          <th>Product Details</th>
+          <th>Quantity</th>
+          <th>Order Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of paged">
+          <td>
+            <div class="p-name">{{ o.product?.name }}</div>
+            <div class="p-price">₹{{ o.product?.price | number }} / unit</div>
+          </td>
+          <td class="qty">x {{ o.quantity }}</td>
+          <td class="total">₹{{ (o.quantity * o.product?.price) | number }}</td>
+          <td>
+            <span class="status-pill" [ngClass]="o.status.toLowerCase().replace(' ', '-')">
+              {{ o.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-cancel" *ngIf="canCancel(o)" (click)="cancelOrder(o)">🚫 Cancel</button>
+            <button class="btn-received" *ngIf="o.status === 'OUT FOR DELIVERY'" (click)="markReceived(o)">✅ Received</button>
+            <button class="btn-feedback" *ngIf="canLeaveFeedback(o)" (click)="openFeedback(o)">💬 Feedback</button>
+            <span class="txt-muted" *ngIf="o.status === 'IN PROGRESS'">Processing...</span>
+            <span class="txt-danger" *ngIf="o.status === 'CANCELLED'">Closed</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-                <!-- Cancel — only when ORDER PLACED -->
-                <button class="btn btn-danger btn-sm" *ngIf="canCancel(o)" (click)="cancelOrder(o)">
-                  🚫 Cancel
-                </button>
-
-                <!-- Status info when processing -->
-                <span *ngIf="o.status === 'IN PROGRESS'" class="text-muted small">Processing...</span>
-
-                <!-- Status info when out for delivery -->
-                <button class="btn btn-success btn-sm" *ngIf="o.status === 'OUT FOR DELIVERY'"
-                  (click)="markReceived(o)">
-                  ✅ Mark as Received
-                </button>
-
-                <!-- Feedback — only after DELIVERED by wholesaler -->
-                <button class="btn btn-info btn-sm" *ngIf="canLeaveFeedback(o)" (click)="openFeedback(o)">
-                  💬 Leave Feedback
-                </button>
-
-                <!-- Already cancelled -->
-                <span *ngIf="o.status === 'CANCELLED'" class="text-danger small">Cancelled</span>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="paged.length === 0">
-            <td colspan="5" class="text-center text-muted py-4">No orders found.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
-      <small class="text-muted">{{ filtered.length }} orders</small>
-      <ul class="pagination pagination-sm mb-0">
-        <li class="page-item" [class.disabled]="page===1">
-          <a class="page-link" (click)="page=page-1">‹</a>
-        </li>
-        <li class="page-item" *ngFor="let p of pages" [class.active]="p===page">
-          <a class="page-link" (click)="page=p">{{p}}</a>
-        </li>
-        <li class="page-item" [class.disabled]="page===totalPages">
-          <a class="page-link" (click)="page=page+1">›</a>
-        </li>
-      </ul>
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="page = page - 1" [disabled]="page === 1">Prev</button>
+      <span>Page {{page}} of {{totalPages}}</span>
+      <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
     </div>
   </div>
 </div>

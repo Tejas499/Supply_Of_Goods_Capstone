@@ -1,171 +1,87 @@
-<div class="container mt-4">
+<div class="dash-wrapper">
+  <!-- Greeting Header -->
+  <header class="dash-header animate">
+    <div class="greeting">
+      <h1>Hello, <span>{{ userName }}</span></h1>
+      <p>Production Hub: Oversee manufacturing, wholesaler logistics, and consumer feedback.</p>
+    </div>
+    <div class="tab-pills">
+      <button [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">📦 Products</button>
+      <button [class.active]="activeTab === 'orders'" (click)="activeTab = 'orders'; loadOrders()">📋 Orders</button>
+      <button [class.active]="activeTab === 'feedback'" (click)="activeTab = 'feedback'">💬 Feedback</button>
+    </div>
+  </header>
 
-  <!-- Confirm Modal -->
-  <div class="modal-backdrop-custom" *ngIf="showConfirm">
-    <div class="modal-box">
-      <h5 class="fw-bold mb-3">⚠️ Confirm Action</h5>
-      <p class="text-muted">{{ confirmMsg }}</p>
-      <div class="d-flex gap-2 justify-content-end mt-3">
-        <button class="btn btn-outline-secondary" (click)="onCancel()">Cancel</button>
-        <button class="btn btn-primary" (click)="onConfirm()">Confirm</button>
+  <!-- Global Confirm Modal -->
+  <div class="glass-overlay" *ngIf="showConfirm">
+    <div class="modal-box animate-pop">
+      <h3>⚠️ Confirm Action</h3>
+      <p>{{ confirmMsg }}</p>
+      <div class="modal-btns">
+        <button class="btn-sec" (click)="onCancel()">Dismiss</button>
+        <button class="btn-pri" (click)="onConfirm()">Execute</button>
       </div>
     </div>
   </div>
 
-  <h3 class="fw-bold mb-4">🏭 Manufacturer Dashboard</h3>
-  <div *ngIf="successMsg" class="alert alert-success">✅ {{ successMsg }}</div>
-  <div *ngIf="errorMsg"   class="alert alert-danger">❌ {{ errorMsg }}</div>
+  <div *ngIf="successMsg" class="toast success animate-up">{{ successMsg }}</div>
+  <div *ngIf="errorMsg" class="toast error animate-up">{{ errorMsg }}</div>
 
-  <!-- Tabs -->
-  <ul class="nav nav-tabs mb-4">
-    <li class="nav-item">
-      <a class="nav-link" [class.active]="activeTab==='products'" (click)="activeTab='products'" style="cursor:pointer">
-        📦 My Products <span class="badge bg-primary ms-1">{{ products.length }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" [class.active]="activeTab==='orders'" (click)="activeTab='orders';loadOrders()" style="cursor:pointer">
-        📋 Wholesaler Orders <span class="badge bg-warning text-dark ms-1">{{ orders.length }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" [class.active]="activeTab==='feedback'" (click)="activeTab='feedback'" style="cursor:pointer">
-        💬 Feedback <span class="badge bg-info text-dark ms-1">{{ feedbacks.length }}</span>
-      </a>
-    </li>
-  </ul>
-
-  <!-- ═══ TAB 1: PRODUCTS ═══ -->
-  <div *ngIf="activeTab === 'products'">
-    <!-- Form -->
-    <div class="card mb-4">
-      <div class="card-header">{{ editingId ? '✏️ Edit Product' : '➕ Add New Product' }}</div>
-      <div class="card-body">
+  <!-- TAB: PRODUCTS -->
+  <div class="tab-content" *ngIf="activeTab === 'products'">
+    <div class="split-layout">
+      <!-- Add/Edit Form -->
+      <div class="side-form animate-left">
+        <div class="card-head">
+          <h3>{{ editingId ? 'Update Product' : 'List New Product' }}</h3>
+        </div>
         <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-          <div class="row g-3 mb-3">
-            <div class="col-md-4">
-              <label class="form-label">Product Name</label>
-              <input type="text" class="form-control" formControlName="name" placeholder="e.g. Apple">
-              <div *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched" class="text-danger small mt-1">Required.</div>
+          <div class="input-row">
+            <label>Product Name</label>
+            <input type="text" formControlName="name" placeholder="e.g. Industrial Gears">
+          </div>
+          <div class="input-row-grid">
+            <div class="input-row">
+              <label>Price (₹)</label>
+              <input type="number" formControlName="price" placeholder="0">
             </div>
-            <div class="col-md-4">
-              <label class="form-label">Price (₹)</label>
-              <div class="input-group">
-                <span class="input-group-text">₹</span>
-                <input type="number" class="form-control" formControlName="price" placeholder="0.00">
-              </div>
-              <div *ngIf="itemForm.get('price')?.hasError('price') && itemForm.get('price')?.touched || itemForm.get('price')?.dirty" class="text-danger small mt-1">Valid Price Please</div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Stock Quantity</label>
-              <input type="number" class="form-control" formControlName="stockQuantity" placeholder="0">
-              <div *ngIf="itemForm.get('stockQuantity')?.hasError('stockQuantity') && itemForm.get('stockQuantity')?.touched ||itemForm.get('stockQuantity')?.dirty" class="text-danger small mt-1">Quantity should be positive</div>
+            <div class="input-row">
+              <label>Initial Stock</label>
+              <input type="number" formControlName="stockQuantity" placeholder="0">
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea class="form-control" formControlName="description" rows="2" placeholder="Description"></textarea>
+          <div class="input-row">
+            <label>Detailed Description</label>
+            <textarea formControlName="description" rows="3"></textarea>
           </div>
-          <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid">{{ editingId ? '💾 Update' : '➕ Add Product' }}</button>
-            <button type="button" class="btn btn-outline-secondary" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
+          <div class="form-actions">
+            <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">{{ editingId ? 'Save Changes' : 'Confirm Production' }}</button>
+            <button type="button" class="btn-text" *ngIf="editingId" (click)="cancelEdit()">Cancel</button>
           </div>
         </form>
       </div>
-    </div>
 
-    <!-- Product List -->
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>📦 Product List</span>
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="form-control form-control-sm" style="width:220px;padding-left:2rem"
-                 placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()">
+      <!-- List -->
+      <div class="main-list animate-right">
+        <div class="list-search">
+          <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Filter products...">
         </div>
-      </div>
-      <div class="card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="flow-table">
           <thead>
-            <tr><th>Product</th><th>Description</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Action</th></tr>
           </thead>
           <tbody>
             <tr *ngFor="let p of paged">
-              <td class="fw-semibold">{{ p.name }}</td>
-              <td class="text-muted">{{ p.description }}</td>
-              <td class="fw-semibold text-success">₹{{ p.price | number:'1.0-0' }}</td>
               <td>
-                <span class="badge" [ngClass]="p.stockQuantity > 10 ? 'bg-success' : p.stockQuantity > 0 ? 'bg-warning text-dark' : 'bg-danger'">
-                  {{ p.stockQuantity }} units
-                </span>
+                <div class="name">{{ p.name }}</div>
+                <div class="desc">{{ p.description }}</div>
               </td>
-              <td>
-                <button class="btn btn-warning btn-sm me-1" (click)="editProduct(p)">✏️ Edit</button>
-                <button class="btn btn-danger btn-sm"  (click)="deleteProduct(p)">🗑️ Delete</button>
+              <td><span class="price-tag">₹{{ p.price }}</span></td>
+              <td><span class="stock-pill" [ngClass]="{'low': p.stockQuantity < 5}">{{ p.stockQuantity }} units</span></td>
+              <td class="btns">
+                <button class="edit" (click)="editProduct(p)">✏️</button>
+                <button class="del" (click)="deleteProduct(p)">🗑️</button>
               </td>
-            </tr>
-            <tr *ngIf="paged.length === 0">
-              <td colspan="5" class="text-center text-muted py-4">No products yet. Add one above.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="card-footer d-flex justify-content-between align-items-center" *ngIf="totalPages > 1">
-        <small class="text-muted">{{ filtered.length }} products</small>
-        <ul class="pagination pagination-sm mb-0">
-          <li class="page-item" [class.disabled]="page===1"><a class="page-link" (click)="page=page-1">‹</a></li>
-          <li class="page-item" *ngFor="let p of pages" [class.active]="p===page"><a class="page-link" (click)="page=p">{{p}}</a></li>
-          <li class="page-item" [class.disabled]="page===totalPages"><a class="page-link" (click)="page=page+1">›</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ TAB 2: WHOLESALER ORDERS (W2M) ═══ -->
-  <div *ngIf="activeTab === 'orders'">
-    <div class="alert alert-info" style="font-size:0.85rem;">
-      ℹ️ These are orders placed by wholesalers for your products. Update status to <strong>IN PROGRESS</strong> when processing, then <strong>OUT FOR DELIVERY</strong> when shipped. Wholesaler will mark as Received.
-    </div>
-    <div class="card">
-      <div class="card-header">📦 Orders from Wholesalers</div>
-      <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-          <thead>
-            <tr><th>Order</th><th>Product</th><th>Wholesaler</th><th>Qty</th><th>Amount</th><th>Status</th><th>Update Status</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let o of orders">
-              <td class="fw-semibold text-primary">#{{ o.id }}</td>
-              <td class="fw-semibold">{{ o.product?.name }}</td>
-              <td class="text-muted small">{{ o.user?.username }}</td>
-              <td>{{ o.quantity }}</td>
-              <td class="text-success fw-semibold">₹{{ (o.quantity * o.product?.price) | number:'1.0-0' }}</td>
-              <td>
-                <span class="badge"
-                  [ngClass]="{
-                    'bg-warning text-dark' : o.status === 'ORDER PLACED',
-                    'bg-primary'           : o.status === 'IN PROGRESS',
-                    'bg-info text-dark'    : o.status === 'OUT FOR DELIVERY',
-                    'bg-success'           : o.status === 'DELIVERED',
-                    'bg-danger'            : o.status === 'CANCELLED'
-                  }">{{ o.status }}</span>
-              </td>
-              <td style="min-width:180px">
-                <ng-container *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'">
-                  <select class="form-select form-select-sm mb-1" [(ngModel)]="o.selectedStatus">
-                    <option value="">-- Select --</option>
-                    <option value="IN PROGRESS"      *ngIf="o.status === 'ORDER PLACED'">In Progress</option>
-                    <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Out for Delivery</option>
-                  </select>
-                  <button class="btn btn-primary btn-sm w-100" [disabled]="!o.selectedStatus" (click)="updateOrderStatus(o)">Update →</button>
-                </ng-container>
-                <span *ngIf="o.status==='DELIVERED'" class="text-success small">✔ Received by wholesaler</span>
-                <span *ngIf="o.status==='CANCELLED'" class="text-danger small">✖ Cancelled</span>
-                <span *ngIf="o.status==='OUT FOR DELIVERY'" class="text-info small">🚚 Awaiting wholesaler confirmation</span>
-              </td>
-            </tr>
-            <tr *ngIf="orders.length === 0">
-              <td colspan="7" class="text-center text-muted py-4">No wholesaler orders yet.</td>
             </tr>
           </tbody>
         </table>
@@ -173,26 +89,47 @@
     </div>
   </div>
 
-  <!-- ═══ TAB 3: FEEDBACK ═══ -->
-  <div *ngIf="activeTab === 'feedback'">
-    <div class="card">
-      <div class="card-header">💬 Consumer Feedback on Your Products</div>
-      <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-          <thead><tr><th>Order</th><th>Product</th><th>Consumer</th><th>Feedback</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let f of feedbacks">
-              <td class="text-primary fw-semibold">#{{ f.order?.id }}</td>
-              <td>{{ f.order?.product?.name }}</td>
-              <td class="text-muted small">{{ f.user?.username }}</td>
-              <td>{{ f.content }}</td>
-            </tr>
-            <tr *ngIf="feedbacks.length === 0">
-              <td colspan="4" class="text-center text-muted py-4">No feedback yet.</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- TAB: ORDERS -->
+  <div class="tab-content animate-up" *ngIf="activeTab === 'orders'">
+    <div class="orders-card">
+      <table class="flow-table">
+        <thead>
+          <tr><th>Order #</th><th>Product</th><th>Client</th><th>Qty</th><th>Status</th><th>Logistics Update</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders">
+            <td class="order-id">#{{ o.id }}</td>
+            <td><strong>{{ o.product?.name }}</strong></td>
+            <td>{{ o.user?.username }}</td>
+            <td>{{ o.quantity }}</td>
+            <td><span class="status-badge" [ngClass]="o.status.toLowerCase().replace(' ', '-')">{{ o.status }}</span></td>
+            <td>
+              <div class="status-update" *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'">
+                <select [(ngModel)]="o.selectedStatus">
+                  <option value="">Update State</option>
+                  <option value="IN PROGRESS" *ngIf="o.status === 'ORDER PLACED'">Processing</option>
+                  <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Shipping</option>
+                </select>
+                <button class="btn-mini" (click)="updateOrderStatus(o)" [disabled]="!o.selectedStatus">✓</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: FEEDBACK -->
+  <div class="tab-content animate-up" *ngIf="activeTab === 'feedback'">
+    <div class="feedback-grid">
+      <div class="feedback-item" *ngFor="let f of feedbacks">
+        <div class="f-header">
+          <strong>Order #{{ f.order?.id }}</strong>
+          <span>{{ f.timestamp | date:'short' }}</span>
+        </div>
+        <p>"{{ f.content }}"</p>
       </div>
+      <div *ngIf="feedbacks.length === 0" class="empty-state">No consumer feedback logged yet.</div>
     </div>
   </div>
 </div>

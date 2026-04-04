@@ -1,9 +1,13 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+<!-- ✅ Navbar only after login -->
+<nav *ngIf="IsLoggin" class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+
   <!-- Logo -->
   <a class="navbar-brand d-flex align-items-center gap-2" [routerLink]="['/dashboard']">
     <div style="width:34px;height:34px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;
                 display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🏭</div>
-    <span class="fw-bold" style="font-size:0.95rem;letter-spacing:0.3px;">Supply-of-Goods M&DP</span>
+    <span class="fw-bold" style="font-size:0.95rem;letter-spacing:0.3px;">
+      Supply-of-Goods M&DP
+    </span>
   </a>
 
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -11,10 +15,10 @@
   </button>
 
   <div class="collapse navbar-collapse" id="navbarNav">
+    
     <ul class="navbar-nav me-auto">
 
-      <!-- Dashboard always visible when logged in -->
-      <li class="nav-item" *ngIf="IsLoggin">
+      <li class="nav-item">
         <a class="nav-link" [routerLink]="['/dashboard']">🏠 Dashboard</a>
       </li>
 
@@ -45,21 +49,15 @@
     </ul>
 
     <ul class="navbar-nav ms-auto">
-      <li class="nav-item" *ngIf="!IsLoggin">
-        <a class="nav-link" [routerLink]="['/login']">Login</a>
-      </li>
-      <li class="nav-item" *ngIf="!IsLoggin">
-        <a class="nav-link" [routerLink]="['/registration']">Register</a>
-      </li>
-      <li class="nav-item" *ngIf="IsLoggin">
+      <li class="nav-item">
         <a class="nav-link" style="cursor:pointer" (click)="logout()">🚪 Logout</a>
       </li>
     </ul>
+
   </div>
 </nav>
 
-<body>
-  <div class="container mt-4">
-    <router-outlet></router-outlet>
-  </div>
-</body>
+<!-- ✅ Page Content -->
+<div [class.container]="IsLoggin" [class.mt-4]="IsLoggin">
+  <router-outlet></router-outlet>
+</div>

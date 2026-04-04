@@ -13,6 +13,7 @@ export class ConsumerGetOrdersComponent implements OnInit {
   itemForm!: FormGroup;
   orders: any[] = [];
   filtered: any[] = [];
+  userName: string = '';
   searchTerm = ''; filterStatus = '';
   successMsg = ''; errorMsg = '';
   showFeedbackFor: any = null;
@@ -26,6 +27,7 @@ export class ConsumerGetOrdersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.userName = localStorage.getItem('username') || 'Customer';
     const userId = localStorage.getItem('userId');
     this.itemForm = this.fb.group({
       orderId:   [''],
@@ -59,17 +61,9 @@ export class ConsumerGetOrdersComponent implements OnInit {
 
   get paged(): any[] { return this.filtered.slice((this.page - 1) * this.pageSize, this.page * this.pageSize); }
   get totalPages(): number { return Math.ceil(this.filtered.length / this.pageSize); }
-  get pages(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
 
-  // Feedback only available when wholesaler has marked order as DELIVERED
-  canLeaveFeedback(o: any): boolean {
-    return o.status === 'DELIVERED';
-  }
-
-  // Cancel only when ORDER PLACED (before wholesaler starts processing)
-  canCancel(o: any): boolean {
-    return o.status === 'ORDER PLACED';
-  }
+  canLeaveFeedback(o: any): boolean { return o.status === 'DELIVERED'; }
+  canCancel(o: any): boolean { return o.status === 'ORDER PLACED'; }
 
   openFeedback(o: any): void {
     this.showFeedbackFor = o;
@@ -78,55 +72,44 @@ export class ConsumerGetOrdersComponent implements OnInit {
       content: '',
       timestamp: this.datePipe.transform(new Date(), 'yyyy-MM-dd HH:mm:ss')
     });
-    this.errorMsg = '';
   }
 
   cancelOrder(o: any): void {
-    this.confirmMsg = `Cancel your order for "${o.product?.name}"? Stock will be restored.`;
+    this.confirmMsg = `Cancel your order for "${o.product?.name}"?`;
     this.confirmAction = () => {
-      // Use the correct CONSUMER cancel endpoint
       this.httpService.cancelConsumerOrder(o.id).subscribe({
         next: () => {
-          this.successMsg = `Order for "${o.product?.name}" cancelled successfully.`;
+          this.successMsg = 'Order cancelled successfully.';
           this.loadOrders();
-          setTimeout(() => this.successMsg = '', 4000);
+          setTimeout(() => this.successMsg = '', 3000);
         },
-        error: (err: any) => {
-          this.errorMsg = err.error?.message || 'Cannot cancel this order.';
-        }
+        error: (err: any) => this.errorMsg = err.error?.message || 'Cancellation failed.'
       });
       this.showConfirm = false;
     };
     this.showConfirm = true;
   }
-  markReceived(o: any): void {
-  const userId = localStorage.getItem('userId');
-  if (!confirm("Mark this order as received?")) return;
 
-  this.httpService.markConsumerOrderReceived(o.id, userId).subscribe({
-    next: () => {
-      this.successMsg = "Order marked as delivered";
-      this.loadOrders();
-      setTimeout(() => this.successMsg = '', 3000);
-    },
-    error: (err: any) => {
-      this.errorMsg = err.error?.message || "Failed to update";
-    }
-  });
-}
+  markReceived(o: any): void {
+    const userId = localStorage.getItem('userId');
+    this.httpService.markConsumerOrderReceived(o.id, userId).subscribe({
+      next: () => {
+        this.successMsg = "Package marked as received!";
+        this.loadOrders();
+        setTimeout(() => this.successMsg = '', 3000);
+      },
+      error: (err: any) => this.errorMsg = "Update failed."
+    });
+  }
 
   onSubmit(): void {
     if (this.itemForm.invalid) return;
     const { orderId, userId, content, timestamp } = this.itemForm.value;
     this.httpService.addConsumerFeedBack(orderId, userId, { content, timestamp }).subscribe({
       next: () => {
-        this.successMsg = 'Feedback submitted! Thank you.';
+        this.successMsg = 'Thank you for your feedback!';
         this.showFeedbackFor = null;
-        this.itemForm.patchValue({ content: '' });
         setTimeout(() => this.successMsg = '', 3000);
-      },
-      error: (err: any) => {
-        this.errorMsg = err.error?.message || 'Failed to submit feedback.';
       }
     });
   }

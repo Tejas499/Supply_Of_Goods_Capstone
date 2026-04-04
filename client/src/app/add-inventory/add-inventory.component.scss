@@ -1,0 +1,56 @@
+$primary: #F59E0B;
+$dark: #0F172A;
+$white: #ffffff;
+
+.inventory-wrapper {
+  padding: 40px;
+  background: #f8fafc;
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    h1 { font-size: 2.5rem; font-weight: 950; color: $dark; span { color: $primary; text-transform: capitalize; } }
+    .search-bar { position: relative; input { padding: 12px 40px 12px 20px; border-radius: 50px; border: 1px solid #e2e8f0; width: 300px; } .icon { position: absolute; right: 15px; top: 12px; } }
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+  }
+
+  .form-card, .table-card {
+    background: $white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+    label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 8px; color: $dark; }
+    input { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #f1f5f9; &:focus { border-color: $primary; outline: none; } }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    th { padding: 15px; text-align: left; color: #64748b; font-size: 13px; text-transform: uppercase; }
+    td { padding: 20px; background: #fff; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; &:first-child { border-radius: 15px 0 0 15px; border-left: 1px solid #f1f5f9; } &:last-child { border-radius: 0 15px 15px 0; border-right: 1px solid #f1f5f9; } }
+  }
+
+  .stock-indicator {
+    display: inline-block; padding: 6px 16px; border-radius: 50px; background: #dcfce7; color: #166534; font-weight: 700; font-size: 12px;
+    &.low { background: #fee2e2; color: #991b1b; }
+    &.mid { background: #fef3c7; color: #92400e; }
+  }
+
+  .btn-pri { width: 100%; padding: 14px; background: $dark; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; &:hover { background: $primary; } }
+}
+
+.animate { animation: fadeIn 0.8s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

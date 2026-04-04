@@ -6,18 +6,27 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./dashbaord.component.scss']
 })
 export class DashbaordComponent implements OnInit {
-  username: string = '';
+  username: string = 'User';
   role: string = '';
   greeting: string = '';
+  today: Date = new Date();
+
+  // Mock stats - in a real app, these would come from your HttpService
+  stats = [
+    { label: 'Active Orders', value: '12', icon: '📦', trend: '+2 this week' },
+    { label: 'Inventory Level', value: '85%', icon: '📊', trend: 'Stable' },
+    { label: 'Pending Feedback', value: '3', icon: '💬', trend: 'Action required' }
+  ];
 
   ngOnInit(): void {
-    this.username = localStorage.getItem('userId') ? 
-      (localStorage.getItem('username') || 'User') : 'User';
-    this.role = localStorage.getItem('role') || '';
+    // Retrieve user data from storage
+    this.username = localStorage.getItem('username') || 'User';
+    this.role = localStorage.getItem('role') || 'Guest';
+    
+    // Dynamic Time-based Greeting
     const hour = new Date().getHours();
-    this.greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
-    // Try to get stored username
-    const stored = localStorage.getItem('username');
-    if (stored) this.username = stored;
+    if (hour < 12) this.greeting = 'Good Morning';
+    else if (hour < 17) this.greeting = 'Good Afternoon';
+    else this.greeting = 'Good Evening';
   }
 }

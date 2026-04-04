@@ -1,83 +1,77 @@
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
-    <h2 class="text-center fw-bold mb-4">Create an Account</h2>
+<div class="auth-wrapper">
+  <div class="auth-card animate">
+    <div class="auth-header">
+      <div class="logo" routerLink="/">FLOW<span>.</span></div>
+      <h2>Join the Network</h2>
+      <p>Create your account to start managing the flow.</p>
+    </div>
 
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input type="text" class="form-control" formControlName="username" placeholder="Username">
-        <div *ngIf="itemForm.get('username')?.dirty" class="text-danger small">
-
-  <span *ngIf="itemForm.get('username')?.hasError('required')">
-    Username is required.
-  </span>
-
-  <span *ngIf="!itemForm.get('username')?.hasError('required') && itemForm.get('username')?.hasError('pattern')">
-    Must start with letter and contain only letters/numbers.
-  </span>
-
-  <span *ngIf="!itemForm.get('username')?.hasError('required') 
-               && !itemForm.get('username')?.hasError('pattern') 
-               && itemForm.get('username')?.hasError('maxlength')">
-    Maximum 10 characters allowed.
-  </span>
-
-</div>
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="auth-form">
+      
+      <!-- Username -->
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-container">
+          <input type="text" formControlName="username" placeholder="Enter username">
+        </div>
+        <div *ngIf="itemForm.get('username')?.dirty && itemForm.get('username')?.invalid" class="error-msg">
+          <span *ngIf="itemForm.get('username')?.hasError('required')">Required.</span>
+          <span *ngIf="itemForm.get('username')?.hasError('pattern')">Must start with a letter (A-Z).</span>
+          <span *ngIf="itemForm.get('username')?.hasError('maxlength')">Max 10 characters.</span>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" formControlName="email" placeholder="email@example.com">
-        <div
-          *ngIf="itemForm.get('email')?.hasError('required') && (itemForm.get('email')?.touched || itemForm.get('email')?.dirty)"
-          class="text-danger small">
-          Email is required.
+      <!-- Email -->
+      <div class="form-group">
+        <label>Email Address</label>
+        <div class="input-container">
+          <input type="email" formControlName="email" placeholder="name@company.com">
         </div>
-        <div
-          *ngIf="itemForm.get('email')?.hasError('email') && (itemForm.get('email')?.touched || itemForm.get('email')?.dirty)"
-          class="text-danger small">
-          Enter a valid email address.
+        <div *ngIf="itemForm.get('email')?.dirty && itemForm.get('email')?.invalid" class="error-msg">
+          Enter a valid business email.
         </div>
       </div>
 
       <!-- Password -->
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input type="password" class="form-control" formControlName="password" placeholder="••••••••">
-        <div
-          *ngIf="itemForm.get('password')?.hasError('required') && (itemForm.get('password')?.touched || itemForm.get('password')?.dirty)"
-          class="text-danger small">
-          Password is required.
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-container">
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••">
+          <button type="button" class="toggle-eye" (click)="togglePassword()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
         </div>
-        <div
-          *ngIf="itemForm.get('password')?.hasError('pattern') && (itemForm.get('password')?.touched || itemForm.get('password')?.dirty)"
-          class="text-danger small">
-          Password must be at least 8 characters long, include one uppercase, one lowercase, one number, and one special
-          character.
+        <div *ngIf="itemForm.get('password')?.dirty && itemForm.get('password')?.invalid" class="error-msg">
+          Must include Uppercase, Lowercase, Number & Special Character (min 8).
         </div>
       </div>
 
-      <div class="mb-4">
-        <label class="form-label">Role</label>
-        <select class="form-select" formControlName="role">
-          <option value="">-- Select Role --</option>
+      <!-- Role Selection -->
+      <div class="form-group">
+        <label>Primary Role</label>
+        <select formControlName="role">
+          <option value="" disabled selected>Select your business role</option>
           <option value="MANUFACTURER">Manufacturer</option>
           <option value="WHOLESALER">Wholesaler</option>
           <option value="CONSUMER">Consumer</option>
         </select>
-        <div *ngIf="itemForm.get('role')?.invalid && itemForm.get('role')?.touched" class="text-danger small">
-          Role is required.
+        <div *ngIf="itemForm.get('role')?.touched && itemForm.get('role')?.invalid" class="error-msg">
+          Please select a role.
         </div>
       </div>
 
-      <button type="submit" class="btn btn-dark w-100 mb-3" [disabled]="itemForm.invalid">Register</button>
-      <div *ngIf="errorMsg" class="text-danger small text-center mb-2">
-  {{ errorMsg }}
-</div>
+      <!-- Submit -->
+      <div class="form-actions">
+        <div *ngIf="errorMsg" class="server-error">{{ errorMsg }}</div>
+        <button type="submit" class="btn-primary" [disabled]="itemForm.invalid || isSubmitting">
+          <span *ngIf="!isSubmitting">Create Account</span>
+          <span *ngIf="isSubmitting" class="loader"></span>
+        </button>
+      </div>
     </form>
 
-    <p class="text-center mb-0">Already have an account?
-      <a [routerLink]="['/login']" class="fw-bold text-primary">Login</a>
-    </p>
+    <div class="auth-footer">
+      Already using Flow? <a routerLink="/login">Log in here</a>
+    </div>
   </div>
 </div>
