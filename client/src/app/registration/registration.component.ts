@@ -22,18 +22,18 @@ export class RegistrationComponent {
     this.itemForm = this.fb.group({
       username: [
         '', [
-          Validators.required, 
-          Validators.maxLength(10), 
+          Validators.required,
+          Validators.maxLength(10),
           Validators.pattern(/^[A-Za-z][A-Za-z0-9]*$/)
         ]
       ],
       password: ['', [
-        Validators.required, 
+        Validators.required,
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       ]],
       email: ['', [
-        Validators.required, 
-        Validators.email, 
+        Validators.required,
+        Validators.email,
         Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
       ]],
       role: ['', Validators.required]
@@ -44,7 +44,7 @@ export class RegistrationComponent {
     if (this.itemForm.valid) {
       this.isSubmitting = true;
       this.errorMsg = '';
-      
+
       this.httpService.registerUser(this.itemForm.value).subscribe({
         next: () => {
           this.router.navigate(['/login']);

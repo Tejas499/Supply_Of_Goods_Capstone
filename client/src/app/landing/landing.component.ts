@@ -1,5 +1,4 @@
-import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Component, OnInit, AfterViewInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 
 interface Feature { title: string; desc: string; }
 interface Testimonial { name: string; text: string; }
@@ -10,23 +9,26 @@ interface Testimonial { name: string; text: string; }
   styleUrls: ['./landing.component.scss']
 })
 export class LandingComponent implements OnInit, AfterViewInit {
-  constructor(private router: Router,
-    private route: ActivatedRoute ){}
-  isScrolled = false;
-  statsStarted = false;
+  @ViewChild('demoVideo') demoVideo!: ElementRef<HTMLVideoElement>;
 
-  // Counter values for the stats section
-  counters = { visitors: 0, clients: 0, orders: 0, integrations: 0 };
+  isDarkMode = false;
+  words = ['Seamless', 'Reliable', 'Optimized'];
+  displayText = '';
+  wordIndex = 0;
+  charIndex = 0;
+  isDeleting = false;
+  isScrolled = false;
+  showDemo = false;
 
   features: Feature[] = [
-    { title: 'Smart Inventory', desc: 'Real-time tracking of every SKU across multiple locations.' },
-    { title: 'Global Orders', desc: 'Fulfill demand instantly with automated order processing.' },
-    { title: 'Deep Analytics', desc: 'Transform warehouse data into actionable business growth.' },
-    { title: 'Secure Access', desc: 'Protected by JWT authentication and Captcha validation.' },
-    { title: 'Data Insights', desc: 'Detailed system reports on sales trends and stock levels.' }
+    { title: 'Smart Inventory', desc: 'Real-time tracking across warehouses with automated stock alerts and predictive reordering.' },
+    { title: 'Order Automation', desc: 'End-to-end order processing from placement to delivery with multi-carrier integration.' },
+    { title: 'Supply Chain Analytics', desc: 'AI-powered insights on demand forecasting, supplier performance, and logistics optimization.' },
+    { title: 'Secure Authentication', desc: 'Enterprise-grade security with JWT tokens, role-based access control, and CAPTCHA protection.' },
+    { title: 'Multi-Warehouse Management', desc: 'Centralized control of inventory across multiple locations with transfer tracking.' },
+    { title: 'Supplier Portal', desc: 'Seamless communication with suppliers for purchase orders, invoices, and shipment tracking.' }
   ];
 
-  // Fixed: testimonials is now an array of objects to match the HTML loop
   testimonials: Testimonial[] = [
     { name: 'Sarah J.', text: 'Flow revolutionized our distribution efficiency overnight.' },
     { name: 'Mark T.', text: 'The most secure and scalable platform we have ever deployed.' },
@@ -34,20 +36,35 @@ export class LandingComponent implements OnInit, AfterViewInit {
   ];
 
   ngOnInit() {
-    // 🔍 VISITOR COUNTER: Increments on every page load
-    const currentVisits = parseInt(localStorage.getItem('vCount') || '0');
-    const newCount = currentVisits + 1;
-    localStorage.setItem('vCount', newCount.toString());
-  }
-  login(){
-    this.router.navigateByUrl('/login');
+    const savedTheme = localStorage.getItem('flowTheme');
+    if (savedTheme === 'dark') this.isDarkMode = true;
+    this.typeEffect();
   }
 
-registration(){
-   this.router.navigateByUrl('/registration');
-}
   ngAfterViewInit() {
-    this.initScrollObserver();
+    setTimeout(() => this.initScrollObserver(), 100);
+  }
+
+  toggleTheme() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('flowTheme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  typeEffect() {
+    const currentWord = this.words[this.wordIndex];
+    this.isDeleting ? this.charIndex-- : this.charIndex++;
+    this.displayText = currentWord.substring(0, this.charIndex);
+    
+    let speed = this.isDeleting ? 120 : 180;
+    if (!this.isDeleting && this.charIndex === currentWord.length) {
+      this.isDeleting = true;
+      speed = 1800;
+    } else if (this.isDeleting && this.charIndex === 0) {
+      this.isDeleting = false;
+      this.wordIndex = (this.wordIndex + 1) % this.words.length;
+      speed = 500;
+    }
+    setTimeout(() => this.typeEffect(), speed);
   }
 
   @HostListener('window:scroll', [])
@@ -58,35 +75,19 @@ registration(){
   private initScrollObserver() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-          // Trigger numbers when stats section enters view
-          if (entry.target.classList.contains('stats-banner') && !this.statsStarted) {
-            this.animateStats();
-          }
-        }
+        if (entry.isIntersecting) entry.target.classList.add('show');
       });
     }, { threshold: 0.15 });
-
     document.querySelectorAll('.animate').forEach(el => observer.observe(el));
   }
 
-  private animateStats() {
-    this.statsStarted = true;
-    const finalVisits = parseInt(localStorage.getItem('vCount') || '1');
-    this.countUp('visitors', 0, finalVisits, 2000);
-    this.countUp('clients', 0, 150, 1500);
-    this.countUp('orders', 0, 1200, 2000);
-    this.countUp('integrations', 0, 45, 1200);
-  }
+  openDemo() { this.showDemo = true; }
 
-  private countUp(prop: keyof typeof this.counters, start: number, end: number, duration: number) {
-    let current = start;
-    const step = Math.ceil((end - start) / (duration / 20));
-    const timer = setInterval(() => {
-      current += step;
-      if (current >= end) { current = end; clearInterval(timer); }
-      this.counters[prop] = current;
-    }, 20);
+  closeDemo() {
+    this.showDemo = false;
+    if (this.demoVideo) {
+      this.demoVideo.nativeElement.pause();
+      this.demoVideo.nativeElement.currentTime = 0;
+    }
   }
 }

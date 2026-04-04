@@ -77,7 +77,8 @@
           </td>
           <td class="actions">
             <button class="btn-cancel" *ngIf="canCancel(o)" (click)="cancelOrder(o)">🚫 Cancel</button>
-            <button class="btn-received" *ngIf="o.status === 'OUT FOR DELIVERY'" (click)="markReceived(o)">✅ Received</button>
+            <button class="btn-received" *ngIf="o.status === 'OUT FOR DELIVERY'" (click)="markReceived(o)">✅
+              Received</button>
             <button class="btn-feedback" *ngIf="canLeaveFeedback(o)" (click)="openFeedback(o)">💬 Feedback</button>
             <span class="txt-muted" *ngIf="o.status === 'IN PROGRESS'">Processing...</span>
             <span class="txt-danger" *ngIf="o.status === 'CANCELLED'">Closed</span>

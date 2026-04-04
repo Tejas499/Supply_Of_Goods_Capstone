@@ -1,4 +1,12 @@
-<div class="landing">
+<div class="landing" [class.dark-mode]="isDarkMode">
+
+  <!-- DARK MODE TOGGLE (floating) -->
+  <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+    style="position:fixed;bottom:32px;right:32px;z-index:1100;">
+    <span class="toggle-icon">{{ isDarkMode ? '☀️' : '🌙' }}</span>
+    {{ isDarkMode ? 'Light' : 'Dark' }}
+  </button>
+
   <!-- NAVIGATION -->
   <nav class="navbar" [class.scrolled]="isScrolled">
     <div class="logo">FLOW<span>.</span></div>
@@ -6,24 +14,37 @@
       <a href="#features">Solutions</a>
       <a href="#feedback">Reviews</a>
       <a href="#contact">Contact</a>
-     <button (click)="login()" class="btn-primary">Login</button>
-     <button (click)="registration()" class="btn-primary">Get Started</button></div>
+      <a routerLink="/login" class="login-link">Login</a>
+      <a routerLink="/registration" class="btn-primary">Get Started</a>
+    </div>
   </nav>
 
   <!-- HERO SECTION -->
   <section class="hero">
-    <div class="hero-bg-accent"></div>
+    <div class="hero-overlay"></div>
     <div class="hero-content animate">
-      <h1>Master the <br /><span class="gradient-text">Global Flow</span></h1>
-      <p>Stop managing. Start orchestrating. Flow provides the intelligence you need to link manufacturers to consumers with zero friction.</p>
+      <h1>
+        Smart Supply<br />
+        <span class="gradient-text">
+          {{ displayText }} Flow
+        </span>
+      </h1>
+      <p>Make supply chains simple and smooth. So your business keeps moving forward.</p>
       <div class="hero-btns">
-        <button class="btn-primary" routerLink="/registration">Start Free Trial</button>
-        <button class="btn-outline">Watch Demo</button>
+        <button class="btn-outline" (click)="openDemo()">Watch Demo</button>
       </div>
     </div>
-    <div class="hero-visual animate">
-      <!-- Fixed Image Link -->
-      <img src="https://www.eurokadra.com/wp-content/uploads/2025/12/WORK-AT-THE-PSARY-WAREHOUSE-1024x585.webp" alt="Dashboard View">
+
+    <!-- DEMO MODAL -->
+    <div class="demo-modal" *ngIf="showDemo">
+      <div class="overlay" (click)="closeDemo()"></div>
+      <div class="modal-content">
+        <span class="close-btn" (click)="closeDemo()">×</span>
+        <video #demoVideo controls autoplay muted playsinline width="100%">
+          <source src="assets/videos/demo.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
     </div>
   </section>
 
@@ -31,8 +52,10 @@
   <div class="brand-bar">
     <div class="scroll-track">
       <span>TRUSTED BY INDUSTRY TITANS</span>
-      <span>AMAZON</span> <span>SHIPROCKET</span> <span>FEDEX</span> <span>SHOPIFY</span> <span>WALMART</span>
-      <span>AMAZON</span> <span>SHIPROCKET</span> <span>FEDEX</span> <span>SHOPIFY</span> <span>WALMART</span>
+      <span>AMAZON</span> <span>SHIPROCKET</span> <span>FEDEX</span>
+      <span>SHOPIFY</span> <span>WALMART</span>
+      <span>AMAZON</span> <span>SHIPROCKET</span> <span>FEDEX</span>
+      <span>SHOPIFY</span> <span>WALMART</span>
     </div>
   </div>
 
@@ -42,8 +65,7 @@
       <div class="section-tag">Capabilities</div>
       <h2 class="animate">Engineered for <span>Scale</span></h2>
       <div class="feature-grid">
-        <div class="feature-card animate" *ngFor="let f of features; let i = index">
-          <!-- <div class="card-num">0{{i + 1}}</div> -->
+        <div class="feature-card" *ngFor="let f of features; let i = index">
           <h3>{{ f.title }}</h3>
           <p>{{ f.desc }}</p>
           <div class="card-arrow">→</div>
@@ -51,20 +73,13 @@
       </div>
     </div>
   </section>
- <!-- STATS BANNER (New) -->
-  <section class="stats-banner animate">
-    <div class="stat-item"><h2>{{ counters.visitors }}</h2><p>Site Visitors</p></div>
-    <div class="stat-item"><h2>{{ counters.clients }}+</h2><p>Partners</p></div>
-    <div class="stat-item"><h2>{{ counters.orders }}+</h2><p>Orders Syncing</p></div>
-    <div class="stat-item"><h2>{{ counters.integrations }}</h2><p>System Features</p></div>
-  </section>
 
   <!-- FEEDBACK -->
-  <section id="feedback" class="feedback-section animate">
+  <section id="feedback" class="feedback-section">
     <div class="section-tag">Testimonials</div>
     <h2>What Our <span>Partners Say</span></h2>
     <div class="feedback-grid">
-      <div class="feedback-card animate" *ngFor="let t of testimonials">
+      <div class="feedback-card" *ngFor="let t of testimonials">
         <div class="stars">★★★★★</div>
         <p>"{{ t.text }}"</p>
         <div class="user-meta">
@@ -96,7 +111,8 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 Flow Inc. | A Larsen & Toubro Group Project</p>
+      <p>&copy; 2026 Flow Inc. | A Larsen &amp; Toubro Group Project</p>
     </div>
   </footer>
+
 </div>

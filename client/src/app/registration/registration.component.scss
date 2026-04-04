@@ -1,132 +1,320 @@
-// Exact colors from your landing page
-$primary: #F59E0B;       // Your Amber
-$primary-hover: #D97706; // Darker Amber
-$dark-bg: #0F172A;      // Your Dark Slate
-$slate-text: #94A3B8;   // Muted Slate
+// =============================================
+// FLOW REGISTRATION — registration.component.scss
+// Design System: Sand + Teal | Playfair Display + Inter
+// =============================================
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+$color-sand: #E1B382;
+$color-sand-dark: #C89666;
+$color-blue: #2D545E;
+$color-blue-dark: #12343B;
+$white: #FFFFFF;
+$border-light: #EAF0F1;
+$text-muted: #8A9FA4;
+$error: #E11D48;
 
 .auth-wrapper {
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  // Match landing page radial gradient style
-  background: radial-gradient(circle at top right, rgba($primary, 0.15), $dark-bg);
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba($color-sand, 0.16) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 80%, rgba($color-blue, 0.25) 0%, transparent 55%),
+    $color-blue-dark;
   overflow: hidden;
-  padding: 20px;
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
   .auth-card {
-    background: #ffffff;
+    position: relative;
+    z-index: 1;
+    background: $white;
     width: 100%;
-    max-width: 420px; 
-    padding: 35px 45px;
-    border-radius: 35px; // Matching your feature-card radius
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 480px;
+    padding: 44px 52px;
+    border-radius: 32px;
+    box-shadow:
+      0 4px 24px rgba(18, 52, 59, 0.10),
+      0 40px 80px rgba(18, 52, 59, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 
     .auth-header {
       text-align: center;
-      margin-bottom: 25px;
-      .logo { 
-        font-size: 30px; 
-        font-weight: 900; 
-        color: $dark-bg; 
+      margin-bottom: 28px;
+
+      .logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        font-weight: 900;
+        color: $color-blue-dark;
         letter-spacing: -1px;
-        span { color: $primary; } 
+        cursor: pointer;
+        display: inline-block;
+        margin-bottom: 14px;
+        transition: opacity 0.2s;
+
+        &:hover {
+          opacity: 0.8;
+        }
+
+        span {
+          color: $color-sand;
+        }
       }
-      h2 { font-size: 24px; font-weight: 900; margin-top: 10px; color: $dark-bg; }
-      p { color: $slate-text; font-size: 14px; margin-top: 5px; font-weight: 600; }
+
+      h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: $color-blue-dark;
+        margin: 0 0 8px;
+        letter-spacing: -0.5px;
+      }
+
+      p {
+        color: $text-muted;
+        font-size: 0.93rem;
+        font-weight: 500;
+        margin: 0;
+      }
     }
   }
 
   .auth-form {
     .form-group {
       margin-bottom: 18px;
-      label { 
-        display: block; 
-        font-weight: 800; 
-        font-size: 11px; 
-        color: $dark-bg; 
-        margin-bottom: 8px; 
-        text-transform: uppercase; 
-        letter-spacing: 1px;
-      }
-      
-      input, select {
-        width: 100%;
-        padding: 14px 18px;
-        border-radius: 12px;
-        border: 2px solid #F1F5F9;
-        background: #F8FAFC;
-        font-size: 14px;
-        font-weight: 600;
-        transition: 0.3s;
-        &:focus { 
-          outline: none; 
-          border-color: $primary; // Using Amber focus to match
-          background: #fff;
-          box-shadow: 0 0 0 4px rgba($primary, 0.1);
-        }
+
+      label {
+        display: block;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: $color-blue-dark;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
       }
 
       .input-container {
         position: relative;
+
         .toggle-eye {
-          position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-          background: none; border: none; font-size: 11px; font-weight: 800; color: $primary; cursor: pointer;
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: $color-sand-dark;
+          cursor: pointer;
+          letter-spacing: 0.05em;
+          transition: color 0.2s;
+
+          &:hover {
+            color: $color-blue-dark;
+          }
         }
       }
 
-      .error-msg { font-size: 10px; color: #E11D48; font-weight: 700; margin-top: 4px; display: block; }
+      input,
+      select {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: 1.5px solid $border-light;
+        background: #F7FAFB;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: $color-blue-dark;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        appearance: none;
+
+        &::placeholder {
+          color: #A8BFC3;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: $color-sand;
+          background: $white;
+          box-shadow: 0 0 0 4px rgba($color-sand, 0.12);
+        }
+      }
+
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A9FA4' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 44px;
+        cursor: pointer;
+      }
+
+      .error-msg {
+        font-size: 0.75rem;
+        color: $error;
+        font-weight: 700;
+        margin-top: 5px;
+        display: block;
+      }
+    }
+
+    .form-actions {
+      margin-top: 8px;
+
+      .server-error {
+        background: #FFF1F2;
+        color: $error;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.88rem;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 16px;
+        border: 1px solid rgba($error, 0.2);
+      }
     }
 
     .btn-primary {
-      width: 100%; 
-      padding: 16px; 
-      background: $dark-bg; // Dark button like your "Login" link on landing
-      color: #fff; 
-      border: none; 
-      border-radius: 12px;
-      font-weight: 800; 
-      font-size: 16px; 
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, $color-blue-dark, $color-blue);
+      color: $white;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
       cursor: pointer;
-      margin-top: 10px;
-      transition: 0.4s;
-      
-      &:hover:not(:disabled) { 
-        background: $primary; // Shifts to Amber on hover like your CTA
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba($primary, 0.3);
+      transition: all 0.35s ease;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, $color-sand, $color-sand-dark);
+        opacity: 0;
+        transition: opacity 0.35s ease;
       }
-      &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      span {
+        position: relative;
+        z-index: 1;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba($color-sand, 0.40);
+
+        &::after {
+          opacity: 1;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loader {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: $white;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+        position: relative;
+        z-index: 1;
+      }
     }
   }
 
-  .auth-footer { 
-    text-align: center; 
-    margin-top: 25px; 
-    font-size: 14px; 
-    color: $slate-text;
-    font-weight: 600;
-    a { 
-      color: $primary; // Amber link
-      font-weight: 800; 
-      text-decoration: none; 
-      &:hover { text-decoration: underline; }
+  .auth-footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 0.9rem;
+    color: $text-muted;
+    font-weight: 500;
+
+    a {
+      color: $color-sand-dark;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover {
+        color: $color-blue-dark;
+        text-decoration: underline;
+      }
     }
   }
 }
 
-// Fade entrance (stays in place, fits 1 page)
-.animate { animation: authFadeIn 0.8s ease-out; }
-@keyframes authFadeIn { 
-  from { opacity: 0; transform: scale(0.98); } 
-  to { opacity: 1; transform: scale(1); } 
+.animate {
+  animation: authReveal 0.7s cubic-bezier(0.2, 1, 0.3, 1) both;
 }
 
-// Tightens space for smaller screens to ensure it stays on 1 page
-@media (max-height: 750px) {
-  .auth-card { padding: 25px 40px; }
-  .auth-header { margin-bottom: 15px; }
-  .auth-form .form-group { margin-bottom: 12px; }
+@keyframes authReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-height: 820px) {
+  .auth-wrapper .auth-card {
+    padding: 32px 44px;
+  }
+
+  .auth-wrapper .auth-header {
+    margin-bottom: 18px;
+  }
+
+  .auth-wrapper .auth-form .form-group {
+    margin-bottom: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-wrapper .auth-card {
+    padding: 32px 24px;
+    border-radius: 24px;
+  }
 }

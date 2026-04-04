@@ -1,82 +1,395 @@
-$primary: #F59E0B;
-$dark: #0F172A;
-$white: #ffffff;
+// =============================================
+// FLOW GET-ORDERS — get-orders.component.scss
+// Design System: Sand + Teal | Playfair Display + Inter
+// =============================================
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+$color-sand:      #E1B382;
+$color-sand-dark: #C89666;
+$color-blue:      #2D545E;
+$color-blue-dark: #12343B;
+$white:           #FFFFFF;
+$border-light:    #EAF0F1;
+$text-muted:      #8A9FA4;
+$bg-page:         #F4F7F8;
+
+@mixin flex-center  { display: flex; align-items: center; justify-content: center; }
 @mixin flex-between { display: flex; align-items: center; justify-content: space-between; }
 
 .orders-wrapper {
-  padding: 40px;
-  background: #fcfcfc;
+  padding: 48px 80px;
+  background: $bg-page;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 
+  // ── Page Header ──────────────────────────────────
   .page-header {
     @include flex-between;
-    margin-bottom: 40px;
-    h1 { font-size: 2.4rem; font-weight: 950; color: $dark; span { color: $primary; text-transform: capitalize; } }
-    .stat-pill { display: inline-block; background: $dark; color: #fff; padding: 8px 16px; border-radius: 50px; font-size: 12px; margin-left: 10px; }
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .greeting {
+      h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 3.5vw, 2.8rem);
+        font-weight: 900;
+        color: $color-blue-dark;
+        margin: 0 0 6px;
+        letter-spacing: -0.5px;
+        span { color: $color-sand; text-transform: capitalize; }
+      }
+      p { color: $text-muted; font-weight: 500; font-size: 0.93rem; margin: 0; }
+    }
+
+    .header-actions {
+      .order-stats { display: flex; gap: 12px; }
+
+      .stat-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: $white;
+        border: 1px solid $border-light;
+        color: $color-blue-dark;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+
+        strong { color: $color-sand-dark; font-weight: 800; }
+      }
+    }
   }
 
+  // ── Tabs ─────────────────────────────────────────
   .tabs-container {
-    display: flex; gap: 10px; margin-bottom: 25px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+
     button {
-      padding: 12px 24px; border-radius: 12px; border: none; background: #f1f5f9; color: #64748b; font-weight: 800; cursor: pointer; transition: 0.3s;
-      &.active { background: $dark; color: #fff; box-shadow: 0 10px 20px rgba($dark, 0.2); }
-      &:hover:not(.active) { background: #e2e8f0; }
+      padding: 12px 24px;
+      border-radius: 50px;
+      border: 1.5px solid $border-light;
+      background: $white;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $text-muted;
+      cursor: pointer;
+      transition: all 0.25s ease;
+
+      &.active {
+        background: $color-blue-dark;
+        border-color: $color-blue-dark;
+        color: $white;
+        box-shadow: 0 4px 18px rgba(18, 52, 59, 0.22);
+      }
+
+      &:hover:not(.active) {
+        border-color: $color-sand;
+        color: $color-blue-dark;
+      }
     }
   }
 
+  // ── Orders Card ──────────────────────────────────
   .orders-card {
-    background: $white; padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.03);
-    
+    background: $white;
+    padding: 36px 32px;
+    border-radius: 22px;
+    border: 1px solid $border-light;
+    box-shadow: 0 4px 24px rgba(18, 52, 59, 0.05);
+
+    // Filter Bar
     .filter-bar {
-      @include flex-between; margin-bottom: 25px;
-      .search-box input { padding: 12px 20px; border-radius: 50px; border: 2px solid #f1f5f9; width: 300px; transition: 0.3s; &:focus { border-color: $primary; outline: none; } }
-      select { padding: 12px 20px; border-radius: 50px; border: 2px solid #f1f5f9; font-weight: 700; background: #fff; cursor: pointer; }
+      @include flex-between;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .search-box {
+        position: relative;
+        flex: 1;
+        min-width: 220px;
+
+        input {
+          width: 100%;
+          padding: 12px 44px 12px 20px;
+          border-radius: 50px;
+          border: 1.5px solid $border-light;
+          background: #F7FAFB;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: $color-blue-dark;
+          box-sizing: border-box;
+          transition: all 0.3s ease;
+          &::placeholder { color: #A8BFC3; }
+          &:focus { outline: none; border-color: $color-sand; box-shadow: 0 0 0 3px rgba($color-sand, 0.12); }
+        }
+      }
+
+      select {
+        padding: 12px 20px;
+        border-radius: 50px;
+        border: 1.5px solid $border-light;
+        background: #F7FAFB;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: $color-blue-dark;
+        cursor: pointer;
+        transition: border-color 0.25s;
+        &:focus { outline: none; border-color: $color-sand; }
+      }
     }
   }
 
+  // ── Flow Table ───────────────────────────────────
   .flow-table {
-    width: 100%; border-collapse: collapse;
-    th { text-align: left; padding: 20px; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 2px solid #f8fafc; }
-    td { padding: 25px 20px; border-bottom: 1px solid #f8fafc; }
-    .p-name { font-weight: 900; color: $dark; font-size: 1.05rem; }
-    .id-tag { background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 11px; color: $dark; }
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: $text-muted;
+      border-bottom: 1.5px solid $border-light;
+    }
+
+    td {
+      padding: 18px 16px;
+      border-bottom: 1px solid $border-light;
+      font-size: 0.93rem;
+      color: $color-blue-dark;
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+      &:hover { background: rgba($color-sand, 0.04); }
+    }
+
+    .p-name { font-weight: 700; color: $color-blue-dark; font-size: 0.98rem; }
+    .p-sub, .text-muted { font-size: 0.8rem; color: $text-muted; margin-top: 3px; }
+
+    .id-tag {
+      background: rgba($color-blue, 0.08);
+      color: $color-blue-dark;
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.8rem;
+    }
+
+    .qty   { font-weight: 600; color: $text-muted; }
+    .total { font-weight: 800; color: #059669; }
   }
 
-  .status-pill {
-    padding: 6px 14px; border-radius: 50px; font-size: 10px; font-weight: 800; text-transform: uppercase;
-    &.order-placed { background: #fef3c7; color: #92400e; }
-    &.in-progress { background: #dbeafe; color: #1e40af; }
-    &.out-for-delivery { background: #ede9fe; color: #5b21b6; }
-    &.delivered { background: #dcfce7; color: #166534; }
+  // ── Actions ──────────────────────────────────────
+  .actions {
+    button {
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-right: 6px;
+
+      &.btn-received {
+        background: rgba(#10B981, 0.12);
+        color: #047857;
+        &:hover { background: #10B981; color: $white; transform: translateY(-1px); }
+      }
+
+      &.btn-cancel {
+        background: rgba(#EF4444, 0.10);
+        color: #DC2626;
+        &:hover { background: #EF4444; color: $white; }
+      }
+    }
   }
 
-  .actions button {
-    padding: 10px 18px; border-radius: 12px; border: none; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.3s;
-    &.btn-received { background: #ecfdf5; color: #10b981; &:hover { background: #10b981; color: #fff; transform: translateY(-2px); } }
-    &.btn-cancel { background: #fef2f2; color: #ef4444; &:hover { background: #ef4444; color: #fff; } }
+  .txt-muted { color: $text-muted; font-size: 0.82rem; font-weight: 600; }
+
+  // ── Select (inline in table) ──────────────────────
+  .flow-table select {
+    padding: 7px 12px;
+    border-radius: 10px;
+    border: 1.5px solid $border-light;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $color-blue-dark;
+    background: $white;
+    cursor: pointer;
+    &:focus { outline: none; border-color: $color-sand; }
   }
 
-  .glass-overlay { position: fixed; inset: 0; background: rgba($dark, 0.7); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-  .confirm-modal { background: #fff; padding: 40px; border-radius: 35px; width: 450px; text-align: center; h3 { font-weight: 900; margin-bottom: 15px; } p { color: #64748b; margin-bottom: 30px; } }
-  .btn-pri { background: $dark; color: #fff; padding: 12px 25px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; &:hover { background: $primary; } }
-  .btn-sec { background: #f1f5f9; color: #475569; padding: 12px 25px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; margin-right: 10px; }
+  // ── Feedback Grid ────────────────────────────────
+  .feedback-grid { display: flex; flex-direction: column; gap: 16px; }
+
+  .feedback-card {
+    background: #F7FAFB;
+    padding: 24px 28px;
+    border-radius: 18px;
+    border: 1px solid $border-light;
+    transition: 0.3s;
+    &:hover { box-shadow: 0 8px 24px rgba(18,52,59,0.06); border-color: rgba($color-sand,0.35); }
+
+    .f-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      strong { color: $color-blue-dark; font-weight: 700; }
+      .f-date { font-size: 0.8rem; color: $text-muted; }
+    }
+
+    .f-content { color: #475569; font-style: italic; line-height: 1.7; font-size: 0.93rem; margin: 0; }
+    .f-footer  { margin-top: 10px; font-size: 0.8rem; color: $text-muted; }
+  }
+
+  // ── Confirm Modal ────────────────────────────────
+  .glass-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba($color-blue-dark, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1000;
+    @include flex-center;
+  }
+
+  .confirm-modal {
+    background: $white;
+    padding: 44px;
+    border-radius: 28px;
+    width: 460px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.28);
+
+    h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: $color-blue-dark;
+      margin: 0 0 12px;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: 0.95rem;
+      margin: 0 0 28px;
+      line-height: 1.6;
+    }
+  }
 }
 
-.animate { animation: fadeIn 0.8s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+// ── Shared Buttons ────────────────────────────────────
+.btn-pri {
+  background: linear-gradient(135deg, $color-blue-dark, $color-blue);
+  color: $white;
+  padding: 12px 26px;
+  border-radius: 12px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover { background: linear-gradient(135deg, $color-sand, $color-sand-dark); box-shadow: 0 6px 20px rgba($color-sand, 0.38); }
+}
 
-// Pagination
+.btn-sec {
+  background: transparent;
+  color: $color-blue-dark;
+  border: 1.5px solid $border-light;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  &:hover { border-color: $color-sand; color: $color-sand-dark; }
+}
+
+.modal-btns { display: flex; justify-content: center; gap: 14px; }
+
+// ── Toast ─────────────────────────────────────────────
+.toast {
+  position: fixed;
+  top: 88px;
+  right: 32px;
+  padding: 14px 28px;
+  border-radius: 14px;
+  color: $white;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 1100;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  animation: toastIn 0.35s cubic-bezier(0.2, 1, 0.3, 1) both;
+
+  &.success { background: linear-gradient(135deg, #059669, #10B981); }
+  &.error   { background: linear-gradient(135deg, #DC2626, #EF4444); }
+}
+
+// ── Pagination ────────────────────────────────────────
 .pagination {
-  display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9;
-  button { padding: 8px 18px; border-radius: 10px; border: 2px solid #f1f5f9; background: #fff; font-weight: 700; cursor: pointer; transition: 0.3s; &:hover:not(:disabled) { background: #0F172A; color: #fff; } &:disabled { opacity: 0.4; cursor: not-allowed; } }
-  span { font-weight: 700; color: #64748b; }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid $border-light;
+
+  button {
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: 1.5px solid $border-light;
+    background: $white;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: $color-blue-dark;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    &:hover:not(:disabled) { background: $color-blue-dark; border-color: $color-blue-dark; color: $white; }
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
+  }
+
+  span { font-weight: 700; font-size: 0.88rem; color: $text-muted; }
 }
 
-// Toast
-.toast { position: fixed; top: 100px; right: 30px; padding: 15px 30px; border-radius: 12px; font-weight: 800; color: #fff; z-index: 2000; animation: fadeIn 0.3s; &.success { background: #10b981; } &.error { background: #ef4444; } }
+// ── Empty State ───────────────────────────────────────
+.empty-state { text-align: center; padding: 48px; color: $text-muted; font-weight: 600; font-size: 0.95rem; }
 
-// Feedback grid in orders
-.feedback-grid { display: flex; flex-direction: column; gap: 15px; }
-.feedback-card { background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px solid #f1f5f9; .f-header { display: flex; justify-content: space-between; margin-bottom: 10px; } .f-content { color: #475569; font-style: italic; } .f-footer { margin-top: 10px; font-size: 12px; color: #94a3b8; } }
-.empty-state { text-align: center; padding: 40px; color: #94a3b8; font-weight: 600; }
+// ── Animations ────────────────────────────────────────
+.animate      { animation: fadeIn 0.7s cubic-bezier(0.2, 1, 0.3, 1) both; }
+.animate-up   { animation: fadeIn 0.7s cubic-bezier(0.2, 1, 0.3, 1) both; animation-delay: 0.1s; }
+.animate-pop  { animation: popIn  0.4s cubic-bezier(0.2, 1, 0.3, 1) both; }
+
+@keyframes fadeIn  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn   { from { opacity: 0; transform: scale(0.92); }      to { opacity: 1; transform: scale(1); }     }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0);} }
+
+// ── Responsive ────────────────────────────────────────
+@media (max-width: 1024px) {
+  .orders-wrapper { padding: 32px 40px; }
+}
+@media (max-width: 768px) {
+  .orders-wrapper { padding: 24px 20px; }
+  .orders-wrapper .page-header { flex-direction: column; align-items: flex-start; }
+  .orders-wrapper .tabs-container { flex-wrap: wrap; }
+  .orders-wrapper .orders-card { padding: 24px 16px; overflow-x: auto; }
+}

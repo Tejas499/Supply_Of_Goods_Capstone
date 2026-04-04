@@ -17,6 +17,7 @@ import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-o
 
 import { HttpService } from '../services/http.service';
 import { AuthInterceptor } from './auth.interceptor';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { AuthInterceptor } from './auth.interceptor';
     ConsumerGetOrdersComponent,
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     FormsModule,

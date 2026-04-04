@@ -22,7 +22,7 @@ export class DashbaordComponent implements OnInit {
     // Retrieve user data from storage
     this.username = localStorage.getItem('username') || 'User';
     this.role = localStorage.getItem('role') || 'Guest';
-    
+
     // Dynamic Time-based Greeting
     const hour = new Date().getHours();
     if (hour < 12) this.greeting = 'Good Morning';

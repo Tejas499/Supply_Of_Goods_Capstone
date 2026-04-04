@@ -21,14 +21,14 @@ const routes: Routes = [
   {
     path: '',
     component: LandingComponent,
-    pathMatch:'full'
+    pathMatch: 'full'
   },
 
   // Public (no-auth)
   {
     path: 'login',
     component: LoginComponent,
-   
+
   },
   {
     path: 'registration',
