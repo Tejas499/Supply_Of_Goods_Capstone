@@ -36,14 +36,31 @@
       <div class="form-group">
         <label>Password</label>
         <div class="input-container">
-          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="••••••••">
-          <button type="button" class="toggle-eye" (click)="togglePassword()">
-            {{ showPassword ? 'Hide' : 'Show' }}
-          </button>
-        </div>
+  <input [type]="showPassword ? 'text' : 'password'" formControlName="password">
+
+  
         <div *ngIf="itemForm.get('password')?.dirty && itemForm.get('password')?.invalid" class="error-msg">
           Must include Uppercase, Lowercase, Number & Special Character (min 8).
         </div>
+  
+  <!-- Confirm Password -->
+<div class="form-group">
+  <label>Confirm Password</label>
+  <div class="input-container">
+    <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword">
+  </div>
+
+  <!-- Error Messages -->
+  <div *ngIf="itemForm.get('confirmPassword')?.dirty && itemForm.get('confirmPassword')?.invalid" class="error-msg">
+    <span *ngIf="itemForm.get('confirmPassword')?.hasError('required')">Required.</span>
+    <span *ngIf="itemForm.get('confirmPassword')?.hasError('mismatch')">Passwords do not match.</span>
+  </div>
+</div>
+  <!-- REMOVE THE {{ showPassword ? 'Hide' : 'Show' }} HERE -->
+  <button type="button" class="toggle-eye" (click)="togglePassword()" [class.active]="showPassword">
+  </button>
+</div>
+
       </div>
 
       <!-- Role Selection -->

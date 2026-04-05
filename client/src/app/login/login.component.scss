@@ -161,36 +161,37 @@ $error: #E11D48;
     }
 
     // Captcha
+       // Captcha
     .captcha-section {
       .captcha-wrapper {
         display: flex;
-        gap: 12px;
+        gap: 10px; // Slightly reduced gap to save space
         align-items: stretch;
 
         .captcha-display {
-          flex: 1;
+          flex: 0 0 160px; // Fixed width for sum box so it doesn't hog space
           background: linear-gradient(135deg, $color-blue-dark, $color-blue);
           color: $color-sand;
           border-radius: 14px;
           font-family: 'Playfair Display', serif;
           font-weight: 900;
-          font-size: 1.2rem;
+          font-size: 1.1rem; // Slightly smaller font to fit sum better
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 18px;
+          padding: 0 14px;
           min-height: 52px;
-          letter-spacing: 2px;
+          letter-spacing: 1px;
 
           .refresh-btn {
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.7);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
             line-height: 1;
-            padding: 4px;
+            padding: 2px;
 
             &:hover {
               transform: rotate(180deg);
@@ -200,15 +201,23 @@ $error: #E11D48;
         }
 
         input {
-          flex: 0 0 100px;
+          flex: 1; // Allows answer box to take all remaining space
+          min-width: 140px; // Ensures placeholder fits
           text-align: center;
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 0.95rem; // Matched to main input font size for placeholder fit
+          padding: 0 12px;
+          
+          &::placeholder {
+            font-size: 0.85rem; // Smaller placeholder text to ensure it stays in box
+            letter-spacing: 0;
+          }
         }
       }
     }
 
-    .btn-primary {
+
+       .btn-primary {
       width: 100%;
       padding: 16px;
       background: linear-gradient(135deg, $color-blue-dark, $color-blue);
@@ -225,26 +234,29 @@ $error: #E11D48;
       position: relative;
       overflow: hidden;
 
+      // FIX: Ensure the text stays on top of the hover background
+      span {
+        position: relative;
+        z-index: 2; 
+      }
+
       &::after {
         content: '';
         position: absolute;
         inset: 0;
         background: linear-gradient(135deg, $color-sand, $color-sand-dark);
         opacity: 0;
+        z-index: 1; // FIX: Place hover background below text
         transition: opacity 0.35s ease;
       }
 
       &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 8px 28px rgba($color-sand, 0.40);
+        color: $color-blue-dark; // Optional: change text color to dark for better contrast on sand
 
         &::after {
           opacity: 1;
-        }
-
-        span {
-          position: relative;
-          z-index: 1;
         }
       }
 
@@ -254,6 +266,7 @@ $error: #E11D48;
         transform: none;
       }
     }
+
   }
 
   .auth-footer {

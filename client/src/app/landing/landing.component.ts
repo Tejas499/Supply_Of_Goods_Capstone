@@ -42,13 +42,30 @@ constructor(private router: Router ){}
     this.typeEffect();
   }
 
+
+  // ... inside LandingComponent class ...
+isThemeChanging = false;
+
+
+
   ngAfterViewInit() {
     setTimeout(() => this.initScrollObserver(), 100);
   }
 
   toggleTheme() {
+      // 1. Start the transition animation
+  this.isThemeChanging = true;
+
+  // 2. Wait 150ms (the peak of the fade) to swap colors
+  setTimeout(() => {
     this.isDarkMode = !this.isDarkMode;
     localStorage.setItem('flowTheme', this.isDarkMode ? 'dark' : 'light');
+    
+    // 3. End the transition after colors have swapped
+    setTimeout(() => {
+      this.isThemeChanging = false;
+    }, 300);
+  }, 150);
   }
  login(){
     this.router.navigateByUrl('/login');
