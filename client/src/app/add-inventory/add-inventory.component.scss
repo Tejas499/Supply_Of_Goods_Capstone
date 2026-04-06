@@ -1,492 +1,207 @@
-// =============================================
-// FLOW ADD-INVENTORY — add-inventory.component.scss
-// Design System: Sand + Teal | Playfair Display + Inter
-// =============================================
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap');
 
 $color-sand: #E1B382;
 $color-sand-dark: #C89666;
 $color-blue: #2D545E;
 $color-blue-dark: #12343B;
-$white: #FFFFFF;
+$white: #ffffff;
 $border-light: #EAF0F1;
 $text-muted: #8A9FA4;
 $bg-page: #F4F7F8;
 
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin card-base {
+@mixin card {
   background: $white;
   border-radius: 22px;
   border: 1px solid $border-light;
-  box-shadow: 0 4px 24px rgba(18, 52, 59, 0.05);
+  box-shadow: 0 4px 24px rgba(18, 52, 59, 0.06);
 }
 
 .inventory-wrapper {
+  min-height: 100vh;
   padding: 48px 80px;
   background: $bg-page;
-  min-height: 100vh;
   font-family: 'Inter', sans-serif;
+}
 
-  // ── Page Header ──────────────────────────────────
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 40px;
+/* HEADER */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
 
-    .greeting {
-      h1 {
+.greeting h1 {
         font-family: 'Playfair Display', serif;
         font-size: clamp(2rem, 3.5vw, 2.8rem);
         font-weight: 900;
         color: $color-blue-dark;
         margin: 0 0 6px;
         letter-spacing: -0.5px;
-
-        span {
-          color: $color-sand;
-          text-transform: capitalize;
-        }
-      }
-
-      p {
-        color: $text-muted;
-        font-weight: 500;
-        font-size: 0.95rem;
-        margin: 0;
-      }
-    }
-
-    .header-actions {
-      .search-bar {
-        position: relative;
-
-        input {
-          padding: 13px 44px 13px 20px;
-          border-radius: 50px;
-          border: 1.5px solid $border-light;
-          background: $white;
-          font-family: 'Inter', sans-serif;
-          font-size: 0.93rem;
-          font-weight: 500;
-          color: $color-blue-dark;
-          width: 280px;
-          transition: all 0.3s ease;
-
-          &::placeholder {
-            color: #A8BFC3;
-          }
-
-          &:focus {
-            outline: none;
-            border-color: $color-sand;
-            box-shadow: 0 0 0 3px rgba($color-sand, 0.12);
-          }
-        }
-
-        .icon {
-          position: absolute;
-          right: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          font-size: 1rem;
-          pointer-events: none;
-        }
-      }
-    }
-  }
-
-  // ── Content Grid ────────────────────────────────
-  .content-grid {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 28px;
-    align-items: start;
-  }
-
-  // ── Form Card ───────────────────────────────────
-  .form-card {
-    @include card-base;
-    padding: 36px 32px;
-
-    .card-title h3 {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: $color-blue-dark;
-      margin: 0 0 28px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid $border-light;
-    }
-  }
-
-  // ── Table Card ──────────────────────────────────
-  .table-card {
-    @include card-base;
-    padding: 36px 32px;
-  }
-
-  // ── Inputs ──────────────────────────────────────
-  .input-group {
-    margin-bottom: 22px;
-
-    label {
-      display: block;
-      font-weight: 700;
-      font-size: 0.72rem;
-      color: $color-blue-dark;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
-
-    input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 1.5px solid $border-light;
-      background: #F7FAFB;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: $color-blue-dark;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
-
-      &::placeholder {
-        color: #A8BFC3;
-      }
-
-      &:focus {
-        outline: none;
-        border-color: $color-sand;
-        background: $white;
-        box-shadow: 0 0 0 3px rgba($color-sand, 0.12);
-      }
-    }
-  }
-
-  .form-btns {
-    margin-top: 8px;
-  }
-
-  // ── Table ───────────────────────────────────────
-  table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th {
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: $text-muted;
-      border-bottom: 1.5px solid $border-light;
-    }
-
-    td {
-      padding: 18px 16px;
-      border-bottom: 1px solid $border-light;
-      font-size: 0.93rem;
-      color: $color-blue-dark;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      strong {
-        font-weight: 700;
-      }
-    }
-
-    tbody tr {
-      transition: background 0.2s ease;
-
-      &:hover {
-        background: rgba($color-sand, 0.04);
-      }
-    }
-  }
-
-  // ── Stock Indicator ─────────────────────────────
-  .stock-indicator {
-    display: inline-block;
-    padding: 5px 14px;
-    border-radius: 50px;
-    background: rgba(#10B981, 0.12);
-    color: #0D6E52;
-    font-weight: 700;
-    font-size: 0.8rem;
-    letter-spacing: 0.02em;
-
-    &.low {
-      background: rgba(#E11D48, 0.10);
-      color: #9B1235;
-    }
-
-    &.mid {
-      background: rgba($color-sand, 0.18);
-      color: $color-sand-dark;
-    }
-  }
 }
 
-// ── Shared Utilities ──────────────────────────────────
-
-.btn-pri {
-  width: 100%;
-  padding: 14px 20px;
-  background: linear-gradient(135deg, $color-blue-dark, $color-blue);
-  color: $white;
-  border: none;
-  border-radius: 14px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 0.02em;
-
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, $color-sand, $color-sand-dark);
-    box-shadow: 0 6px 22px rgba($color-sand, 0.38);
-    transform: translateY(-1px);
-  }
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+.greeting span {
+  color: $color-sand;
 }
 
-.btn-sec {
-  background: transparent;
-  color: $color-blue-dark;
+.greeting p {
+  margin-top: 6px;
+  color: $text-muted;
+}
+
+.search-bar {
+  position: relative;
+}
+
+.search-bar input {
+  width: 280px;
+  padding: 13px 44px 13px 18px;
+  border-radius: 50px;
   border: 1.5px solid $border-light;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
+  font-weight: 500;
+}
 
-  &:hover {
-    border-color: $color-sand;
-    color: $color-sand-dark;
-    background: rgba($color-sand, 0.06);
-  }
+.search-bar .icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* GRID */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* TABLE CARD */
+.table-card {
+  @include card;
+  padding: 32px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px 10px;
+  font-size: 0.75rem;
+  color: $text-muted;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid $border-light;
+}
+
+td {
+  padding: 14px 10px;
+  border-bottom: 1px solid $border-light;
+}
+
+tbody tr:hover {
+  background: rgba($color-sand, 0.05);
 }
 
 .m-badge {
-  background: rgba($color-blue, 0.08);
-  color: $color-blue;
+  background: rgba($color-blue, 0.1);
   padding: 4px 12px;
   border-radius: 6px;
   font-weight: 700;
   font-size: 0.8rem;
+  color: $color-blue;
 }
 
-// ── Glass Overlay / Modal ─────────────────────────────
-.glass-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba($color-blue-dark, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 1000;
-  @include flex-center;
-}
+/* STOCK BADGE */
+/* STOCK BADGE — REFORMATTED */
+.stock-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-.confirm-modal {
-  background: $white;
-  padding: 44px;
-  border-radius: 28px;
-  width: 440px;
-  text-align: center;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  min-width: 110px;
+  height: 32px;
+  padding: 0 14px;
 
-  h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: $color-blue-dark;
-    margin: 0 0 12px;
+  border-radius: 999px;
+  background: rgba(#10b981, 0.15);
+  color: #065f46;
+
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+
+  &.mid {
+    background: rgba($color-sand, 0.22);
+    color: $color-sand-dark;
   }
 
-  p {
-    color: $text-muted;
-    font-size: 0.95rem;
-    margin: 0 0 28px;
-    line-height: 1.6;
+  &.low {
+    background: rgba(#ef4444, 0.16);
+    color: #991b1b;
   }
 }
 
-.modal-btns {
+/* PAGINATION */
+.pagination {
   display: flex;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
+  margin-top: 24px;
 }
 
-// ── Toast ─────────────────────────────────────────────
+.pagination button {
+  padding: 8px 20px;
+  border-radius: 10px;
+  border: 1px solid $border-light;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* TOAST */
 .toast {
   position: fixed;
   top: 88px;
   right: 32px;
   padding: 14px 28px;
   border-radius: 14px;
-  color: $white;
-  font-family: 'Inter', sans-serif;
+  color: white;
   font-weight: 700;
-  font-size: 0.9rem;
-  z-index: 1100;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  animation: toastIn 0.35s cubic-bezier(0.2, 1, 0.3, 1) both;
+  z-index: 2000;
 
   &.success {
-    background: linear-gradient(135deg, #059669, #10B981);
+    background: linear-gradient(135deg, #059669, #10b981);
   }
 
   &.error {
-    background: linear-gradient(135deg, #DC2626, #EF4444);
+    background: linear-gradient(135deg, #dc2626, #ef4444);
   }
 }
 
-// ── Pagination ────────────────────────────────────────
-.pagination {
+/* MODAL */
+.glass-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba($color-blue-dark, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid $border-light;
-
-  button {
-    padding: 9px 20px;
-    border-radius: 10px;
-    border: 1.5px solid $border-light;
-    background: $white;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 0.88rem;
-    color: $color-blue-dark;
-    cursor: pointer;
-    transition: all 0.25s ease;
-
-    &:hover:not(:disabled) {
-      background: $color-blue-dark;
-      border-color: $color-blue-dark;
-      color: $white;
-    }
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-  }
-
-  span {
-    font-weight: 700;
-    font-size: 0.88rem;
-    color: $text-muted;
-  }
 }
 
-// ── Animations ────────────────────────────────────────
-.animate {
-  animation: fadeIn 0.7s cubic-bezier(0.2, 1, 0.3, 1) both;
+.confirm-modal {
+  @include card;
+  padding: 44px;
+  text-align: center;
+  width: 440px;
 }
 
-.animate-left {
-  animation: slideLeft 0.7s cubic-bezier(0.2, 1, 0.3, 1) both;
-}
-
-.animate-right {
-  animation: slideRight 0.7s cubic-bezier(0.2, 1, 0.3, 1) both;
-  animation-delay: 0.1s;
-}
-
-.animate-pop {
-  animation: popIn 0.4s cubic-bezier(0.2, 1, 0.3, 1) both;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-28px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideRight {
-  from {
-    opacity: 0;
-    transform: translateX(28px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-// ── Responsive ────────────────────────────────────────
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .inventory-wrapper {
     padding: 32px 40px;
-  }
-
-  .inventory-wrapper .content-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -495,13 +210,13 @@ $bg-page: #F4F7F8;
     padding: 24px 20px;
   }
 
-  .inventory-wrapper .page-header {
+  .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .inventory-wrapper .header-actions .search-bar input {
+  .search-bar input {
     width: 100%;
   }
 }

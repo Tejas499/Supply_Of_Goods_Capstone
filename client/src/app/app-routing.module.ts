@@ -13,13 +13,18 @@ import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-o
 
 import { AuthGuard } from './auth.guard';
 import { LandingComponent } from './landing/landing.component';
+import { IntroAnimationComponent } from './intro-animation/intro-animation.component';
 // import { NoAuthGuard } from './auth.guard';
 
 const routes: Routes = [
 
+  // {path:'',
+  //   component:IntroAnimationComponent
+  // },
+
   // ✅ DEFAULT PATH → Landing Component
   {
-    path: '',
+    path: 'landing',
     component: LandingComponent,
     pathMatch: 'full'
   },
@@ -88,13 +93,16 @@ const routes: Routes = [
   // ✅ Wildcard → back to landing
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'landing',
     pathMatch: 'full'
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+  scrollPositionRestoration: 'enabled',
+  anchorScrolling: 'enabled'
+})],
   exports: [RouterModule],
 })
 export class AppRoutingModule { }

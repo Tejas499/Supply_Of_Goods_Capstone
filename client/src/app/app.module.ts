@@ -18,11 +18,15 @@ import { ConsumerGetOrdersComponent } from './consumer-get-orders/consumer-get-o
 import { HttpService } from '../services/http.service';
 import { AuthInterceptor } from './auth.interceptor';
 import { CommonModule } from '@angular/common';
+import { LandingComponent } from './landing/landing.component';
+import { IntroAnimationComponent } from './intro-animation/intro-animation.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
+   
+    LandingComponent,
     RegistrationComponent,
     DashbaordComponent,
     CreateProductsComponent,

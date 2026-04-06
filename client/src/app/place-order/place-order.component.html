@@ -77,29 +77,29 @@
       <div class="panel-card shadow">
         <div class="panel-header">
           <h3>Create Order</h3>
-          <button class="close-btn" (click)="closeOrderForm()">✕</button>
         </div>
         
         <div class="selected-product-info">
           <h4>{{ selectedProduct?.name }}</h4>
           <span class="m-sub">by {{ selectedProduct?.manufacturer?.username }}</span>
         </div>
-
+        
         <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
           <div class="input-group">
             <label>Quantity to Procure</label>
             <input type="number" formControlName="quantity" (input)="calculateTotal()" placeholder="Enter quantity">
             <small *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="err">Required (Min 1)</small>
           </div>
-
+          
           <div class="summary-box">
             <div class="sum-row"><span>Unit Price:</span> <strong>₹{{ selectedProduct?.price }}</strong></div>
             <div class="sum-row total"><span>Total Cost:</span> <strong>₹{{ totalPrice | number }}</strong></div>
           </div>
-
+          
           <button type="submit" class="btn-pri w-100" [disabled]="itemForm.invalid">
             Place Procurement Order
           </button>
+          <button class="btn-sec" style="text-decoration-color: red;" (click)="closeOrderForm()">Cancel Ordering</button>
         </form>
       </div>
     </div>

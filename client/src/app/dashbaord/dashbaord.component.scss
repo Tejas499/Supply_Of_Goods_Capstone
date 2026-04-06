@@ -15,10 +15,15 @@ $text-muted: #8A9FA4;
 $bg-page: #F4F7F8;
 
 .dash-container {
-  padding: 48px 80px;
+
+  width: 100%;        // full width
+  max-width: 100%;    // prevent Bootstrap constraints
+  margin: 0;          // no side margins
+  padding: 48px 24px; // reduce side padding so content fills more
   background: $bg-page;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+
 
   // ── Welcome Banner ───────────────────────────────
   .welcome-banner {

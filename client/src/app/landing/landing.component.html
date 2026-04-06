@@ -11,9 +11,10 @@
   <nav class="navbar" [class.scrolled]="isScrolled">
     <div class="logo">FLOW<span>.</span></div>
     <div class="nav-links">
-      <a href="#features">Solutions</a>
-      <a href="#feedback">Reviews</a>
-      <a href="#contact">Contact</a>
+      <a [routerLink]="['/landing']" fragment="features">Solutions</a>
+<a [routerLink]="['/landing']" fragment="feedback">Reviews</a>
+<a [routerLink]="['/landing']" fragment="contact">Contact</a>
+
        <button (click)="login()" class="btn-primary">Login</button>
      <button (click)="registration()" class="btn-primary">Get Started</button>
     </div>

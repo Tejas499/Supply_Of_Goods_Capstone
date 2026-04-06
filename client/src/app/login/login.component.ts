@@ -69,6 +69,7 @@ export class LoginComponent implements OnInit {
         next: (res: any) => {
           this.authService.saveToken(res.token);
           this.authService.SetRole(res.role);
+          this.authService.SetUsername(this.itemForm.value.username);
           this.authService.saveUserId(String(res.userId));
 
           // Replace current history entry so back button cannot return to /login

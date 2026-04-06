@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap');
+
+$sand: #E1B382;
+$sand-dark: #C89666;
+$blue-dark: #12343B;
+$white: #FFFFFF;
+
+// ── Full-screen dark canvas ───────────────────────────
+.intro-screen {
+position: fixed;
+inset: 0;
+background: #080F11;
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+
+// Subtle grain texture via pseudo-element
+&::before {
+content: '';
+position: absolute;
+inset: 0;
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+pointer-events: none;
+opacity: 0.6;
+}
+
+// Radial glow center
+&::after {
+content: '';
+position: absolute;
+inset: 0;
+background: radial-gradient(ellipse 60% 50% at 50% 50%,
+rgba(#2D545E, 0.18) 0%,
+transparent 70%);
+pointer-events: none;
+}
+
+// Fade out transition to landing
+&.fade-out {
+animation: screenFadeOut 0.8s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+}
+
+// ── Skip button ──────────────────────────────────────
+.skip-btn {
+position: absolute;
+top: 28px;
+right: 36px;
+background: transparent;
+border: 1px solid rgba($white, 0.15);
+color: rgba($white, 0.4);
+font-family: 'Inter', sans-serif;
+font-size: 0.78rem;
+font-weight: 600;
+letter-spacing: 1px;
+padding: 8px 18px;
+border-radius: 50px;
+cursor: pointer;
+transition: all 0.25s;
+z-index: 10;
+
+&:hover {
+color: $sand;
+border-color: rgba($sand, 0.4);
+background: rgba($sand, 0.05);
+}
+}
+
+// ── Progress dots ─────────────────────────────────────
+.progress-dots {
+position: absolute;
+bottom: 44px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 10px;
+z-index: 10;
+
+.dot {
+width: 6px;
+height: 6px;
+border-radius: 50%;
+background: rgba($white, 0.18);
+transition: all 0.4s ease;
+
+&.active {
+background: $sand;
+transform: scale(1.4);
+box-shadow: 0 0 8px rgba($sand, 0.5);
+}
+
+&.done {
+background: rgba($sand, 0.4);
+}
+}
+}
+
+// ── Stage wrapper ─────────────────────────────────────
+.stage-wrap {
+text-align: center;
+position: relative;
+z-index: 5;
+width: 100%;
+padding: 0 40px;
+}
+
+// ── Stage (the animated unit) ─────────────────────────
+.stage {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 18px;
+
+// ENTER: slide up + fade in
+&.enter {
+animation: stageEnter 0.6s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+}
+
+// HOLD: just stays visible (enter anim left it fully visible)
+&.hold {
+opacity: 1;
+transform: translateY(0);
+}
+
+// EXIT: slide up + fade out
+&.exit {
+animation: stageExit 0.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+}
+
+// ── Icon ──────────────────────────────────────────────
+.stage-icon {
+font-size: clamp(3rem, 6vw, 4.5rem);
+line-height: 1;
+filter: drop-shadow(0 0 20px rgba($sand, 0.25));
+animation: iconFloat 3s ease-in-out infinite;
+}
+
+// ── Main phrase ───────────────────────────────────────
+.stage-phrase {
+font-family: 'Playfair Display', serif;
+font-size: clamp(2.8rem, 7vw, 5.5rem);
+font-weight: 900;
+color: $white;
+margin: 0;
+letter-spacing: -1.5px;
+line-height: 1.05;
+
+// Subtle text gradient
+background: linear-gradient(135deg, $white 40%, rgba($sand, 0.7) 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+// ── Sub text ──────────────────────────────────────────
+.stage-sub {
+font-family: 'Inter', sans-serif;
+font-size: clamp(0.9rem, 2vw, 1.1rem);
+font-weight: 300;
+color: rgba($white, 0.38);
+letter-spacing: 3px;
+text-transform: uppercase;
+margin: 0;
+}
+
+// ── Animated underline ────────────────────────────────
+.underline {
+height: 2px;
+width: 0;
+background: linear-gradient(90deg, transparent, $sand, transparent);
+border-radius: 2px;
+transition: width 1.6s cubic-bezier(0.2, 1, 0.3, 1);
+margin-top: 8px;
+
+&.grow {
+width: clamp(160px, 30vw, 320px);
+}
+}
+
+// ── Logo reveal ───────────────────────────────────────
+.logo-reveal {
+text-align: center;
+position: relative;
+z-index: 5;
+opacity: 0;
+transform: scale(0.88);
+
+&.logo-in {
+animation: logoReveal 0.9s cubic-bezier(0.2, 1, 0.3, 1) 0.1s forwards;
+}
+
+.logo-text {
+font-family: 'Playfair Display', serif;
+font-size: clamp(3rem, 8vw, 6rem);
+font-weight: 900;
+color: $white;
+letter-spacing: -2px;
+line-height: 1;
+
+span {
+color: $sand;
+}
+}
+/* FLOW text */
+.flow-text {
+display: inline-block;
+white-space: nowrap;
+overflow: hidden;
+
+/* Gradient text */
+background: linear-gradient(90deg, #F5A623, #FFD700, #FFF176);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+
+/* Glow */
+text-shadow:
+0 0 8px rgba(232, 222, 162, 0.7),
+0 0 16px rgba(205, 198, 161, 0.6);
+
+/* Cursor */
+border-right: 3px solid #9A957D;
+}
+
+/* Typing animation */
+.typing {
+width: 0;
+animation: typing 1s steps(5, end) forwards, blink 0.7s infinite;
+}
+
+.logo-tagline {
+font-family: 'Inter', sans-serif;
+font-size: clamp(0.8rem, 1.8vw, 1rem);
+font-weight: 400;
+color: rgba($white, 0.35);
+letter-spacing: 4px;
+text-transform: uppercase;
+margin-top: 16px;
+animation: taglineFade 0.8s ease 0.7s forwards;
+opacity: 0;
+}
+}
+
+// ── Keyframes ─────────────────────────────────────────
+
+@keyframes stageEnter {
+from {
+opacity: 0;
+transform: translateY(40px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes stageExit {
+from {
+opacity: 1;
+transform: translateY(0);
+}
+to {
+opacity: 0;
+transform: translateY(-36px);
+}
+}
+
+@keyframes logoReveal {
+from {
+opacity: 0;
+transform: scale(0.88);
+}
+to {
+opacity: 1;
+transform: scale(1);
+}
+}
+
+@keyframes taglineFade {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes iconFloat {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-8px); }
+}
+
+@keyframes screenFadeOut {
+from { opacity: 1; }
+to { opacity: 0; pointer-events: none; }
+}
+@keyframes typing {
+from { width: 0 }
+to { width: 5ch } /* FLOW. = 5 chars */
+}
+
+@keyframes blink {
+50% { border-color: transparent }
+}

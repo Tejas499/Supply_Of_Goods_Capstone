@@ -1,0 +1,42 @@
+<div class="intro-screen" [class.fade-out]="fadeOut">
+
+<!-- Skip button -->
+<button class="skip-btn" (click)="skip()">Skip-></button>
+
+<!-- Progress dots -->
+<div class="progress-dots">
+<span
+*ngFor="let s of stages; let i = index"
+class="dot"
+[class.active]="i === currentStage"
+[class.done]="i < currentStage">
+</span>
+</div>
+
+<!-- Stage content -->
+<div class="stage-wrap" *ngIf="!showLogo">
+<div
+class="stage"
+[class.enter]="phase === 'enter'"
+[class.hold]="phase === 'hold'"
+[class.exit]="phase === 'exit'">
+
+<div class="stage-icon">{{ stages[currentStage].icon }}</div>
+<h1 class="stage-phrase">{{ stages[currentStage].phrase }}</h1>
+<p class="stage-sub">{{ stages[currentStage].sub }}</p>
+
+<!-- Animated line under text -->
+<div class="underline" [class.grow]="phase === 'hold' || phase === 'enter'"></div>
+</div>
+</div>
+
+<!-- Logo reveal -->
+<div class="logo-reveal" *ngIf="showLogo" [class.logo-in]="showLogo">
+<div class="logo-text">Requires A
+<br>
+<div class="flow-text typing">FLOW.</div>
+</div>
+<p class="logo-tagline">From Factory Floor to Your Door.</p>
+</div>
+
+</div>

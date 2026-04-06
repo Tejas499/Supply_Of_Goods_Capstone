@@ -7,7 +7,12 @@
     </div>
     <div class="header-actions">
       <div class="search-bar">
-        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Search products...">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()"
+          placeholder="Search products..."
+        />
         <span class="icon">🔍</span>
       </div>
     </div>
@@ -27,33 +32,10 @@
 
   <!-- Main Content -->
   <div class="content-grid">
-    <!-- Form Area -->
-    <div class="form-card animate-left">
-      <div class="card-title">
-        <h3>{{ editingId ? 'Update Stock' : 'Add New Record' }}</h3>
-      </div>
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        <div class="input-group">
-          <label>Product ID / Name</label>
-          <input type="text" formControlName="productId" [placeholder]="editingId ? 'Updating...' : 'Enter ID'">
-        </div>
-        <div class="input-group">
-          <label>Quantity</label>
-          <input type="number" formControlName="stockQuantity" placeholder="0">
-        </div>
-        <div class="form-btns">
-          <button type="submit" class="btn-pri" [disabled]="itemForm.invalid">
-            {{ editingId ? 'Update Inventory' : 'Add to Warehouse' }}
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Table Area -->
     <div class="table-card animate-right">
       <div *ngIf="successMsg" class="toast success">{{ successMsg }}</div>
       <div *ngIf="errorMsg" class="toast error">{{ errorMsg }}</div>
-      
+
       <table>
         <thead>
           <tr>
@@ -65,9 +47,19 @@
         <tbody>
           <tr *ngFor="let inv of paged">
             <td><strong>{{ inv.product?.name }}</strong></td>
-            <td><span class="m-badge">{{ inv.product?.manufacturer?.username }}</span></td>
             <td>
-              <div class="stock-indicator" [ngClass]="{'low': inv.stockQuantity < 5, 'mid': inv.stockQuantity >= 5 && inv.stockQuantity < 20}">
+              <span class="m-badge">
+                {{ inv.product?.manufacturer?.username }}
+              </span>
+            </td>
+            <td>
+              <div
+                class="stock-indicator"
+                [ngClass]="{
+                  low: inv.stockQuantity < 5,
+                  mid: inv.stockQuantity >= 5 && inv.stockQuantity < 20
+                }"
+              >
                 {{ inv.stockQuantity }} Units
               </div>
             </td>
@@ -75,11 +67,14 @@
         </tbody>
       </table>
 
-      <!-- Pagination -->
       <div class="pagination" *ngIf="totalPages > 1">
-        <button (click)="page = page - 1" [disabled]="page === 1">Prev</button>
-        <span>Page {{page}} of {{totalPages}}</span>
-        <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
+        <button (click)="page = page - 1" [disabled]="page === 1">
+          Prev
+        </button>
+        <span>Page {{ page }} of {{ totalPages }}</span>
+        <button (click)="page = page + 1" [disabled]="page === totalPages">
+          Next
+        </button>
       </div>
     </div>
   </div>

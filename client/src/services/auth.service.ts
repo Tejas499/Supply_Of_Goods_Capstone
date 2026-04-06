@@ -11,6 +11,7 @@ export class AuthService {
   // Reactive streams — AppComponent subscribes to these
   private loggedIn$ = new BehaviorSubject<boolean>(!!localStorage.getItem('token'));
   private role$    = new BehaviorSubject<string | null>(localStorage.getItem('role'));
+  private username$    = new BehaviorSubject<string | null>(localStorage.getItem('username'));
 
   isLoggedIn$ = this.loggedIn$.asObservable();
   currentRole$ = this.role$.asObservable();
@@ -26,6 +27,10 @@ export class AuthService {
   SetRole(role: any) {
     localStorage.setItem('role', role);
     this.role$.next(role);
+  }
+  SetUsername(username: any) {
+    localStorage.setItem('username', username);
+    this.username$.next(username);
   }
 
   saveUserId(userid: string) {
@@ -49,6 +54,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('userId');
+    localStorage.removeItem('username');
     this.token = null;
     this.loggedIn$.next(false);
     this.role$.next(null);
