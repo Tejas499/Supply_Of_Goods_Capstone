@@ -25,7 +25,7 @@ import { IntroAnimationComponent } from './intro-animation/intro-animation.compo
   declarations: [
     AppComponent,
     LoginComponent,
-   
+   IntroAnimationComponent,
     LandingComponent,
     RegistrationComponent,
     DashbaordComponent,

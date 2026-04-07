@@ -16,9 +16,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.edutech.supply_of_goods_management.dto.LoginRequest;
 import com.edutech.supply_of_goods_management.dto.LoginResponse;
+import com.edutech.supply_of_goods_management.dto.OtpVerifyRequest;
 import com.edutech.supply_of_goods_management.entity.User;
 import com.edutech.supply_of_goods_management.jwt.JwtUtil;
+import com.edutech.supply_of_goods_management.service.OtpService;
 import com.edutech.supply_of_goods_management.service.UserService;
+
+import java.util.Map;
 
 
 @RestController
@@ -34,23 +38,26 @@ public class RegisterAndLoginController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/register")
-public ResponseEntity<?> register(@RequestBody User user) {
+    @Autowired
+    private OtpService otpService;
 
-    // ✅ Check duplicate
-    if (userService.existsByUsernameOrEmail(user.getUsername(), user.getEmail())) {
-        throw new ResponseStatusException(
-            HttpStatus.BAD_REQUEST,
-            "Username or Email already exists"
-        );
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        if (userService.existsByUsernameOrEmail(user.getUsername(), user.getEmail())) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Username or Email already exists"
+            );
+        }
+        User saved = userService.registerUser(user);
+        return ResponseEntity.ok(saved);
     }
 
-    User saved = userService.registerUser(user);
-    return ResponseEntity.ok(saved);
-}
-
+    /**
+     * Step 1: Validate credentials → generate & send OTP to registered email.
+     */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -60,9 +67,37 @@ public ResponseEntity<?> register(@RequestBody User user) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
         }
 
-        UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
-        String token = jwtUtil.generateToken(loginRequest.getUsername());
         User user = userService.findByUsername(loginRequest.getUsername());
+        otpService.generateAndSendOtp(user.getUsername(), user.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+            "otpRequired", true,
+            "message", "OTP sent to your registered email address"
+        ));
+    }
+
+    /**
+     * Step 2: Verify OTP → return JWT token.
+     */
+    @PostMapping("/verify-otp")
+    public ResponseEntity<LoginResponse> verifyOtp(@RequestBody OtpVerifyRequest request) {
+        try {
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    request.getUsername(), request.getPassword())
+            );
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+
+        boolean valid = otpService.verifyOtp(request.getUsername(), request.getOtp());
+        if (!valid) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired OTP");
+        }
+
+        UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
+        String token = jwtUtil.generateToken(request.getUsername());
+        User user = userService.findByUsername(request.getUsername());
 
         LoginResponse response = new LoginResponse(
             user.getId(), token, user.getUsername(), user.getEmail(), user.getRole()

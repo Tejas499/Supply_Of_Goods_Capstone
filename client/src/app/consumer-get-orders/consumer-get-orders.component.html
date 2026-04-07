@@ -11,7 +11,7 @@
         <span class="icon">🔍</span>
       </div>
       <select class="status-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
-        <option value="">All Status</option>
+        <option value="">All Statuses</option>
         <option value="ORDER PLACED">Order Placed</option>
         <option value="IN PROGRESS">In Progress</option>
         <option value="OUT FOR DELIVERY">Out for Delivery</option>
@@ -82,6 +82,7 @@
             <button class="btn-feedback" *ngIf="canLeaveFeedback(o)" (click)="openFeedback(o)">💬 Feedback</button>
             <span class="txt-muted" *ngIf="o.status === 'IN PROGRESS'">Processing...</span>
             <span class="txt-danger" *ngIf="o.status === 'CANCELLED'">Closed</span>
+            <button class="btn-invoice" *ngIf="o.status === 'DELIVERED'" (click)="generateInvoice(o)" title="Download Invoice">🧾 Invoice</button>
           </td>
         </tr>
       </tbody>

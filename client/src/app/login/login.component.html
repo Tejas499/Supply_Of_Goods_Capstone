@@ -1,14 +1,20 @@
+
+
+
+
 <div class="auth-wrapper">
   <div class="auth-card animate">
     <div class="auth-header">
       <div class="logo" routerLink="/">FLOW<span>.</span></div>
-      <h2>Welcome Back</h2>
-      <p>Securely manage your goods and distribution.</p>
+      <h2>{{ otpStep ? 'Verify OTP' : 'Welcome Back' }}</h2>
+      <p>{{ otpStep ? 'Enter the OTP sent to your email.' : 'Securely manage your goods and distribution.' }}</p>
     </div>
 
     <div *ngIf="errorMsg" class="server-error">{{ errorMsg }}</div>
+    <div *ngIf="successMsg && !errorMsg" class="server-success">{{ successMsg }}</div>
 
-    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="auth-form">
+    <!-- ── Step 1: Login Form ── -->
+    <form *ngIf="!otpStep" [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="auth-form">
 
       <!-- Username -->
       <div class="form-group">
@@ -48,12 +54,35 @@
       </div>
 
       <!-- Login Button -->
-      <button type="submit" class="btn-primary" [disabled]="itemForm.invalid || !isCaptchaValid">
-        <span>Login to Flow</span>
+      <button type="submit" class="btn-primary" [disabled]="itemForm.invalid || !isCaptchaValid || isLoading">
+        <span>{{ isLoading ? 'Sending OTP...' : 'Login to Flow' }}</span>
       </button>
     </form>
 
-    <div class="auth-footer">
+    <!-- ── Step 2: OTP Verification Form ── -->
+    <form *ngIf="otpStep" [formGroup]="otpForm" (ngSubmit)="onVerifyOtp()" class="auth-form">
+
+      <div class="form-group">
+        <label>One-Time Password (OTP)</label>
+        <div class="input-container">
+          <input type="text" formControlName="otp" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="one-time-code">
+        </div>
+        <div *ngIf="otpForm.get('otp')?.invalid && otpForm.get('otp')?.touched" class="error-msg">
+          Please enter the 6-digit OTP.
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="otpForm.invalid || isLoading">
+        <span>{{ isLoading ? 'Verifying...' : 'Verify OTP' }}</span>
+      </button>
+
+      <div class="otp-actions">
+        <button type="button" class="btn-link" (click)="onResendOtp()" [disabled]="isLoading">Resend OTP</button>
+        <button type="button" class="btn-link" (click)="goBack()">← Back to Login</button>
+      </div>
+    </form>
+
+    <div class="auth-footer" *ngIf="!otpStep">
       Don't have an account?
       <a [routerLink]="['/registration']">Register Now</a>
     </div>

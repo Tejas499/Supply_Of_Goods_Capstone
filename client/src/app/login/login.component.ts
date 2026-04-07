@@ -13,11 +13,19 @@ export class LoginComponent implements OnInit {
   itemForm!: FormGroup;
   errorMsg: string = '';
 
+  otpForm!: FormGroup;
+  // errorMsg: string = '';
+  successMsg: string = '';
+
   num1: number = 0;
   num2: number = 0;
   operator: string = '';
   captchaAnswer: number = 0;
   isCaptchaValid: boolean = false;
+
+  // OTP step control
+  otpStep: boolean = false;
+  isLoading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -34,6 +42,10 @@ export class LoginComponent implements OnInit {
       captcha: ['', Validators.required],
     });
     this.generateCaptcha();
+
+    this.otpForm = this.fb.group({
+      otp:['', Validators.required]
+    });
 
     // Show a friendly message when the interceptor auto-redirected here
     const reason = this.route.snapshot.queryParamMap.get('reason');
@@ -63,23 +75,88 @@ export class LoginComponent implements OnInit {
     this.isCaptchaValid = Number(value) === this.captchaAnswer;
   }
 
-  onSubmit(): void {
-    if (this.itemForm.valid) {
-      this.httpService.Login(this.itemForm.value).subscribe({
-        next: (res: any) => {
-          this.authService.saveToken(res.token);
-          this.authService.SetRole(res.role);
-          this.authService.SetUsername(this.itemForm.value.username);
-          this.authService.saveUserId(String(res.userId));
+  // onSubmit(): void {
+  //   if (this.itemForm.valid) {
+  //     this.httpService.Login(this.itemForm.value).subscribe({
+  //       next: (res: any) => {
+  //         this.authService.saveToken(res.token);
+  //         this.authService.SetRole(res.role);
+  //         this.authService.SetUsername(this.itemForm.value.username);
+  //         this.authService.saveUserId(String(res.userId));
 
-          // Replace current history entry so back button cannot return to /login
-          this.router.navigate(['/dashboard'], { replaceUrl: true });
+  //         // Replace current history entry so back button cannot return to /login
+  //         this.router.navigate(['/dashboard'], { replaceUrl: true });
+  //       },
+  //       error: () => {
+  //         this.errorMsg = 'Invalid username or password.';
+  //         this.generateCaptcha();
+  //       }
+  //     });
+  //   }
+  // }
+  onSubmit(): void {
+    if (this.itemForm.valid && this.isCaptchaValid) {
+      this.isLoading = true;
+      this.errorMsg = '';
+      this.httpService.Login({
+        username: this.itemForm.value.username,
+        password: this.itemForm.value.password
+      }).subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
+          if (res.otpRequired) {
+            this.otpStep = true;
+            this.successMsg = 'OTP sent to your registered email address. Valid for 5 minutes.';
+          }
         },
         error: () => {
+          this.isLoading = false;
           this.errorMsg = 'Invalid username or password.';
           this.generateCaptcha();
         }
       });
     }
+  }
+
+  onVerifyOtp(): void {
+    if (this.otpForm.valid) {
+      this.isLoading = true;
+      this.errorMsg = '';
+      const payload = {
+        username: this.itemForm.value.username,
+        password: this.itemForm.value.password,
+        otp: this.otpForm.value.otp
+      };
+      this.httpService.VerifyOtp(payload).subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
+          this.authService.saveToken(res.token);
+          this.authService.SetRole(res.role);
+          this.authService.SetUsername(this.itemForm.value.username);
+          this.authService.saveUserId(String(res.userId));
+          this.router.navigate(['/dashboard'], { replaceUrl: true });
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          this.errorMsg = err?.error?.message || 'Invalid or expired OTP. Please try again.';
+          this.otpForm.reset();
+        }
+      });
+    }
+  }
+
+  onResendOtp(): void {
+    this.errorMsg = '';
+    this.successMsg = '';
+    this.otpForm.reset();
+    this.onSubmit();
+  }
+
+  goBack(): void {
+    this.otpStep = false;
+    this.errorMsg = '';
+    this.successMsg = '';
+    this.otpForm.reset();
+    this.generateCaptcha();
   }
 }

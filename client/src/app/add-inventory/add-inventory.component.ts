@@ -18,6 +18,14 @@ export class AddInventoryComponent implements OnInit {
   showConfirm = false; confirmMsg = ''; confirmAction: any = null;
   page = 1; pageSize = 5;
 
+  // ── Low stock alert ─────────────────────────────────
+  LOW_STOCK_THRESHOLD = 10;
+  get lowStockItems(): any[] {
+    return this.inventories.filter(i => i.stockQuantity <= this.LOW_STOCK_THRESHOLD && i.stockQuantity >= 0);
+  }
+  get hasLowStock(): boolean { return this.lowStockItems.length > 0; }
+  dismissedAlert = false;
+
   constructor(private fb: FormBuilder, private httpService: HttpService) {}
 
   ngOnInit(): void {

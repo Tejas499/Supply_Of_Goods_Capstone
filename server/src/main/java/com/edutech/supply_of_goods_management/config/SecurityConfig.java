@@ -39,7 +39,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-                .antMatchers("/api/user/register", "/api/user/login").permitAll()
+                // .antMatchers("/api/user/register", "/api/user/login").permitAll()
+                .antMatchers("/api/user/register", "/api/user/login", "/api/user/verify-otp").permitAll()
 
                 // Payment — public (Razorpay callback needs no auth)
                 .antMatchers("/payment/**").permitAll()

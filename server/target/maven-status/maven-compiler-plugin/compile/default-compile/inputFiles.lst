@@ -1,6 +1,7 @@
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/service/FeedbackService.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/dto/LoginResponse.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/entity/Inventory.java
+/home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/dto/OtpVerifyRequest.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/config/SecurityConfig.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/jwt/JwtRequestFilter.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/repository/OrderRepository.java
@@ -12,6 +13,7 @@
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/entity/Product.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/repository/ProductRepository.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/entity/Order.java
+/home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/service/OtpService.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/config/Configurations.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/controller/PaymentController.java
 /home/coder/app/server/src/main/java/com/edutech/supply_of_goods_management/controller/RegisterAndLoginController.java

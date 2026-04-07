@@ -50,17 +50,18 @@ export class HttpService {
   cancelConsumerOrder(id: any): Observable<any> { return this.http.put(`${this.serverName}/api/consumers/order/${id}/cancel`, null, { headers: this.h() }); }
   addConsumerFeedBack(id: any, uId: any, d: any): Observable<any> { return this.http.post(`${this.serverName}/api/consumers/order/${id}/feedback?userId=${uId}`, d, { headers: this.h() }); }
   markConsumerOrderReceived(id: any, userId: any): Observable<any> {
-  return this.http.put(
-    `${this.serverName}/api/consumers/order/${id}/received?userId=${userId}`,
-    null,
-    { headers: this.h() }
-  );
-}
+    return this.http.put(
+      `${this.serverName}/api/consumers/order/${id}/received?userId=${userId}`,
+      null,
+      { headers: this.h() }
+    );
+  }
   // Keep for backward compat
   getOrderByWholesalers(userId: any): Observable<any> { return this.getPlacedOrders(userId); }
 
   // ── AUTH ─────────────────────────────────────────────────────
   Login(d: any): Observable<any> { return this.http.post(`${this.serverName}/api/user/login`, d, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }); }
+  VerifyOtp(d: any): Observable<any> { return this.http.post(`${this.serverName}/api/user/verify-otp`, d, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }); }
   registerUser(d: any): Observable<any> { return this.http.post(`${this.serverName}/api/user/register`, d, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }); }
   // checkUserExists(d: any): Observable<any> { return this.http.post(`${this.serverName}/api/user/register`, d, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }); }
 

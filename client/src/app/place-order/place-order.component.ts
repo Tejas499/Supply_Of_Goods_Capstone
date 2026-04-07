@@ -60,7 +60,7 @@ export class PlaceOrderComponent implements OnInit {
     this.errorMsg = ''; this.successMsg = '';
   }
 
-  calculateTotal(): void { if (this.selectedProduct) { this.totalPrice = this.itemForm.value.quantity * this.selectedProduct.price; } }
+  calculateTotal(): void { if (this.selectedProduct) { this.totalPrice = this.itemForm.value.quantity * this.selectedProduct.price+((this.itemForm.value.quantity * this.selectedProduct.price)*0.18); } }
 
   closeOrderForm(): void { this.showOrderForm = false; this.selectedProduct = null; this.itemForm.reset(); }
 

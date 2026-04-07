@@ -5,10 +5,16 @@
       <h1>Hello, <span>{{ userName }}</span></h1>
       <p>Browse manufacturer catalogs and manage your inventory procurement.</p>
     </div>
+
     <div class="header-actions">
       <div class="search-bar">
-        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Search products or manufacturers...">
-        <span class="icon"> </span>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()"
+          placeholder="Search products or manufacturers..."
+        />
+        <span class="icon"></span>
       </div>
     </div>
   </header>
@@ -20,86 +26,110 @@
       <p>{{ confirmMsg }}</p>
       <div class="modal-btns">
         <button class="btn-sec" (click)="onCancel()">Review Order</button>
-        <button class="btn-pri" (click)="onConfirm()">Confirm & Place</button>
+        <button class="btn-pri" (click)="onConfirm()">Confirm &amp; Place</button>
       </div>
     </div>
   </div>
 
-  <div class="content-grid">
+  <!-- ✅ Responsive Resizing Layout -->
+  <div class="content-grid" [class.split]="showOrderForm">
     <!-- Catalog Table Card -->
-    <div class="catalog-card animate-left">
+    <div class="catalog-card animate-left" [class.full]="!showOrderForm">
       <div class="card-title">
         <h3>Available Inventory</h3>
       </div>
-      
+
       <div *ngIf="successMsg" class="toast success">{{ successMsg }}</div>
       <div *ngIf="errorMsg" class="toast error">{{ errorMsg }}</div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Manufacturer</th>
-            <th>Price/Unit</th>
-            <th>Stock Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of paged" [class.active-row]="selectedProduct?.id === p.id">
-            <td><strong>{{ p.name }}</strong></td>
-            <td><span class="m-badge">{{ p.manufacturer?.username }}</span></td>
-            <td class="price">₹{{ p.price | number }}</td>
-            <td>
-              <div class="stock-indicator" [ngClass]="{'low': p.stockQuantity < 10, 'out': p.stockQuantity === 0}">
-                {{ p.stockQuantity }} Units
-              </div>
-            </td>
-            <td>
-              <button class="btn-buy" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">
-                {{ p.stockQuantity === 0 ? 'Out of Stock' : 'Order' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- ✅ Scrollable table area so card can fill page height cleanly -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Manufacturer</th>
+              <th>Price/Unit</th>
+              <th>Stock Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let p of paged" [class.active-row]="selectedProduct?.id === p.id">
+              <td><strong>{{ p.name }}</strong></td>
+              <td><span class="m-badge">{{ p.manufacturer?.username }}</span></td>
+              <td class="price">₹{{ p.price | number }}</td>
+              <td>
+                <div class="stock-indicator" [ngClass]="{'low': p.stockQuantity < 10, 'out': p.stockQuantity === 0}">
+                  {{ p.stockQuantity }} Units
+                </div>
+              </td>
+              <td>
+                <button class="btn-buy" (click)="openOrderForm(p)" [disabled]="p.stockQuantity === 0">
+                  {{ p.stockQuantity === 0 ? 'Out of Stock' : 'Order' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
       <div class="pagination" *ngIf="totalPages > 1">
         <button (click)="page = page - 1" [disabled]="page === 1">Prev</button>
-        <span>Page {{page}} of {{totalPages}}</span>
+        <span>Page {{ page }} of {{ totalPages }}</span>
         <button (click)="page = page + 1" [disabled]="page === totalPages">Next</button>
       </div>
     </div>
 
-    <!-- Interactive Order Panel -->
-    <div class="order-panel" *ngIf="showOrderForm" class="animate-right">
+    <!-- ✅ Order Panel (fixed duplicate class issue) -->
+    <div class="order-panel animate-right" *ngIf="showOrderForm">
       <div class="panel-card shadow">
         <div class="panel-header">
           <h3>Create Order</h3>
         </div>
-        
+
         <div class="selected-product-info">
-          <h4>{{ selectedProduct?.name }}</h4>
-          <span class="m-sub">by {{ selectedProduct?.manufacturer?.username }}</span>
-        </div>
-        
+  <h4>{{ selectedProduct?.name }}</h4>
+  <span class="m-sub">by {{ selectedProduct?.manufacturer?.username }}</span>
+
+  <!-- ✅ NEW: Available Stock -->
+  <div class="stock-pill"
+       [ngClass]="{
+         'low': selectedProduct?.stockQuantity < 10,
+         'out': selectedProduct?.stockQuantity === 0
+       }">
+    Available Stock: {{ selectedProduct?.stockQuantity }} Units
+  </div>
+</div>
+
         <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
           <div class="input-group">
             <label>Quantity to Procure</label>
-            <input type="number" formControlName="quantity" (input)="calculateTotal()" placeholder="Enter quantity">
-            <small *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="err">Required (Min 1)</small>
+            <input type="number" formControlName="quantity" (input)="calculateTotal()" placeholder="Enter quantity" />
+            <small *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched" class="err">
+              Required (Min 1)
+            </small>
           </div>
-          
+
           <div class="summary-box">
-            <div class="sum-row"><span>Unit Price:</span> <strong>₹{{ selectedProduct?.price }}</strong></div>
-            <div class="sum-row total"><span>Total Cost:</span> <strong>₹{{ totalPrice | number }}</strong></div>
+            <div class="sum-row">
+              <span>Unit Price:</span>
+              <strong>₹{{ selectedProduct?.price }}</strong>
+            </div>
+            <div class="sum-row total">
+              <span>Total Cost:</span>
+              <strong>₹{{ totalPrice | number }}</strong>
+            </div>
           </div>
-          
+
           <button type="submit" class="btn-pri w-100" [disabled]="itemForm.invalid">
             Place Procurement Order
           </button>
-          <button class="btn-sec" style="text-decoration-color: red;" (click)="closeOrderForm()">Cancel Ordering</button>
+          <button class="btn-sec" (click)="closeOrderForm()" type="button">
+            Cancel Ordering
+          </button>
         </form>
       </div>
     </div>

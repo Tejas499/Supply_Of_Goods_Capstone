@@ -18,9 +18,9 @@ import { IntroAnimationComponent } from './intro-animation/intro-animation.compo
 
 const routes: Routes = [
 
-  // {path:'',
-  //   component:IntroAnimationComponent
-  // },
+  {path:'',
+    component:IntroAnimationComponent
+  },
 
   // ✅ DEFAULT PATH → Landing Component
   {
@@ -93,7 +93,7 @@ const routes: Routes = [
   // ✅ Wildcard → back to landing
   {
     path: '**',
-    redirectTo: 'landing',
+    redirectTo: '',
     pathMatch: 'full'
   }
 ];

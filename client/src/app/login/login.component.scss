@@ -326,3 +326,22 @@ $error: #E11D48;
     border-radius: 24px;
   }
 }
+
+
+.otp-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent, #6366f1);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px 0;
+  text-decoration: underline;
+  &:hover { opacity: 0.8; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
