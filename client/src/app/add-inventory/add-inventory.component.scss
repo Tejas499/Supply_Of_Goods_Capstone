@@ -21,6 +21,11 @@ $bg-page: #F4F7F8;
   padding: 48px 80px;
   background: $bg-page;
   font-family: 'Inter', sans-serif;
+   background: linear-gradient(
+  180deg,
+  #F4F7F8 0%,
+  #cae7f1 100%
+);
 }
 
 /* HEADER */
@@ -57,7 +62,7 @@ $bg-page: #F4F7F8;
   width: 280px;
   padding: 13px 44px 13px 18px;
   border-radius: 50px;
-  border: 1.5px solid $border-light;
+  border: 2px solid $border-light;
   font-weight: 500;
 }
 

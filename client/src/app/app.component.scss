@@ -2,6 +2,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  // background-color: teal;
+  
+
 
   .logo-box {
     width: 34px;
@@ -35,4 +38,163 @@
   padding: 0;
   background: #f4f7f8;
 }
+.navbar{
+  background: linear-gradient(
+    135deg,
+    #12343B,
+    #2D545E
+  );
+}
 
+
+
+/* =============================================
+   APP LAYOUT FIX — REMOVE SIDE WHITE SPACE
+   ============================================= */
+
+/* Override Bootstrap container ONLY for app layout */
+.container {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Ensure router content fills full width */
+router-outlet + * {
+  width: 100%;
+}
+
+/* Body safety */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* App page wrapper (after navbar) */
+.page-wrapper,
+.orders-wrapper,
+.dash-container {
+  width: 100%;
+  margin: 0;
+}
+
+
+/* =========================================
+   FLOW NAVBAR — Enhanced Interactions
+   ========================================= */
+
+.Flow-navbar {
+  background: linear-gradient(135deg, #12343B, #2D545E);
+  box-shadow: 0 6px 24px rgba(18, 52, 59, 0.35);
+}
+
+/* Shared nav link base */
+.Flow-navbar .nav-link {
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.75) !important;
+  padding: 10px 14px;
+  margin: 0 4px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+/* Icon spacing */
+.Flow-navbar .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Underline animation */
+.Flow-navbar .nav-link::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(90deg, #E1B382, #C89666);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+  border-radius: 2px;
+}
+
+/* Hover animation */
+.Flow-navbar .nav-link:hover {
+  color: #FFFFFF !important;
+  background: rgba(225, 179, 130, 0.12);
+  transform: translateY(-1px);
+}
+
+.Flow-navbar .nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* ===============================
+   ACTIVE STATE (Angular Router)
+   =============================== */
+.Flow-navbar .nav-link.router-link-active {
+  color: #12343B !important;
+  background: linear-gradient(
+    135deg,
+    rgba(225, 179, 130, 0.95),
+    rgba(200, 150, 102, 0.95)
+  );
+  box-shadow: 0 4px 16px rgba(225, 179, 130, 0.55);
+}
+
+.Flow-navbar .nav-link.router-link-active::after {
+  transform: scaleX(1);
+  background: #12343B;
+}
+
+/* ==================================
+   DASHBOARD SPECIAL ACCENT
+   ================================== */
+.Flow-navbar .nav-link[routerlink*="dashboard"] {
+  color: #E1B382 !important;
+}
+
+.Flow-navbar .nav-link[routerlink*="dashboard"]:hover {
+  background: rgba(225, 179, 130, 0.25);
+}
+
+/* ==================================
+   PRODUCTS SPECIAL ACCENT
+   ================================== */
+.Flow-navbar .nav-link[routerlink*="create-product"] {
+  color: #A7F3D0 !important;
+}
+
+.Flow-navbar .nav-link[routerlink*="create-product"]:hover {
+  background: rgba(16, 185, 129, 0.22);
+}
+
+/* ==================================
+   LOGOUT (Danger / Exit Styling)
+   ================================== */
+.Flow-navbar .nav-link:last-child {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.Flow-navbar .nav-link:last-child:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #FFFFFF !important;
+}
+
+/* ==================================
+   Toggler (Mobile)
+   ================================== */
+.Flow-navbar .navbar-toggler {
+  border: none;
+}
+
+.Flow-navbar .navbar-toggler-icon {
+  filter: brightness(1.4);
+}

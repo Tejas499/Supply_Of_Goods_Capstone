@@ -25,9 +25,14 @@ $bg-page:         #F4F7F8;
 
 .order-wrapper {
   padding: 48px 80px;
-  background: $bg-page;
+  // background: $bg-page;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+    background: linear-gradient(
+  180deg,
+  #F4F7F8 0%,
+  #cae7f1 100%
+);
 
   // ── Page Header ──────────────────────────────────
   .page-header {
@@ -52,6 +57,8 @@ $bg-page:         #F4F7F8;
     .header-actions {
       .search-bar {
         position: relative;
+        border-radius: 50px;
+        border: 2px #12343B;
         input {
           padding: 13px 44px 13px 20px;
           border-radius: 50px;

@@ -205,6 +205,7 @@ $border-light: #EAF0F1;
         color: $color-blue-dark;
         padding: 11px 26px;
         border-radius: 50px;
+        border: none;
         font-family: 'Inter', sans-serif;
         font-weight: 700;
         font-size: 0.9rem;
@@ -384,17 +385,15 @@ $border-light: #EAF0F1;
       gap: 28px;
 
 
-
-      .container {
-        width: 100%;
-        display: block;
-      }
-
       .feature-card {
         padding: 44px 40px;
         background: var(--bg-card, $bg-card);
         border-radius: 24px;
-        border: 3px solid var(--border-color, #e1b3822e);
+        border: 3px solid rgba(45, 84, 94, 0.55); // teal border
+        // border: 3px solid var(--border-color, #e1b3822e);
+        box-shadow:
+        0 10px 24px rgba(18, 52, 59, 0.08); // soft teal shadow
+
         transition: 0.4s cubic-bezier(0.2, 1, 0.3, 1);
         position: relative;
 
@@ -414,7 +413,7 @@ $border-light: #EAF0F1;
         }
 
         .card-arrow {
-          margin-top: 28px;
+          margin-top: 1px;
           font-size: 1.4rem;
           color: $color-sand;
           opacity: 0;
@@ -478,6 +477,7 @@ $border-light: #EAF0F1;
   // =============================================
   .feedback-section {
     padding: 120px 80px;
+    // background-color: #2D545E;
     background: var(--feedback-bg, rgba(225, 179, 130, 0.04));
     text-align: center;
 
@@ -507,15 +507,18 @@ $border-light: #EAF0F1;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 28px;
       margin-top: 50px;
+      
     }
 
     .feedback-card {
       background: var(--bg-card, $bg-card);
+      background-color: #2D545E;
       padding: 38px 36px;
       border-radius: 22px;
       border: 1px solid var(--border-color, $border-light);
       box-shadow: 0 8px 28px rgba(18, 52, 59, 0.05);
       transition: 0.35s;
+      
 
       &:hover {
         transform: translateY(-6px);
@@ -546,7 +549,7 @@ $border-light: #EAF0F1;
 
         strong {
           font-family: 'Inter', sans-serif;
-          color: var(--text-heading, $color-blue-dark);
+          color: var(--text-heading, $white);
           font-weight: 700;
           font-size: 0.95rem;
         }
@@ -1024,3 +1027,5 @@ $border-light: #EAF0F1;
     }
   }
 }
+
+

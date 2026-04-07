@@ -19,7 +19,12 @@ $bg-page:         #F4F7F8;
 
 .dash-wrapper {
   padding: 48px 80px;
-  background: $bg-page;
+  // background: $bg-page;
+  background: linear-gradient(
+  180deg,
+  #F4F7F8 0%,
+  #cae7f1 100%
+);
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
 
@@ -47,7 +52,14 @@ $bg-page:         #F4F7F8;
     .tab-pills {
       display: flex;
       gap: 6px;
-      background: rgba($color-blue-dark, 0.06);
+      // background: rgba($color-blue-dark, 0.06);
+      
+ background: linear-gradient(
+    135deg,
+    $color-blue,
+    $color-blue-dark
+  );
+
       padding: 6px;
       border-radius: 16px;
 
@@ -62,8 +74,8 @@ $bg-page:         #F4F7F8;
         background: transparent;
         cursor: pointer;
         transition: all 0.25s ease;
-        &.active { background: $white; color: $color-blue-dark; font-weight: 700; box-shadow: 0 2px 12px rgba(18, 52, 59, 0.10); }
-        &:hover:not(.active) { color: $color-blue-dark; }
+        &.active { background: $color-blue; color: $white; font-weight: 700; box-shadow: 0 2px 12px rgba(18, 52, 59, 0.10); }
+        &:hover:not(.active) { color: $white; }
       }
     }
   }
@@ -80,6 +92,12 @@ $bg-page:         #F4F7F8;
   .side-form {
     @include card-base;
     padding: 36px 32px;
+  //    background: linear-gradient(
+  //   135deg,
+  //   $white,
+  //   $color-blue
+    
+  // );
     .card-head h3 {
       font-family: 'Playfair Display', serif;
       font-size: 1.25rem;
@@ -87,7 +105,7 @@ $bg-page:         #F4F7F8;
       color: $color-blue-dark;
       margin: 0 0 24px;
       padding-bottom: 16px;
-      border-bottom: 1px solid $border-light;
+      border-bottom: 2px solid $border-light;
     }
   }
 
@@ -124,7 +142,7 @@ $bg-page:         #F4F7F8;
       width: 100%;
       padding: 13px 16px;
       border-radius: 14px;
-      border: 1.5px solid $border-light;
+      border: 2px solid $border-light;
       background: #F7FAFB;
       font-family: 'Inter', sans-serif;
       font-size: 0.93rem;
@@ -154,7 +172,7 @@ $bg-page:         #F4F7F8;
       min-width: 160px;
       padding: 11px 16px;
       border-radius: 12px;
-      border: 1.5px solid $border-light;
+      border: 2px solid $border-light;
       background: #F7FAFB;
       font-family: 'Inter', sans-serif;
       font-size: 0.9rem;
@@ -220,7 +238,7 @@ $bg-page:         #F4F7F8;
       text-transform: uppercase;
       letter-spacing: 1.2px;
       color: $text-muted;
-      border-bottom: 1.5px solid $border-light;
+      border-bottom: 2px solid $border-light;
     }
 
     td {

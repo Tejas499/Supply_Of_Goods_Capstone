@@ -19,9 +19,14 @@ $bg-page:         #F4F7F8;
 
 .orders-wrapper {
   padding: 48px 80px;
-  background: $bg-page;
+  // background: $bg-page;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+    background: linear-gradient(
+  180deg,
+  #F4F7F8 0%,
+  #cae7f1 100%
+);
 
   // ── Page Header ──────────────────────────────────
   .page-header {
@@ -53,7 +58,7 @@ $bg-page:         #F4F7F8;
         input {
           padding: 12px 44px 12px 20px;
           border-radius: 50px;
-          border: 1.5px solid $border-light;
+          border: 2px solid $border-light;
           background: $white;
           font-family: 'Inter', sans-serif;
           font-size: 0.9rem;
@@ -70,7 +75,7 @@ $bg-page:         #F4F7F8;
       .status-select {
         padding: 12px 20px;
         border-radius: 50px;
-        border: 1.5px solid $border-light;
+        border: 2px solid $border-light;
         background: $white;
         font-family: 'Inter', sans-serif;
         font-weight: 600;
