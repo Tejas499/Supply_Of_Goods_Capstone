@@ -163,7 +163,7 @@
     <div class="feedback-grid">
       <div class="feedback-item" *ngFor="let f of feedbacks">
         <div class="f-header">
-          <strong>Order #{{ f.order?.id }}</strong>
+          <strong>Order #{{ f.order?.id}}</strong>
           <span>{{ f.timestamp | date:'short' }}</span>
         </div>
         <p>"{{ f.content }}"</p>

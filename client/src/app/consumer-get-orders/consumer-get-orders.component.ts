@@ -186,7 +186,7 @@ export class ConsumerGetOrdersComponent implements OnInit {
 
   <div class="header">
     <div>
-      <div class="logo">FLOW<span></span></div>
+      <div class="logo">FL<span style="color: yellow">O</span>W</div>
       <p style="color:#8A9FA4;font-size:11px;margin-top:6px;">Supply Chain Management Platform</p>
     </div>
     <div class="inv-meta">

@@ -131,7 +131,7 @@
                 <option value="">Update</option>
                 <option value="IN PROGRESS" *ngIf="o.status === 'ORDER PLACED'">In Progress</option>
                 <option value="OUT FOR DELIVERY" *ngIf="o.status === 'IN PROGRESS'">Out for Delivery</option>
-                <option value="DELIVERED" *ngIf="o.status === 'OUT FOR DELIVERY'">Delivered</option>
+                <!-- <option value="DELIVERED" *ngIf="o.status === 'OUT FOR DELIVERY'">Delivered</option> -->
               </select>
               <button class="btn-received" (click)="updateReceivedOrder(o.id, o.selectedStatus)" [disabled]="!o.selectedStatus">✓</button>
             </div>
@@ -157,11 +157,11 @@
     <div class="feedback-grid" *ngIf="activeTab === 'feedback'">
       <div class="feedback-card" *ngFor="let f of feedbacks">
         <div class="f-header">
-          <strong>Order #{{ f.orderId }}</strong>
+          <strong>Order #{{ f.order?.id }}</strong>
           <span class="f-date">{{ f.timestamp | date:'short' }}</span>
         </div>
         <p class="f-content">"{{ f.content }}"</p>
-        <div class="f-footer">— From User ID: {{ f.userId }}</div>
+        <div class="f-footer">— From User ID: {{ f.user?.username}}</div>
       </div>
       <div class="empty-state" *ngIf="feedbacks.length === 0">No feedback records found.</div>
     </div>

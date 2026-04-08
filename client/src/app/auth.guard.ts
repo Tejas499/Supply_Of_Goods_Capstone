@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
 
       if (!currentRole || !roles.includes(currentRole)) {
         // If user logged in but not allowed -> send to dashboard
-        return this.router.parseUrl('/dashboard');
+        return this.router.parseUrl('/login');
       }
     }
 

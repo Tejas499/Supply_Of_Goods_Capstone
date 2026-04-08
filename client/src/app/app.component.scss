@@ -3,9 +3,8 @@
   align-items: center;
   gap: 0.5rem;
   // background-color: teal;
+
   
-
-
   .logo-box {
     width: 34px;
     height: 34px;
@@ -16,7 +15,8 @@
     font-size: 1.1rem;
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
   }
-
+  
+  .logo-box span { color: #E1B382; }
 
   span {
     font-weight: 700;       // bold
